@@ -1,0 +1,551 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C3504C19-71A9-4810-A59C-D585654A12C3}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AOVGEN</RootNamespace>
+    <AssemblyName>AOVGEN</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>AOVGENico.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AcCoreMgd, Version=20.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\AcCoreMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcCui, Version=20.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\AcCui.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcDbMgd, Version=20.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\AcDbMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acdbmgdbrep, Version=20.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\acdbmgdbrep.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcDx, Version=20.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\AcDx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcMgd, Version=20.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\AcMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcMr, Version=20.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\AcMr.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcTcMgd, Version=20.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\AcTcMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcWindows, Version=20.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\AcWindows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AdWindows, Version=6.3.0.14, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD.ObjectARX.2016.1.0.0\lib\AdWindows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AutoUpdater.NET, Version=1.7.0.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autoupdater.NET.Official.1.7.0\lib\net45\AutoUpdater.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="Bunifu.Core, Version=1.11.5.1, Culture=neutral, PublicKeyToken=e8e24ccd28363fe9" />
+    <Reference Include="Bunifu.UI.WinForm.BunifuShadowPanel">
+      <HintPath>..\..\..\..\Desktop\Bunifu UI WinForms 1.11.5.1\Bunifu.UI.WinForm.BunifuShadowPanel.dll</HintPath>
+    </Reference>
+    <Reference Include="Bunifu.UI.WinForms.BunifuButton">
+      <HintPath>..\..\..\..\Desktop\Bunifu UI WinForms 1.11.5.1\Bunifu.UI.WinForms.BunifuButton.dll</HintPath>
+    </Reference>
+    <Reference Include="Bunifu.UI.WinForms.BunifuImageButton">
+      <HintPath>..\..\..\..\Desktop\Bunifu UI WinForms 1.11.5.1\Bunifu.UI.WinForms.BunifuImageButton.dll</HintPath>
+    </Reference>
+    <Reference Include="Bunifu.UI.WinForms.ToggleSwitch">
+      <HintPath>..\..\..\..\Desktop\Bunifu UI WinForms 1.11.5.1\Bunifu.UI.WinForms.ToggleSwitch.dll</HintPath>
+    </Reference>
+    <Reference Include="Bunifu_UI_v1.5.3">
+      <HintPath>..\..\..\..\Desktop\Bunifu UI WinForms 1.11.5.1\Bunifu_UI_v1.5.3.dll</HintPath>
+    </Reference>
+    <Reference Include="ClosedXML, Version=0.95.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ClosedXML.0.95.4\lib\net46\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.16.0.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.2.16.0\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ExcelNumberFormat, Version=1.1.0.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelNumberFormat.1.1.0\lib\net20\ExcelNumberFormat.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.115.5, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\lib\net46\System.Data.SQLite.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="System.Design" />
+    <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.Packaging, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Packaging.6.0.0\lib\net461\System.IO.Packaging.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Telerik.WinControls, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL">
+      <HintPath>..\lib\RCWF\2019.2.618.40\Telerik.WinControls.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Telerik.WinControls.GridView, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.WinControls.RadDiagram, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.WinControls.RadSpreadsheet, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.WinControls.Themes.HighContrastBlack, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.WinControls.Themes.Office2007Black, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.WinControls.Themes.Office2010Black, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL" />
+    <Reference Include="Telerik.WinControls.UI, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL">
+      <HintPath>..\lib\RCWF\2019.2.618.40\Telerik.WinControls.UI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Telerik.Windows.Documents.Core, Version=2019.2.612.40, Culture=neutral, PublicKeyToken=5803cfa389c90ce7" />
+    <Reference Include="Telerik.Windows.Documents.Spreadsheet, Version=2019.2.612.40, Culture=neutral, PublicKeyToken=5803cfa389c90ce7" />
+    <Reference Include="Telerik.Windows.Documents.Spreadsheet.FormatProviders.OpenXml, Version=2019.2.612.40, Culture=neutral, PublicKeyToken=5803cfa389c90ce7" />
+    <Reference Include="Telerik.Windows.Documents.Spreadsheet.FormatProviders.Pdf, Version=2019.2.612.40, Culture=neutral, PublicKeyToken=5803cfa389c90ce7" />
+    <Reference Include="TelerikCommon, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL">
+      <HintPath>..\lib\RCWF\2019.2.618.40\TelerikCommon.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="WinFormAnimation, Version=1.6.0.4, Culture=neutral, PublicKeyToken=310fd07b25df79b3, processorArchitecture=MSIL">
+      <HintPath>..\packages\WinFormAnimation.1.6.0.4\lib\net40\WinFormAnimation.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddSensorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddSensorForm.Designer.cs">
+      <DependentUpon>AddSensorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Attempt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Attempt.Designer.cs">
+      <DependentUpon>Attempt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Building.cs" />
+    <Compile Include="CableImage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CableImage.designer.cs">
+      <DependentUpon>CableImage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CableLenghtForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CableLenghtForm.designer.cs">
+      <DependentUpon>CableLenghtForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CableSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CableSettings.designer.cs">
+      <DependentUpon>CableSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CreateAnalogue.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateAnalogue.designer.cs">
+      <DependentUpon>CreateAnalogue.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CreatePannel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreatePannel.designer.cs">
+      <DependentUpon>CreatePannel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataBaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DataBaseForm.designer.cs">
+      <DependentUpon>DataBaseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Editor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Editor.designer.cs">
+      <DependentUpon>Editor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EditorV2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditorV2.Designer.cs">
+      <DependentUpon>EditorV2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EditorV2AdditionalClasses.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EnumDescConverter.cs" />
+    <Compile Include="IO_Summ.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IO_Summ.Designer.cs">
+      <DependentUpon>IO_Summ.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Loading.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Loading.Designer.cs">
+      <DependentUpon>Loading.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyClass.cs" />
+    <Compile Include="Pannel.cs" />
+    <Compile Include="PlacePannelsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PlacePannelsForm.Designer.cs">
+      <DependentUpon>PlacePannelsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Project.cs" />
+    <Compile Include="RunRevitCommand.cs" />
+    <Compile Include="SelectPannelForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectPannelForm.Designer.cs">
+      <DependentUpon>SelectPannelForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SetCableLenght.cs" />
+    <Compile Include="SetCabName.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetCabName.Designer.cs" />
+    <Compile Include="ShemaASUTP.cs" />
+    <Compile Include="SpreadSheetForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SpreadSheetForm.Designer.cs">
+      <DependentUpon>SpreadSheetForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TableExternalConnections.cs" />
+    <Compile Include="VendorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VendorForm.Designer.cs">
+      <DependentUpon>VendorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VentSystem.cs" />
+    <Compile Include="WriteVentSystemToDB.cs" />
+    <EmbeddedResource Include="AddSensorForm.resx">
+      <DependentUpon>AddSensorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Attempt.resx">
+      <DependentUpon>Attempt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CableImage.resx">
+      <DependentUpon>CableImage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CableLenghtForm.resx">
+      <DependentUpon>CableLenghtForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CableSettings.resx">
+      <DependentUpon>CableSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CreateAnalogue.resx">
+      <DependentUpon>CreateAnalogue.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CreatePannel.resx">
+      <DependentUpon>CreatePannel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataBaseForm.resx">
+      <DependentUpon>DataBaseForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Editor.resx">
+      <DependentUpon>Editor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditorV2.resx">
+      <DependentUpon>EditorV2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IO_Summ.resx">
+      <DependentUpon>IO_Summ.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Loading.resx">
+      <DependentUpon>Loading.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PlacePannelsForm.resx">
+      <DependentUpon>PlacePannelsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="SelectPannelForm.resx">
+      <DependentUpon>SelectPannelForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SpreadSheetForm.resx">
+      <DependentUpon>SpreadSheetForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VendorForm.resx">
+      <DependentUpon>VendorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--sirinie -->
+    <COMReference Include="AutoCAD">
+      <Guid>{E2077CF2-3573-4E66-B1DC-01118675056D}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\close.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\document-2-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documents-32 %281%29.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documents-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-3-32 %281%29.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-3-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-32 %281%29.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\OpenFolder.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AOVGENico.ico" />
+    <None Include="Resources\green_light.png" />
+    <None Include="Resources\fan_left_dual.png" />
+    <None Include="Resources\fan_right_dual.png" />
+    <None Include="Resources\icons8-cancel-48.png" />
+    <None Include="Resources\icons8-cancel-96.png" />
+    <None Include="Resources\effective.png" />
+    <None Include="Resources\air-filter.png" />
+    <None Include="Resources\waterheater1.png" />
+    <None Include="Resources\shutter_selection.png" />
+    <None Include="Resources\shutter_right_T.png" />
+    <None Include="Resources\shutter_right.png" />
+    <None Include="Resources\shutter_left.png" />
+    <None Include="Resources\shutter.png" />
+    <None Include="Resources\rooms.png" />
+    <None Include="Resources\room__arrow_supply_TH.png" />
+    <None Include="Resources\room__arrow_supply_T.png" />
+    <None Include="Resources\room__arrow_supply.png" />
+    <None Include="Resources\room__arrow_supp_exh_TH_big.png" />
+    <None Include="Resources\room__arrow_supp_exh_TH.png" />
+    <None Include="Resources\room__arrow_supp_exh_T_big.png" />
+    <None Include="Resources\room__arrow_supp_exh_T.png" />
+    <None Include="Resources\room__arrow_supp_exh_big.png" />
+    <None Include="Resources\room__arrow_supp_exh.png" />
+    <None Include="Resources\room__arrow_exhaust_R.png" />
+    <None Include="Resources\room__arrow_exhaust_L.png" />
+    <None Include="Resources\Humidifier.png" />
+    <None Include="Resources\heater.png" />
+    <None Include="Resources\froster_big.png" />
+    <None Include="Resources\Froster.png" />
+    <None Include="Resources\fan_selection.png" />
+    <None Include="Resources\fan_right.png" />
+    <None Include="Resources\fan_left.png" />
+    <None Include="Resources\fan.png" />
+    <None Include="Resources\electroheater.png" />
+    <None Include="Resources\effective5.png" />
+    <None Include="Resources\cross11.png" />
+    <None Include="Resources\cross10.png" />
+    <None Include="Resources\cross9.png" />
+    <None Include="Resources\cross8.png" />
+    <None Include="Resources\cross7.png" />
+    <None Include="Resources\cross6.png" />
+    <None Include="Resources\cross5.png" />
+    <None Include="Resources\cross4.png" />
+    <None Include="Resources\cross3.png" />
+    <None Include="Resources\cross2.png" />
+    <None Include="Resources\cross1TH.png" />
+    <None Include="Resources\cross1T.png" />
+    <None Include="Resources\cross1.png" />
+    <None Include="Resources\cross_selection.png" />
+    <None Include="Resources\I7gj.gif" />
+    <None Include="Resources\frame_000_delay-0.03s.gif" />
+    <None Include="Resources\Image1.bmp" />
+    <None Include="Resources\database.ico" />
+    <None Include="Resources\AOVGEN_white_ico.ico" />
+    <None Include="Resources\AOVGENico.ico" />
+    <None Include="Resources\AppIcon.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 и x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\GKS_ASU_Loader\GKS_ASU_Loader\GKS_ASU_Loader.csproj">
+      <Project>{f4c0798a-c1e1-43f4-ac80-d3f836e56456}</Project>
+      <Name>GKS_ASU_Loader</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties ShouldAddDPIScalingManifest="False" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
+  </Target>
+  <Import Project="..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

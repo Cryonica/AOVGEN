@@ -1,0 +1,245 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AOVGEN.VentSystem" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="17" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIFAiwAAAAAAABBAQCgAJJAAAIAAAAAkAgBgEAAAAAI=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="AOVGEN.Vent" Collapsed="true">
+    <Position X="6.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABFAAEwEgACMggIgQAAAAAAsAAQIJgAIAAAYAAAo=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.SupplyVent" Collapsed="true">
+    <Position X="5.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAIAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.ExtVent" Collapsed="true">
+    <Position X="7.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAIAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.Filtr" Collapsed="true">
+    <Position X="6.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAFAAAAAgAAEAAAgQAAAAAAEAAQABAAAAAAIAAAg=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.SupplyFiltr" Collapsed="true">
+    <Position X="5.5" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.ExtFiltr" Collapsed="true">
+    <Position X="7.75" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.Damper" Collapsed="true">
+    <Position X="11.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAgQgAAEAAAgAAAAAAAAAAAAAgAAAAAAAAAg=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.SupplyDamper" Collapsed="true">
+    <Position X="10" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAEAAAAQAACAAgAAAAMAAAAIAAQAAQAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.ExtDamper" Collapsed="true">
+    <Position X="12.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAEAAAAQAACAAgAAAAMAAAAIAAQAAQAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.WaterHeater" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="18.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CIFAAdAAKDQAATCAAAAAAIQgBAAEAUEFQAABgOCMAgg=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="AOVGEN.ElectroHeater" Collapsed="true">
+    <Position X="1" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAEBAEgAgACUggAgEAIAAAAIAAQgBQAAAAAAAAAg=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.Froster" Collapsed="true">
+    <Position X="3.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CIhoA0ABGIVAAzBAgAgESIig0CBIkUAFQBBBBACBQgo=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="AOVGEN.Humidifier" Collapsed="true">
+    <Position X="14.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AkBAAEBAEkYEBSMAgggAAIRAACIAA4EBYAAAAAIAgog=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.Recuperator" Collapsed="true">
+    <Position X="18.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgSAkEBgCIAAECAAAo4AKAAAAECgwAAQEDAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.Sensor">
+    <Position X="1" Y="2.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="AOVGEN.Sensor.SensorType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>VentSystem.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAFAAIAAAgAgAAEAQAgAAAAAAAIEAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.SensorT">
+    <Position X="4.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.OutdoorTemp">
+    <Position X="0.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAEAAAAAAAAAAAAAAAAAAAAIAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.SupplyTemp" Collapsed="true">
+    <Position X="3" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAEAAAAAAAAAAAAAAAAAAAAIAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.ExhaustTemp" Collapsed="true">
+    <Position X="5.25" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAEAAAAAAAAAAQAAAAAQAAAIAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.IndoorTemp" Collapsed="true">
+    <Position X="7.5" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAEAAAAAAAAAAQAAAAAQAAAIAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.PressureContol" Collapsed="true">
+    <Position X="9.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAEACAAAAAAAAQAAAIAAAAAgAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.ElectroDevice" Collapsed="true">
+    <Position X="7.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAgAgAAAAgAAAAAAAAAAAAEABAAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.Cable" Collapsed="true">
+    <Position X="17" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAEAAAgAAAgADCCAAAAIAAIAAKIAEgAgBEAAABAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.ShemaASUbase" Collapsed="true">
+    <Position X="3.25" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAACAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAECAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="AOVGEN.ShemaASU" Collapsed="true">
+    <Position X="0.5" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CQAAAgAgyIAAAAAIAAQASAAAAAACAABCACRAAAGAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AOVGEN.Dummy" Collapsed="true">
+    <Position X="2.75" Y="10.25" Width="1.5" />
+    <InheritanceLine Type="AOVGEN.ShemaASUbase" FixedToPoint="true">
+      <Path>
+        <Point X="3.594" Y="9.062" />
+        <Point X="3.594" Y="9.437" />
+        <Point X="3.917" Y="9.437" Type="JumpStart" />
+        <Point X="4.083" Y="9.437" Type="JumpEnd" />
+        <Point X="4.625" Y="9.437" />
+        <Point X="4.625" Y="11.316" />
+        <Point X="3.938" Y="11.316" />
+        <Point X="3.938" Y="10.941" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Object" Collapsed="true">
+    <Position X="21" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Interface Name="AOVGEN.ISchemaASU" Collapsed="true">
+    <Position X="17" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAACAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="AOVGEN.VentComponents" Collapsed="true">
+    <Position X="18.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAgAAAAxAAAAQAAIQAhQAAAAAAAAAQAgAAAAAQAQA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="AOVGEN.CableTypes" Collapsed="true">
+    <Position X="17" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAApABAAAA=</HashCode>
+      <FileName>VentSystem.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

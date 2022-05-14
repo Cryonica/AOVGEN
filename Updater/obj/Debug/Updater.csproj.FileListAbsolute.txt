@@ -1,0 +1,9 @@
+C:\Users\akoltakov\source\repos\AOVGEN\Updater\bin\Debug\Updater.exe.config
+C:\Users\akoltakov\source\repos\AOVGEN\Updater\bin\Debug\Updater.exe
+C:\Users\akoltakov\source\repos\AOVGEN\Updater\bin\Debug\Updater.pdb
+C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Debug\Updater.Properties.Resources.resources
+C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Debug\Updater.csproj.GenerateResource.cache
+C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Debug\Updater.csproj.CoreCompileInputs.cache
+C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Debug\Updater.exe
+C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Debug\Updater.pdb
+C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Debug\Updater.csproj.AssemblyReference.cache
