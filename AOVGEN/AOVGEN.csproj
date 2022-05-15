@@ -285,7 +285,6 @@
     <Compile Include="MainForm.designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MyClass.cs" />
     <Compile Include="Pannel.cs" />
     <Compile Include="PlacePannelsForm.cs">
       <SubType>Form</SubType>
@@ -406,7 +405,7 @@
   <ItemGroup>
     <!--sirinie -->
     <COMReference Include="AutoCAD">
-      <Guid>{E2077CF2-3573-4E66-B1DC-01118675056D}</Guid>
+      <Guid>{4E3F492A-FB57-4439-9BF0-1567ED84A3A9}</Guid>
       <VersionMajor>1</VersionMajor>
       <VersionMinor>0</VersionMinor>
       <Lcid>0</Lcid>
@@ -521,12 +520,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\GKS_ASU_Loader\GKS_ASU_Loader\GKS_ASU_Loader.csproj">
-      <Project>{f4c0798a-c1e1-43f4-ac80-d3f836e56456}</Project>
-      <Name>GKS_ASU_Loader</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
