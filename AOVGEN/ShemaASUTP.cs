@@ -9,7 +9,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using AutoCAD;
-using Autodesk.AutoCAD.Runtime;
+//using Autodesk.AutoCAD.Runtime;
 using System.Threading;
 
 namespace AOVGEN
@@ -78,7 +78,7 @@ namespace AOVGEN
 
         }
         #endregion
-        [CommandMethod("NewDrawing", CommandFlags.Session)]
+        //[CommandMethod("NewDrawing", CommandFlags.Session)]
         internal int Execute()
         {
             int result = 0;

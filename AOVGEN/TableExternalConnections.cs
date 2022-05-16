@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Collections;
 using AutoCAD;
-using Autodesk.AutoCAD.Runtime;
+//using Autodesk.AutoCAD.Runtime;
 using System.Threading;
 using System.ComponentModel;
 
@@ -65,7 +65,7 @@ namespace AOVGEN
         //Dictionary<Cable.CableAttribute, string> lastdict = new Dictionary<Cable.CableAttribute, string>();
 
         #endregion
-        [CommandMethod("NewDrawing", CommandFlags.Session)]
+        //[CommandMethod("NewDrawing", CommandFlags.Session)]
         internal int Execute()
         {
 
