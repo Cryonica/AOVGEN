@@ -1,0 +1,1131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Presets>
+	<Preset presetName = "Электрический нагреватель" presetType = "ПВ">
+	  <Compontents>
+		<Item itemName="ExtDamper">
+		  <Parameters>
+			<Description>Э/д вытяжной заслонки</Description>
+			<HasControl>False</HasControl>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,0</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="ExtVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Exhaust</Location>
+			<Description>Э/д вытяжного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,0</Pos>
+			<Size>0,0</Size>
+			<Image>fan_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Room">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,0</Pos>
+			<Size>0,1</Size>
+			<Image>room__arrow_supp_exh_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyDamper">
+		  <Parameters>
+			<Description>
+			</Description>
+			<HasControl>False</HasControl>
+			<ControlType>No</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,1</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_right</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,1</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="ElectroHeater">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Description>Электрический нагреватель</Description>
+			<Stairs>S1</Stairs>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,1</Pos>
+			<Size>0,0</Size>
+			<Image>electroheater</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Supply</Location>
+			<Description>Э/д приточного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,1</Pos>
+			<Size>0,0</Size>
+			<Image>fan_right</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,1</Pos>
+			<Size>0,0</Size>
+			<Image>cross1T</Image>
+		  </PosInfo>
+		</Item>
+	  </Compontents>
+
+
+	</Preset>
+	<Preset presetName = "Водяной нагреватель" presetType = "ПВ">	
+	  <Compontents>
+		<Item itemName="ExtDamper">
+		  <Parameters>
+			<Description>Э/д вытяжной заслонки</Description>
+			<HasControl>False</HasControl>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,0</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="ExtVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Exhaust</Location>
+			<Description>Э/д вытяжного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,0</Pos>
+			<Size>0,0</Size>
+			<Image>fan_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Room">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,0</Pos>
+			<Size>0,1</Size>
+			<Image>room__arrow_supp_exh_T_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyDamper">
+		  <Parameters>
+			<Description>
+			</Description>
+			<HasControl>False</HasControl>
+			<ControlType>Analogue</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,1</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_right_T</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,1</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="WaterHeater">
+		  <Parameters>
+			<ValveType>Analogue_0_10</ValveType>
+			<PumpTK>False</PumpTK>
+			<WaterProtect>Duct_BackWater</WaterProtect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,1</Pos>
+			<Size>0,1</Size>
+			<Image>waterheater1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Supply</Location>
+			<Description>Э/д приточного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,1</Pos>
+			<Size>0,0</Size>
+			<Image>fan_right</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,1</Pos>
+			<Size>0,0</Size>
+			<Image>cross1T</Image>
+		  </PosInfo>
+		</Item>
+	  </Compontents>
+	</Preset>
+	<Preset presetName = "Водяной нагреватель + охладитель" presetType = "ПВ">
+	  <Compontents>
+		<Item itemName="ExtDamper">
+		  <Parameters>
+			<Description>Э/д вытяжной заслонки</Description>
+			<HasControl>False</HasControl>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,0</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="ExtVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Exhaust</Location>
+			<Description>Э/д вытяжного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,0</Pos>
+			<Size>0,0</Size>
+			<Image>fan_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Room">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>6,0</Pos>
+			<Size>0,1</Size>
+			<Image>room__arrow_supp_exh_T_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyDamper">
+		  <Parameters>
+			<Description>
+			</Description>
+			<HasControl>False</HasControl>
+			<ControlType>Analogue</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,1</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_right_T</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,1</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="WaterHeater">
+		  <Parameters>
+			<ValveType>Analogue_0_10</ValveType>
+			<PumpTK>False</PumpTK>
+			<WaterProtect>Duct_BackWater</WaterProtect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,1</Pos>
+			<Size>0,1</Size>
+			<Image>waterheater1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Froster">
+		  <Parameters>
+			<FrosterType>Freon</FrosterType>
+			<Stairs>One</Stairs>
+			<KKBControlType>Analogue</KKBControlType>
+			<ValveType>No</ValveType>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,1</Pos>
+			<Size>0,1</Size>
+			<Image>froster_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Supply</Location>
+			<Description>Э/д приточного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,1</Pos>
+			<Size>0,0</Size>
+			<Image>fan_right</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,1</Pos>
+			<Size>0,0</Size>
+			<Image>cross1T</Image>
+		  </PosInfo>
+		</Item>
+	  </Compontents>
+	</Preset>
+	<Preset presetName = "Рекуператор + водяной нагреватель" presetType = "ПВ">
+	  <Compontents>
+		<Item itemName="ExtDamper">
+		  <Parameters>
+			<Description>Э/д вытяжной заслонки</Description>
+			<HasControl>False</HasControl>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,0</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="ExtVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Exhaust</Location>
+			<Description>Э/д вытяжного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,0</Pos>
+			<Size>0,0</Size>
+			<Image>fan_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Recuperator">
+		  <Parameters>
+			<RecuperatorType>LaminatedBypass</RecuperatorType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,0</Pos>
+			<Size>0,1</Size>
+			<Image>effective5</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,0</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Room">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>6,0</Pos>
+			<Size>0,1</Size>
+			<Image>room__arrow_supp_exh_T_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyDamper">
+		  <Parameters>
+			<Description>
+			</Description>
+			<HasControl>False</HasControl>
+			<ControlType>No</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,1</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_right_T</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,1</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Supply</Location>
+			<Description>Э/д приточного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,1</Pos>
+			<Size>0,0</Size>
+			<Image>fan_right</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="WaterHeater">
+		  <Parameters>
+			<ValveType>Analogue_0_10</ValveType>
+			<PumpTK>False</PumpTK>
+			<WaterProtect>Duct_BackWater</WaterProtect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,1</Pos>
+			<Size>0,1</Size>
+			<Image>waterheater1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,1</Pos>
+			<Size>0,0</Size>
+			<Image>cross1T</Image>
+		  </PosInfo>
+		</Item>
+	  </Compontents>
+
+
+	</Preset>
+	<Preset presetName = "Рекуператор + водяной нагреватель + охладитель" presetType = "ПВ">
+	  <Compontents>
+		<Item itemName="ExtDamper">
+		  <Parameters>
+			<Description>Э/д вытяжной заслонки</Description>
+			<HasControl>False</HasControl>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,0</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="ExtVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Exhaust</Location>
+			<Description>Э/д вытяжного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,0</Pos>
+			<Size>0,0</Size>
+			<Image>fan_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Recuperator">
+		  <Parameters>
+			<RecuperatorType>LaminatedBypass</RecuperatorType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,0</Pos>
+			<Size>0,1</Size>
+			<Image>effective5</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>6,0</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Room">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>7,0</Pos>
+			<Size>0,1</Size>
+			<Image>room__arrow_supp_exh_T_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyDamper">
+		  <Parameters>
+			<Description>
+			</Description>
+			<HasControl>False</HasControl>
+			<ControlType>No</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,1</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_right_T</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,1</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Supply</Location>
+			<Description>Э/д приточного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,1</Pos>
+			<Size>0,0</Size>
+			<Image>fan_right</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="WaterHeater">
+		  <Parameters>
+			<ValveType>Analogue_0_10</ValveType>
+			<PumpTK>False</PumpTK>
+			<WaterProtect>Duct_BackWater</WaterProtect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,1</Pos>
+			<Size>0,1</Size>
+			<Image>waterheater1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Froster">
+		  <Parameters>
+			<FrosterType>Freon</FrosterType>
+			<Stairs>One</Stairs>
+			<KKBControlType>Analogue</KKBControlType>
+			<ValveType>No</ValveType>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,1</Pos>
+			<Size>0,1</Size>
+			<Image>froster_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>6,1</Pos>
+			<Size>0,0</Size>
+			<Image>cross1T</Image>
+		  </PosInfo>
+		</Item>
+	  </Compontents>
+
+	
+	</Preset>
+	<Preset presetName = "Рекуператор + осушение" presetType = "ПВ">
+	  <Compontents>
+		<Item itemName="ExtDamper">
+		  <Parameters>
+			<Description>Э/д вытяжной заслонки</Description>
+			<HasControl>False</HasControl>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,0</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Recuperator">
+		  <Parameters>
+			<RecuperatorType>Recirculation</RecuperatorType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,0</Pos>
+			<Size>0,1</Size>
+			<Image>effective5</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>6,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="ExtVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Exhaust</Location>
+			<Description>Э/д вытяжного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>7,0</Pos>
+			<Size>0,0</Size>
+			<Image>fan_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>8,0</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Room">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>9,0</Pos>
+			<Size>0,1</Size>
+			<Image>room__arrow_supp_exh_T_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyDamper">
+		  <Parameters>
+			<Description>
+			</Description>
+			<HasControl>False</HasControl>
+			<ControlType>No</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,1</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_right_T</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,1</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="WaterHeater">
+		  <Parameters>
+			<ValveType>Analogue_0_10</ValveType>
+			<PumpTK>False</PumpTK>
+			<WaterProtect>No</WaterProtect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,1</Pos>
+			<Size>0,1</Size>
+			<Image>waterheater1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Froster">
+		  <Parameters>
+			<FrosterType>Freon</FrosterType>
+			<Stairs>One</Stairs>
+			<KKBControlType>Analogue</KKBControlType>
+			<ValveType>No</ValveType>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,1</Pos>
+			<Size>0,1</Size>
+			<Image>froster_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,1</Pos>
+			<Size>0,0</Size>
+			<Image>cross1T</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="WaterHeater">
+		  <Parameters>
+			<ValveType>Analogue_0_10</ValveType>
+			<PumpTK>False</PumpTK>
+			<WaterProtect>Duct_BackWater</WaterProtect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>6,1</Pos>
+			<Size>0,1</Size>
+			<Image>waterheater1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Supply</Location>
+			<Description>Э/д приточного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>7,1</Pos>
+			<Size>0,0</Size>
+			<Image>fan_right</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>Analogue</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>8,1</Pos>
+			<Size>0,0</Size>
+			<Image>cross1TH</Image>
+		  </PosInfo>
+		</Item>
+	  </Compontents>
+
+	
+	</Preset>
+	<Preset presetName = "ПТест" presetType = "П">
+	  <Compontents>
+		<Item itemName="ExtDamper">
+		  <Parameters>
+			<Description>Э/д вытяжной заслонки</Description>
+			<HasControl>False</HasControl>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,0</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="ExtVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Exhaust</Location>
+			<Description>Э/д вытяжного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,0</Pos>
+			<Size>0,0</Size>
+			<Image>fan_left</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Recuperator">
+		  <Parameters>
+			<RecuperatorType>LaminatedBypass</RecuperatorType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>3,0</Pos>
+			<Size>0,1</Size>
+			<Image>effective5</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>No</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,0</Pos>
+			<Size>0,0</Size>
+			<Image>cross1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,0</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Room">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>6,0</Pos>
+			<Size>0,1</Size>
+			<Image>room__arrow_supp_exh_T_big</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyDamper">
+		  <Parameters>
+			<Description>
+			</Description>
+			<HasControl>False</HasControl>
+			<ControlType>No</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>0,1</Pos>
+			<Size>0,0</Size>
+			<Image>shutter_right_T</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="Filtr">
+		  <Parameters>
+			<Description>Фильтр</Description>
+			<ControlType>Discrete</ControlType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>1,1</Pos>
+			<Size>0,0</Size>
+			<Image>air_filter</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="SupplyVent">
+		  <Parameters>
+			<Voltage>AC220</Voltage>
+			<Power>0</Power>
+			<Location>Supply</Location>
+			<Description>Э/д приточного вентилятора</Description>
+			<ControlType>Direct</ControlType>
+			<Protect>No</Protect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>2,1</Pos>
+			<Size>0,0</Size>
+			<Image>fan_right</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="WaterHeater">
+		  <Parameters>
+			<ValveType>Analogue_0_10</ValveType>
+			<PumpTK>False</PumpTK>
+			<WaterProtect>Duct_BackWater</WaterProtect>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>4,1</Pos>
+			<Size>0,1</Size>
+			<Image>waterheater1</Image>
+		  </PosInfo>
+		</Item>
+		<Item itemName="CrossSection">
+		  <Parameters>
+			<SensorTType>Analogue</SensorTType>
+			<SensorHType>No</SensorHType>
+		  </Parameters>
+		  <PosInfo>
+			<Pos>5,1</Pos>
+			<Size>0,0</Size>
+			<Image>cross1T</Image>
+		  </PosInfo>
+		</Item>
+	  </Compontents>
+
+
+	</Preset>
+
+
+</Presets>
