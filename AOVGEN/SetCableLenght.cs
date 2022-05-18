@@ -7,9 +7,9 @@ using AutoCAD;
 using System.Data.SQLite;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
-using System.Windows;
 using System.IO;
-
+using DataTable = System.Data.DataTable;
+using MessageBox = System.Windows.MessageBox;
 
 
 namespace AOVGEN
@@ -63,7 +63,6 @@ namespace AOVGEN
                 dt.Rows.Add(dataRow);
             }
             var grouped = from DataRow dr in dt.Rows group dr by dr["Куда"];
-            string x = "";
             Dictionary<string, double> dict = new Dictionary<string, double>();
             var rnd = new Random();
             foreach (var k in grouped)
@@ -71,45 +70,35 @@ namespace AOVGEN
                 
                 int min = Convert.ToInt32(lenght - addition);
                 int max = Convert.ToInt32(lenght + addition);
-                x = (string)(k.ElementAt(0)["Куда"]);
-                var n = rnd.Next(min, max);
-                dict.Add(x, n);
+                var From = (string)(k.ElementAt(0)["Куда"]);
+                var Lenght = rnd.Next(min, max);
+                dict.Add(From, Lenght);
 
             }
-            string query = string.Empty;
-            
+
             SQLiteCommand command = new SQLiteCommand { Connection = connection };
             foreach (var row in this.RadGridView.SelectedRows)
             {
                 Cable cable = (Cable)row.Tag;
-                switch (cable.Attrubute)
+                if (cable.Attrubute == Cable.CableAttribute.P)
                 {
-                    case Cable.CableAttribute.P:
-                        if (usepowercables)
-                        {
-                            if (allowgen)
-                            {
-                                cable.Lenght = Convert.ToDouble(dict[cable.ToPosName]);
-                            }
-                            else
-                            {
-                                cable.Lenght = powercablelenght;
-                            }
-                        }
-                        else
-                        {
-                            cable.Lenght = 0;
-                        }
-                        break;
-                    default:
-                        cable.Lenght = Convert.ToDouble(dict[cable.ToPosName]);
-                        break;
-
+                    if (usepowercables)
+                    {
+                        cable.Lenght = allowgen ? Convert.ToDouble(dict[cable.ToPosName]) : powercablelenght;
+                    }
+                    else
+                    {
+                        cable.Lenght = 0;
+                    }
                 }
-                
-                
+                else
+                {
+                    cable.Lenght = Convert.ToDouble(dict[cable.ToPosName]);
+                }
+
+
                 row.Cells[6].Value = cable.Lenght.ToString();
-                query = $"UPDATE Cable SET CableLenght = '{cable.Lenght}' WHERE GUID = '{cable.cableGUID}'";
+                var query = $"UPDATE Cable SET CableLenght = '{cable.Lenght}' WHERE GUID = '{cable.cableGUID}'";
                 command.CommandText = query;
                 command.ExecuteNonQuery();
             }
@@ -130,31 +119,28 @@ namespace AOVGEN
                     object[] attributes = block.GetAttributes();
                     IEnumerable<AcadAttributeReference> guidattr = attributes.OfType<AcadAttributeReference>()
                         .Where(i => i.TagString == "AOVGEN_GUID");
-                    if (guidattr != null)
+                    if (guidattr.Count() > 0)
                     {
-                        if (guidattr.Count() > 0)
+                        IEnumerable<AcadAttributeReference> cablen = attributes.OfType<AcadAttributeReference>()
+                            .Where(i => i.TagString == "ДЛИНА_КАБЕЛЯ");
+                        if (cablen.Count() > 0 && guidattr.ElementAt(0).TextString != string.Empty)
                         {
-                            IEnumerable<AcadAttributeReference> cablen = attributes.OfType<AcadAttributeReference>()
-                                .Where(i => i.TagString == "ДЛИНА_КАБЕЛЯ");
-                            if (cablen.Count() > 0 && guidattr.ElementAt(0).TextString != string.Empty)
+                            if (!cableblockdict.ContainsKey(guidattr.ElementAt(0).TextString))
                             {
-                                if (!cableblockdict.ContainsKey(guidattr.ElementAt(0).TextString))
+                                string cablelenstring = cablen.ElementAt(0).TextString;
+                                if (cablelenstring.Contains("м"))
                                 {
-                                    string cablelenstring = cablen.ElementAt(0).TextString;
-                                    if (cablelenstring.Contains("м"))
-                                    {
-                                        string[] arr = cablelenstring.Split(' ');
-                                        double.TryParse(arr[0], out double len);
-                                        cableblockdict.Add(guidattr.ElementAt(0).TextString, len.ToString());
-                                    }
-                                    else
-                                    {
-                                        cableblockdict.Add(guidattr.ElementAt(0).TextString, cablen.ElementAt(0).TextString);
-                                    }
-
+                                    string[] arr = cablelenstring.Split(' ');
+                                    double.TryParse(arr[0], out double len);
+                                    cableblockdict.Add(guidattr.ElementAt(0).TextString, len.ToString());
+                                }
+                                else
+                                {
+                                    cableblockdict.Add(guidattr.ElementAt(0).TextString, cablen.ElementAt(0).TextString);
                                 }
 
                             }
+
                         }
                     }
                 }
@@ -318,9 +304,6 @@ namespace AOVGEN
             
             WindowHelper.BringProcessToFront(Process.GetCurrentProcess());
         }
-        
-        
-
 
     }
     public static class WindowHelper
@@ -345,4 +328,8 @@ namespace AOVGEN
         [System.Runtime.InteropServices.DllImport("User32.dll")]
         private static extern bool IsIconic(IntPtr handle);
     }
+
+    
+
+    
 }

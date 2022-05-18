@@ -58,105 +58,100 @@ namespace AOVGEN
         #endregion
         private void Editor_Load(object sender, EventArgs e)
         {
-            if (this.VentSystem == null)
+            if (VentSystem == null)
             {
                 VentSystem myventSystem = new VentSystem();
-                this.VentSystem = myventSystem;
-                this.radAutoCompleteBox1.Text = "VentsystemName;";
+                VentSystem = myventSystem;
+                radAutoCompleteBox1.Text = "VentsystemName;";
             }
             else
             {
-                this.radAutoCompleteBox1.Text = VentSystem.SystemName;
-                this.radAutoCompleteBox1.Enabled = false;
-                //oldpower = mainForm.GetVentSystemPower(VentSystem).ToString(); //сохраняем мощность вент.агрегата до редактирования
-
+                radAutoCompleteBox1.Text = VentSystem.SystemName;
+                radAutoCompleteBox1.Enabled = false;
                 //отрисовка картинок у существующей системы
-                foreach (object item in VentSystem)
+                foreach (var item in VentSystem
+                    .Cast<object>()
+                    .Where(item => item != null))
                 {
-                    if (item != null)
+                    switch (item.GetType().Name)
                     {
-                        
-                        switch (item.ToString())
-                        {
-                            case "AOVGEN.SupplyVent":
-                                radButton4.Tag = VentSystem._SupplyVent;
-                                pictureBox6.Tag = VentSystem._SupplyVent;
-                                pictureBox6.Visible = true;
-                                break;
-                            case "AOVGEN.ExtVent":
-                                radButton10.Tag = VentSystem._ExtVent;
-                                pictureBox11.Tag = VentSystem._ExtVent;
-                                pictureBox11.Visible = true;
-                                break;
-                            case "AOVGEN.SupplyFiltr":
-                                radButton1.Tag = VentSystem._SupplyFiltr;
-                                pictureBox1.Tag = VentSystem._SupplyFiltr;
-                                pictureBox1.Visible = true;
-                                break;
-                            case "AOVGEN.ExtFiltr":
-                                radButton11.Tag = VentSystem._ExtFiltr;
-                                pictureBox10.Tag = VentSystem._ExtFiltr;
-                                pictureBox10.Visible = true;
-                                break;
-                            case "AOVGEN.SupplyDamper":
-                                radButton2.Tag = VentSystem._SupplyDamper;
-                                pictureBox4.Tag = VentSystem._SupplyDamper;
-                                pictureBox4.Visible = true;
-                                break;
-                            case "AOVGEN.ExtDamper":
-                                radButton9.Tag = VentSystem._ExtDamper;
-                                pictureBox12.Tag = VentSystem._ExtDamper;
-                                pictureBox12.Visible = true;
-                                break;
-                            case "AOVGEN.WaterHeater":
-                                radButton5.Tag = VentSystem._WaterHeater;
-                                pictureBox7.Tag = VentSystem._WaterHeater;
-                                pictureBox7.Visible = true;
-                                break;
-                            case "AOVGEN.ElectroHeater":
-                                radButton6.Tag = VentSystem._ElectroHeater;
-                                pictureBox8.Tag = VentSystem._ElectroHeater;
-                                pictureBox8.Visible = true;
-                                break;
-                            case "AOVGEN.Froster":
-                                radButton7.Tag = VentSystem._Froster;
-                                pictureBox5.Tag = VentSystem._Froster;
-                                pictureBox5.Visible = true;
-                                break;
-                            case "AOVGEN.Humidifier":
-                                radButton8.Tag = VentSystem._Humidifier;
-                                pictureBox9.Tag = VentSystem._Humidifier;
-                                pictureBox9.Visible = true;
-                                break;
-                            case "AOVGEN.Recuperator":
-                                radButton3.Tag = VentSystem._Recuperator;
-                                pictureBox3.Tag = VentSystem._Recuperator;
-                                pictureBox3.Image = new Bitmap(VentSystem._Recuperator.Imagepath);
-                                pictureBox3.Visible = true;
-                                break;
-                            case "AOVGEN.SupplyTemp":
-                                radButton13.Tag = VentSystem._SupplyTemp;
-                                pictureBox13.Tag = VentSystem._SupplyTemp;
-                                pictureBox13.Visible = true;
+                        case nameof(SupplyVent):
+                            radButton4.Tag = VentSystem._SupplyVent;
+                            pictureBox6.Tag = VentSystem._SupplyVent;
+                            pictureBox6.Visible = true;
+                            break;
+                        case nameof(ExtVent):
+                            radButton10.Tag = VentSystem._ExtVent;
+                            pictureBox11.Tag = VentSystem._ExtVent;
+                            pictureBox11.Visible = true;
+                            break;
+                        case nameof(SupplyFiltr):
+                            radButton1.Tag = VentSystem._SupplyFiltr;
+                            pictureBox1.Tag = VentSystem._SupplyFiltr;
+                            pictureBox1.Visible = true;
+                            break;
+                        case nameof(ExtFiltr):
+                            radButton11.Tag = VentSystem._ExtFiltr;
+                            pictureBox10.Tag = VentSystem._ExtFiltr;
+                            pictureBox10.Visible = true;
+                            break;
+                        case nameof(SupplyDamper):
+                            radButton2.Tag = VentSystem._SupplyDamper;
+                            pictureBox4.Tag = VentSystem._SupplyDamper;
+                            pictureBox4.Visible = true;
+                            break;
+                        case nameof(ExtDamper):
+                            radButton9.Tag = VentSystem._ExtDamper;
+                            pictureBox12.Tag = VentSystem._ExtDamper;
+                            pictureBox12.Visible = true;
+                            break;
+                        case nameof(WaterHeater):
+                            radButton5.Tag = VentSystem._WaterHeater;
+                            pictureBox7.Tag = VentSystem._WaterHeater;
+                            pictureBox7.Visible = true;
+                            break;
+                        case nameof(ElectroHeater):
+                            radButton6.Tag = VentSystem._ElectroHeater;
+                            pictureBox8.Tag = VentSystem._ElectroHeater;
+                            pictureBox8.Visible = true;
+                            break;
+                        case nameof(Froster):
+                            radButton7.Tag = VentSystem._Froster;
+                            pictureBox5.Tag = VentSystem._Froster;
+                            pictureBox5.Visible = true;
+                            break;
+                        case nameof(Humidifier):
+                            radButton8.Tag = VentSystem._Humidifier;
+                            pictureBox9.Tag = VentSystem._Humidifier;
+                            pictureBox9.Visible = true;
+                            break;
+                        case nameof(Recuperator):
+                            radButton3.Tag = VentSystem._Recuperator;
+                            pictureBox3.Tag = VentSystem._Recuperator;
+                            pictureBox3.Image = new Bitmap(VentSystem._Recuperator.Imagepath);
+                            pictureBox3.Visible = true;
+                            break;
+                        case nameof(SupplyTemp):
+                            radButton13.Tag = VentSystem._SupplyTemp;
+                            pictureBox13.Tag = VentSystem._SupplyTemp;
+                            pictureBox13.Visible = true;
 
-                                break;
-                            case "AOVGEN.ExhaustTemp":
-                                radButton14.Tag = VentSystem._ExhaustTemp;
-                                pictureBox14.Tag = VentSystem._ExhaustTemp;
-                                pictureBox14.Visible = true;
-                                break;
-                            case "AOVGEN.IndoorTemp":
-                                radButton16.Tag = VentSystem._IndoorTemp;
-                                pictureBox16.Tag = VentSystem._IndoorTemp;
-                                pictureBox16.Visible = true;
-                                break;
-                            case "AOVGEN.OutdoorTemp":
-                                radButton15.Tag = VentSystem._OutdoorTemp;
-                                pictureBox15.Tag = VentSystem._OutdoorTemp;
-                                pictureBox15.Visible = true;
-                                break;
-
-                        }
+                            break;
+                        case nameof(ExhaustTemp):
+                            radButton14.Tag = VentSystem._ExhaustTemp;
+                            pictureBox14.Tag = VentSystem._ExhaustTemp;
+                            pictureBox14.Visible = true;
+                            break;
+                        case nameof(IndoorTemp):
+                            radButton16.Tag = VentSystem._IndoorTemp;
+                            pictureBox16.Tag = VentSystem._IndoorTemp;
+                            pictureBox16.Visible = true;
+                            break;
+                        case nameof(OutdoorTemp):
+                            radButton15.Tag = VentSystem._OutdoorTemp;
+                            pictureBox15.Tag = VentSystem._OutdoorTemp;
+                            pictureBox15.Visible = true;
+                            break;
                     }
                 }
             }
@@ -166,7 +161,8 @@ namespace AOVGEN
 
         }
         #region PropertyGridEventHendler
-        private void RadPropertyGrid1_PropertyValueChanged(object sender, Telerik.WinControls.UI.PropertyGridItemValueChangedEventArgs e)
+        
+        private void RadPropertyGrid1_PropertyValueChanged(object sender, PropertyGridItemValueChangedEventArgs e)
         {
             
             try
@@ -176,43 +172,25 @@ namespace AOVGEN
                     case "Froster":
                         if (radPropertyGrid1.SelectedObject is Froster froster)
                         {
-                            Froster.FrosterType frosterType;
-                            frosterType = froster._FrosterType;
-                            pictureBox5.Image = new Bitmap(Froster.makeimagepath(frosterType).ToString());
-                            switch (frosterType)
-                            {
-                                case Froster.FrosterType.Freon:
-                                    radPropertyGrid1.PropertyGridElement.PropertyTableElement.BeginUpdate();
-                                    radPropertyGrid1.Items["Stairs"].Visible = true;
-                                    radPropertyGrid1.Items["KKBControlType"].Visible = true;
-                                    radPropertyGrid1.Items["valveType"].Visible = false;
-                                    radPropertyGrid1.PropertyGridElement.PropertyTableElement.EndUpdate();
-                                    break;
-                                case Froster.FrosterType.Water:
-                                    radPropertyGrid1.PropertyGridElement.PropertyTableElement.BeginUpdate();
-                                    radPropertyGrid1.Items["Stairs"].Visible = false;
-                                    radPropertyGrid1.Items["KKBControlType"].Visible = false;
-                                    radPropertyGrid1.Items["valveType"].Visible = true;
-                                    radPropertyGrid1.PropertyGridElement.PropertyTableElement.EndUpdate();
-                                    break;
-                            }
+                            var frosterType = froster._FrosterType;
 
+                            pictureBox5.Image = new Bitmap(Froster.makeimagepath(frosterType));
+
+                            radPropertyGrid1.PropertyGridElement.PropertyTableElement.BeginUpdate();
+                            radPropertyGrid1.Items["Stairs"].Visible = frosterType == Froster.FrosterType.Freon;
+                            radPropertyGrid1.Items["KKBControlType"].Visible = frosterType == Froster.FrosterType.Freon;
+                            radPropertyGrid1.Items["valveType"].Visible = frosterType == Froster.FrosterType.Water;
+                            radPropertyGrid1.PropertyGridElement.PropertyTableElement.EndUpdate();
                         }
                         break;
 
                     case "Recuperator":
-                        Recuperator recuperator = radPropertyGrid1.SelectedObject as Recuperator;
-                        Recuperator.RecuperatorType recuperatorType;
-                        recuperatorType = recuperator._RecuperatorType;
-                        pictureBox3.Image = new Bitmap(recuperator.Imagepath);
-                        PropertyGridItem propitem = e.Item as PropertyGridItem;
+                        if (radPropertyGrid1.SelectedObject is Recuperator recuperator) pictureBox3.Image = new Bitmap(recuperator.Imagepath);
                         break;
                     case "ExtVent":
-                        ExtVent extVent = radPropertyGrid1.SelectedObject as ExtVent;
-                        string power1 = extVent.Power;
-                        //string power2 = oldpower;
+                        
+                        
                         break;
-
                 }
             }
             catch (Exception ex)
@@ -329,21 +307,21 @@ namespace AOVGEN
             ContextMenuStrip s = (ContextMenuStrip)t.Owner; //а вот тут я получаю кто послал это меню, то есть саму кнопку
             switch (s.SourceControl.Name) //дальше я начиню смотреть на имя этой кнопки
             {
-                case "radButton2":
+                case nameof(radButton2):
                     SupplyDamper supplyDamper = new SupplyDamper(); //вот тут я создаю экземпляр класса заслонки
                     pictureBox4.Visible = true; //включаю картинку
                     VentSystem._SupplyDamper = supplyDamper; //в вент.систему в приточную заслонку кладу саму заслонку
                     pictureBox4.Tag = supplyDamper; //и вот это место, я еще в tag картинки кладу заслонку
                     radPropertyGrid1.SelectedObject = supplyDamper; //ну и контрол свойств назначаю заслонку (чтобы менять свойства у заслонки)
                     break;
-                case "radButton1":
+                case nameof(radButton1):
                     SupplyFiltr supplyFiltr = new SupplyFiltr();
                     pictureBox1.Visible = true;
                     VentSystem._SupplyFiltr = supplyFiltr;
                     pictureBox1.Tag = supplyFiltr;
                     radPropertyGrid1.SelectedObject = supplyFiltr;
                     break;
-                case "radButton3":
+                case nameof(radButton3):
                     Recuperator recuperator = new Recuperator
                     {
                         //_RecuperatorType = Recuperator.RecuperatorType.RotorNoControl
@@ -353,45 +331,39 @@ namespace AOVGEN
                     recuperator._RecuperatorType = Recuperator.RecuperatorType.LaminatedBypass;
                     pictureBox3.Image = new Bitmap(recuperator.Imagepath);
                     VentSystem._Recuperator = recuperator;
-
                     pictureBox3.Tag = recuperator;
                     radPropertyGrid1.SelectedObject = recuperator;
                     break;
-                case "radButton4":
+                case nameof(radButton4):
                     SupplyVent supplyVent = new SupplyVent();
                     pictureBox6.Visible = true;
                     pictureBox6.Tag = supplyVent;
                     VentSystem._SupplyVent = supplyVent;
                     radPropertyGrid1.SelectedObject = supplyVent;
                     break;
-                case "radButton5":
+                case nameof(radButton5):
                     WaterHeater waterHeater = new WaterHeater();
                     pictureBox7.Visible = true;
                     pictureBox7.Tag = waterHeater;
                     VentSystem._WaterHeater = waterHeater;
                     radPropertyGrid1.SelectedObject = waterHeater;
                     break;
-                case "radButton6":
+                case nameof(radButton6):
                     ElectroHeater electroHeater = new ElectroHeater();
                     pictureBox8.Visible = true;
                     pictureBox8.Tag = electroHeater;
                     VentSystem._ElectroHeater = electroHeater;
                     radPropertyGrid1.SelectedObject = electroHeater;
                     break;
-                case "radButton7":
-                    bool minrequest = false;
-                    Froster froster = new Froster(minrequest);
+                case nameof(radButton7):
+                    Froster froster = new Froster(false);
                     pictureBox5.Visible = true;
                     pictureBox5.Tag = froster;
                     VentSystem._Froster = froster;
                     radPropertyGrid1.SelectedObject = froster;
                     radPropertyGrid1.Items["valveType"].Visible = false;
-                    //radPropertyGrid1.EnableGrouping = true;
-                    //GroupDescriptor group = new GroupDescriptor(new SortDescriptor[] { new SortDescriptor("FormattedValue", ListSortDirection.Ascending) });
-                    //radPropertyGrid1.GroupDescriptors.Add(group);
-
                     break;
-                case "radButton8":
+                case nameof(radButton8):
                     Humidifier humidifier = new Humidifier
                     {
 
@@ -402,28 +374,28 @@ namespace AOVGEN
                     VentSystem._Humidifier = humidifier;
                     radPropertyGrid1.SelectedObject = humidifier;
                     break;
-                case "radButton11":
+                case nameof(radButton11):
                     ExtFiltr extFiltr = new ExtFiltr();
                     pictureBox10.Visible = true;
                     pictureBox10.Tag = extFiltr;
                     VentSystem._ExtFiltr = extFiltr;
                     radPropertyGrid1.SelectedObject = extFiltr;
                     break;
-                case "radButton10":
+                case nameof(radButton10):
                     ExtVent extVent = new ExtVent();
                     pictureBox11.Visible = true;
                     pictureBox11.Tag = extVent;
                     VentSystem._ExtVent = extVent;
                     radPropertyGrid1.SelectedObject = extVent;
                     break;
-                case "radButton9":
+                case nameof(radButton9):
                     ExtDamper extDamper = new ExtDamper();
                     pictureBox12.Visible = true;
                     pictureBox12.Tag = extDamper;
                     VentSystem._ExtDamper = extDamper;
                     radPropertyGrid1.SelectedObject = extDamper;
                     break;
-                case "radButton13":
+                case nameof(radButton13):
                     
                     SupplyTemp supplyTemp = new SupplyTemp
                     {
@@ -434,7 +406,7 @@ namespace AOVGEN
                     VentSystem._SupplyTemp = supplyTemp;
                     radPropertyGrid1.SelectedObject = supplyTemp;
                     break;
-                case "radButton14":
+                case nameof(radButton14):
                     ExhaustTemp exhaustTemp = new ExhaustTemp
                     {
                         _SensorType = Sensor.SensorType.Analogue
@@ -444,7 +416,7 @@ namespace AOVGEN
                     VentSystem._ExhaustTemp = exhaustTemp;
                     radPropertyGrid1.SelectedObject = exhaustTemp;
                     break;
-                case "radButton15":
+                case nameof(radButton15):
                     OutdoorTemp outdoorTemp = new OutdoorTemp
                     {
                         _SensorType = Sensor.SensorType.Analogue
@@ -454,7 +426,7 @@ namespace AOVGEN
                     VentSystem._OutdoorTemp = outdoorTemp;
                     radPropertyGrid1.SelectedObject = outdoorTemp;
                     break;
-                case "radButton16":
+                case nameof(radButton16):
                     IndoorTemp indoorTemp = new IndoorTemp
                     {
                         _SensorType = Sensor.SensorType.Analogue
@@ -463,391 +435,96 @@ namespace AOVGEN
                     pictureBox16.Tag = indoorTemp;
                     VentSystem._IndoorTemp = indoorTemp;
                     radPropertyGrid1.SelectedObject = indoorTemp;
-                    break;
-
-
-            }
+                    break;}
         }
         #endregion
         #region ButtonClicked
-        
-        private void RadButton1_MouseClick(object sender, MouseEventArgs e)
+
+        private void MouseClickReaction(MouseEventArgs e, RadButton button, object SelectedObject)
         {
             switch (e.Button)
             {
 
                 case MouseButtons.Left:
                     // Left click
-                    if (this.VentSystem._SupplyFiltr != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._SupplyFiltr;
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
+                    radPropertyGrid1.SelectedObject = SelectedObject;
                     break;
 
                 case MouseButtons.Right:
                     // Right click
-                    CreateContexMenu(radButton1, e);
-
+                    CreateContexMenu(button, e);
                     break;
             }
+        }
+        private void RadButton1_MouseClick(object sender, MouseEventArgs e)
+        {
+            MouseClickReaction(e, (RadButton)sender, VentSystem._SupplyFiltr);
         }
         private void RadButton2_MouseClick(object sender, MouseEventArgs e) //обработчик события клика по кнопке
         {
-            switch (e.Button) //проверяем какая именно кнопка мыши нажата
-            {
-
-                case MouseButtons.Left: //если левая                   
-                    if (this.VentSystem._SupplyDamper != null) //если в вент.системе есть приточная заслонка
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._SupplyDamper; //в контрол свойств вытыскиваем заслонку
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;// а если не  было заслонки, то обнуляем контрол свойств
-                    }
-                    break;
-                case MouseButtons.Right:    //если правая                
-                    CreateContexMenu(radButton2, e);
-                    break;
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._SupplyDamper);
         }
         private void RadButton3_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._Recuperator != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._Recuperator;
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton3, e);
-                    break;
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._Recuperator);
         }
         private void RadButton4_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._SupplyVent != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._SupplyVent;
-                       
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton4, e);
-
-                    break;
-
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._SupplyVent);
+           
         }
         private void RadButton5_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._WaterHeater != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._WaterHeater;
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton5, e);
-
-                    break;
-
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._WaterHeater);
+            
         }
         private void RadButton6_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._ElectroHeater != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._ElectroHeater;
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton6, e);
-
-                    break;
-
-            }
-
+            MouseClickReaction(e, (RadButton)sender, VentSystem._ElectroHeater);
         }
         private void RadButton7_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._Froster != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._Froster;
-                        
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton7, e);
-                    break;
-
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._Froster);
+            
         }
         private void RadButton8_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._Humidifier != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._Humidifier;
-                       
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton8, e);
-                    break;
-
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._Humidifier);
+            
         }
         private void RadButton11_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._ExtFiltr != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._ExtFiltr;
-                        
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton11, e);
-                    
-
-                    break;
-
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._ExtFiltr);
+          
         }
         private void RadButton10_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._ExtVent != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._ExtVent;
-                       
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton10, e);
-                    
-                    break;
-
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._ExtVent);
+           
         }
         private void RadButton9_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._ExtDamper != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._ExtDamper;
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton9, e);
-                    
-                    break;
-
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._ExtDamper);
+            
         }
         private void RadButton13_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._SupplyTemp != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._SupplyTemp;
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton13, e);                    
-                    break;
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._SupplyTemp);
+           
         }
         private void RadButton14_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._ExhaustTemp != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._ExhaustTemp;
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton14, e);                    
-                    break;
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._ExhaustTemp);
+            
         }
         private void RadButton15_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._OutdoorTemp != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._OutdoorTemp;
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton15, e);
-                    break;
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._OutdoorTemp);
+            
         }
         private void RadButton16_MouseClick(object sender, MouseEventArgs e)
         {
-            switch (e.Button)
-            {
-
-                case MouseButtons.Left:
-                    // Left click
-                    if (this.VentSystem._IndoorTemp != null)
-                    {
-                        radPropertyGrid1.SelectedObject = VentSystem._IndoorTemp;
-                    }
-                    else
-                    {
-                        radPropertyGrid1.SelectedObject = null;
-                    }
-
-                    break;
-
-                case MouseButtons.Right:
-                    // Right click
-                    CreateContexMenu(radButton16, e);
-                    break;
-            }
+            MouseClickReaction(e, (RadButton)sender, VentSystem._IndoorTemp);
         }
         void CreateContexMenu(RadButton button, MouseEventArgs e )
         {
@@ -857,10 +534,6 @@ namespace AOVGEN
             plus.Click += Plus_Click;
             minus.Click += Minus_Click;
             cm.Show(button, new Point(e.X, e.Y));
-        }
-        private void BunifuImageButton1_Click(object sender, EventArgs e)
-        {
-            Close();
         }
         private void BunifuImageButton1_Click_1(object sender, EventArgs e)
         {
@@ -892,8 +565,6 @@ namespace AOVGEN
                     };
                 
                     //Write Ventsystem (host) to DataBase
-                    string InsertQuery = string.Empty;
-                    string UpdateQuery = string.Empty;
                     var date = DateTime.Now.ToString("dd-MM-yyyy");
                     string vesrsion = "1";
                     string author = "Колтаков";
@@ -1215,8 +886,7 @@ namespace AOVGEN
             {
               
                 string Numbering = $"SELECT [To], COUNT(*) AS ToCount FROM Cable WHERE SystemGUID = '{systemguid}' GROUP BY [To]";
-                string query;
-                
+
                 SQLiteCommand command = new SQLiteCommand
                 {
                     Connection = Connection
@@ -1237,13 +907,10 @@ namespace AOVGEN
                 SQLiteDataReader dataReader = command.ExecuteReader();
                 while (dataReader.Read())
                 {
-
-                    string cntstr = string.Empty;
                     string Pos = dataReader[0].ToString();
-                    cntstr = dataReader[1].ToString();
-                    query = $"SELECT [To], Cable.ToGUID, Cable.GUID, Cable.SortPriority, Cable.WriteBlock, Cable.TableForSearch FROM Cable " +
-                    $"WHERE((([To]) = '{Pos}') AND((Cable.SystemGUID) = '{systemguid}')) " +
-                    "ORDER BY Cable.SortPriority;";
+                    var query = "SELECT [To], Cable.ToGUID, Cable.GUID, Cable.SortPriority, Cable.WriteBlock, Cable.TableForSearch FROM Cable " +
+                                $"WHERE((([To]) = '{Pos}') AND((Cable.SystemGUID) = '{systemguid}')) " +
+                                "ORDER BY Cable.SortPriority;";
                     command1.CommandText = query;
                     SQLiteDataReader readerchild1 = command1.ExecuteReader();
                     int cnt = 1;
@@ -1253,7 +920,6 @@ namespace AOVGEN
                         bool writeblock = bool.Parse(readerchild1[4].ToString());
                         string hosttable = readerchild1[5].ToString();
                         string posguid = readerchild1[1].ToString();
-                        string cableguid = readerchild1[2].ToString();
                         string newposname = (AllConnectedSumm).ToString() + devider + readerchild1[0].ToString() + cnt.ToString();
                         posnames.Oldposname = readerchild1[0].ToString();
                         posnames.Newposname = newposname;
@@ -1299,46 +965,26 @@ namespace AOVGEN
             catch (Exception ex)
             {
                 
-                MessageBox.Show(ex.Message + "; \n" +  ex.StackTrace);
+                MessageBox.Show(ex.Message + @"; " +  ex.StackTrace);
             }
 
             
         }
-        //private void UpdatePannelPower(VentSystem ventSystem, Pannel pannel)
-        //{
-        //    double currentPower = Convert.ToDouble(pannel.Power);
-        //    double oldsystempower = Convert.ToDouble(oldpower);
-        //    double newsystempower = mainForm.GetVentSystemPower(ventSystem);
-        //    double difference = newsystempower - oldsystempower;
-        //    pannel.Power = (currentPower + difference).ToString();
-        //    string UpdatePannelPowerQuery = $"UPDATE Pannel SET Power = '{pannel.Power}' WHERE [GUID] = '{pannel.GetGUID()}'";
-        //    SQLiteCommand command = new SQLiteCommand
-        //    {
-        //        Connection = Connection,
-        //        CommandText = UpdatePannelPowerQuery
-        //    };
-
-        //    command.ExecuteNonQuery();
-        //    command.Dispose();
-            
-        //}
         private RadTreeNode FindNodeByName(object text, Telerik.WinControls.UI.RadTreeNodeCollection nodes)
         {
 
             foreach (RadTreeNode node in nodes)
             {
-                
+
                 if (node.Name.Equals(text))
                 {
                     return node;
                 }
-                else
+
+                RadTreeNode n = FindNodeByName(text, node.Nodes);
+                if (n != null)
                 {
-                    RadTreeNode n = FindNodeByName(text, node.Nodes);
-                    if (n != null)
-                    {
-                        return n;
-                    }
+                    return n;
                 }
 
 
@@ -1402,43 +1048,24 @@ namespace AOVGEN
         #endregion
         private void RadPropertyGrid1_SelectedObjectChanged(object sender, PropertyGridSelectedObjectChangedEventArgs e)
         {
-            
-            if (e.SelectedObject != null)
+            if (e.SelectedObject == null) return;
+            switch (e.SelectedObject.GetType().Name)
             {
-                switch (e.SelectedObject.GetType().Name)
-                {
-                    case "Froster":
-                        if (radPropertyGrid1.SelectedObject is Froster froster)
-                        {
-                            Froster.FrosterType frosterType;
-                            frosterType = froster._FrosterType;
-                            pictureBox5.Image = new Bitmap(Froster.makeimagepath(frosterType).ToString());
-                            switch (frosterType)
-                            {
-                                case Froster.FrosterType.Freon:
-                                    radPropertyGrid1.PropertyGridElement.PropertyTableElement.BeginUpdate();
-                                    radPropertyGrid1.Items["Stairs"].Visible = true;
-                                    radPropertyGrid1.Items["KKBControlType"].Visible = true;
-                                    radPropertyGrid1.Items["valveType"].Visible = false;
-                                    radPropertyGrid1.PropertyGridElement.PropertyTableElement.EndUpdate();
-                                    break;
-                                case Froster.FrosterType.Water:
-                                    radPropertyGrid1.PropertyGridElement.PropertyTableElement.BeginUpdate();
-                                    radPropertyGrid1.Items["Stairs"].Visible = false;
-                                    radPropertyGrid1.Items["KKBControlType"].Visible = false;
-                                    radPropertyGrid1.Items["valveType"].Visible = true;
-                                    radPropertyGrid1.PropertyGridElement.PropertyTableElement.EndUpdate();
-                                    break;
-                            }
+                case "Froster":
+                    if (radPropertyGrid1.SelectedObject is Froster froster)
+                    {
+                        var frosterType = froster._FrosterType;
 
-                        }
-                        break;
+                        pictureBox5.Image = new Bitmap(Froster.makeimagepath(frosterType));
+                        radPropertyGrid1.PropertyGridElement.PropertyTableElement.BeginUpdate();
 
-
-
-                }
+                        radPropertyGrid1.Items["Stairs"].Visible = frosterType == Froster.FrosterType.Freon;
+                        radPropertyGrid1.Items["KKBControlType"].Visible = frosterType == Froster.FrosterType.Freon;
+                        radPropertyGrid1.Items["valveType"].Visible = frosterType == Froster.FrosterType.Water;
+                        radPropertyGrid1.PropertyGridElement.PropertyTableElement.EndUpdate();
+                    }
+                    break;
             }
-            
         }
         #region Internal Classes
         internal class Posnames
@@ -1450,7 +1077,3 @@ namespace AOVGEN
 
     }
 }
-
-        
-       
-        

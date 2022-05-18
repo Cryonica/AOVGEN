@@ -18,6 +18,8 @@ namespace AOVGEN
             {
                 pictureBox1.Image = Bitmap;
             }
+
+           
         }
     }
 }

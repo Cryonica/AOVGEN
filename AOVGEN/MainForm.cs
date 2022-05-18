@@ -24,7 +24,9 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-
+using DataTable = System.Data.DataTable;
+using Exception = System.Exception;
+using Font = System.Drawing.Font;
 
 
 namespace AOVGEN
@@ -1005,6 +1007,7 @@ namespace AOVGEN
             cablecontextMenu.Items.Add(cablelenghtset);
             cablecontextMenu.Items.Add(setcablelenghtinAcadDrawing);
         }
+        
 
         private void SetcablelenghtinAcadDrawing_Click(object sender, EventArgs e)
         {
@@ -1038,11 +1041,13 @@ namespace AOVGEN
                 acadApp.WindowState = AcWindowState.acMax;
                 if (acadApp.Documents.Count <= 0) return;
                 bool flagFindDraw = false;
-                            
+
+
                 foreach (AcadDocument acadDocument in acadApp.Documents)
                 {
                     if (!flagFindDraw)
                     {
+                        
                         AcadBlocks blocks = acadDocument.Blocks;
                         //acadDoc.Activate();
                         if (blocks.Count <= 0) continue;
@@ -1276,6 +1281,7 @@ namespace AOVGEN
 
                         if (hWnd != IntPtr.Zero)
                         {
+                            
                             AcadApplication acadApp = cadApp;
 
                             AcadDocument acadDoc = acadApp.ActiveDocument;

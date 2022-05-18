@@ -5,12 +5,16 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Collections;
+using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using AutoCAD;
 //using Autodesk.AutoCAD.Runtime;
 using System.Threading;
+using System.Threading.Tasks;
+using GKS_ASU_Loader;
 
 namespace AOVGEN
 {
@@ -20,6 +24,15 @@ namespace AOVGEN
         #region Set Autocad windw to front
         [DllImport("user32.dll")]
         internal static extern IntPtr SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        const UInt32 SWP_NOSIZE = 0x0001;
+        const UInt32 SWP_NOMOVE = 0x0002;
+        const UInt32 SWP_SHOWWINDOW = 0x0040;
+
+
         [DllImport("user32.dll")]
         internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
         [DllImport("user32.dll")]
@@ -79,97 +92,184 @@ namespace AOVGEN
         }
         #endregion
         //[CommandMethod("NewDrawing", CommandFlags.Session)]
+        [DllImport("ole32.dll")]
+        static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
+        [DllImport("ole32.dll")]
+        public static extern void GetRunningObjectTable(
+            int reserved,
+            out IRunningObjectTable prot);
+        private List<object> GetRunningInstances(string[] progIds)
+        {
+
+            // get the app clsid
+            List<string> clsIds = (from progId in progIds select Type.GetTypeFromProgID(progId) into type where type != null select type.GUID.ToString().ToUpper()).ToList();
+            // get Running Object Table ...
+            IRunningObjectTable Rot;
+            GetRunningObjectTable(0, out Rot);
+            if (Rot == null) return null;
+            // get enumerator for ROT entries
+            Rot.EnumRunning(out var monikerEnumerator);
+            if (monikerEnumerator == null) return null;
+            monikerEnumerator.Reset();
+            List<object> instances = new List<object>();
+            IntPtr pNumFetched = new IntPtr();
+            IMoniker[] monikers = new IMoniker[1];
+            // go through all entries and identifies app instances
+            while (monikerEnumerator.Next(1, monikers, pNumFetched) == 0)
+            {
+                CreateBindCtx(0, out IBindCtx bindCtx);
+                if (bindCtx == null) continue;
+                monikers[0].GetDisplayName(bindCtx, null, out var displayName);
+                foreach (var clsId in clsIds.Where(clsId => displayName.ToUpper().IndexOf(clsId) > 0))
+                {
+                    Rot.GetObject(monikers[0], out var ComObject);
+                    if (ComObject == null) continue;
+                    instances.Add(ComObject);
+                    break;
+                }
+            }
+            return instances;
+
+        }
+        private readonly string[] progIds =
+        {
+            "AutoCAD.Application.17",
+            "AutoCAD.Application.17.1",
+            "AutoCAD.Application.17.2",
+            "AutoCAD.Application.18",
+            "AutoCAD.Application.18.1",
+            "AutoCAD.Application.18.2",
+            "AutoCAD.Application.19",
+            "AutoCAD.Application.19.1",
+            "AutoCAD.Application.19.2",
+            "AutoCAD.Application.20",
+            "AutoCAD.Application.20.1",
+            "AutoCAD.Application.20.2",
+            "AutoCAD.Application.21",
+            "AutoCAD.Application.21.1",
+            "AutoCAD.Application.21.2",
+            "AutoCAD.Application.23",
+            "AutoCAD.Application.23.0"
+        };
+
         internal int Execute()
         {
             int result = 0;
-
+            List<object> instances = GetRunningInstances(progIds);
+            dynamic GetAutoCad2019()
+            {
+                return instances
+                    .Cast<dynamic>()
+                    .FirstOrDefault(e => ((string)e.Version).Contains("23"));
+            }
+            
             (string path, string progID) Acad2019;
             Acad2019.progID = "AutoCAD.Application";
             Acad2019.path = @"\Autodesk\AutoCAD 2019\acad.exe";
-            dynamic cadApp = null;
+            dynamic Acad2019COM = null;
+            Task<dynamic> StartAcadTask = null;
             try
             {
-                cadApp = Marshal.GetActiveObject(Acad2019.progID);
+
+                Acad2019COM = GetAutoCad2019();
+                if (Acad2019COM == null)
+                {
+                    MessageBox.Show("Попытка запуска Autocad 2019\n" +
+                                    "Или попробуйте запустить его вручную");
+                    StartAcadTask = Task.Factory.StartNew(() => StartAutocad(Acad2019));
+                }
 
             }
             catch
             {
-                cadApp = StartAutocad(Acad2019); //MessageBox.Show("Не нашел акад");
+                //cadApp = StartAutocad(Acad2019); //MessageBox.Show("Не нашел акад");
             }
-            if (cadApp != null)
+
+            StartAcadTask?.Wait();
+            if (Acad2019COM == null)
             {
-                AutoCAD.AcadApplication acadApp;
-                try
+
+                Acad2019COM = Marshal.GetActiveObject(Acad2019.progID);
+                if (Acad2019COM == null) return result;
+            }
+            
+            try
+            {
+                AutoCAD.AcadApplication acadApp = Acad2019COM;
+                
+                //Process[] localByName = Process.GetProcessesByName("acad");
+                //Process process = localByName[0];
+                //long pid = Acad2019COM.HWND;
+                IntPtr hWnd = new IntPtr(Acad2019COM.HWND);
+                if (hWnd != IntPtr.Zero)
                 {
+                    SetForegroundWindow(hWnd);
+                    //SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                }
+                acadApp.WindowState = AutoCAD.AcWindowState.acMax;
+                System.Windows.Forms.SendKeys.Send("{ESC}");
 
-                    Process[] localByName = Process.GetProcessesByName("acad");
-                    Process process = localByName[0];
-                    IntPtr hWnd = process.MainWindowHandle;
-                    if (hWnd != IntPtr.Zero)
+                if (acadApp.Documents.Count > 0)
+                {
+                    foreach (AcadDocument acadDocument in acadApp.Documents)
                     {
-                        SetForegroundWindow(hWnd);
-
-                    }
-                    
-                    acadApp = cadApp;
-                    acadApp.WindowState = AutoCAD.AcWindowState.acMax;
-                    System.Windows.Forms.SendKeys.Send("{ESC}");
-
-                    if (acadApp.Documents.Count > 0)
-                    {
-                        foreach (AcadDocument acadDocument in acadApp.Documents)
+                        if (acadDocument.Name == "Схема автоматизации.dwg")
                         {
-                            if (acadDocument.Name == "Схема автоматизации.dwg")
+                            acadDoc = acadDocument;
+                            acadDoc.Activate();
+                            System.Windows.Forms.SendKeys.Send("{ESC}"); //drop all selection and commands in Autocad
+                            break;
+                        }
+                        else
+                        {
+                            AcadBlocks blocks = acadDocument.Blocks;
+                            if (blocks.Count>0)
                             {
-                                acadDoc = acadDocument;
-                                acadDoc.Activate();
-                                System.Windows.Forms.SendKeys.Send("{ESC}"); //drop all selection and commands in Autocad
-                                break;
-                            }
-                            else
-                            {
-                                AcadBlocks blocks = acadDocument.Blocks;
-                                if (blocks.Count>0)
+                                AcadBlock podval = (from AcadBlock block in blocks
+                                    where block.Name == "Подвал1"
+                                    select block).FirstOrDefault();
+                                if (podval != null)
                                 {
-                                    AcadBlock podval = (from AcadBlock block in blocks
-                                                  where block.Name == "Подвал1"
-                                                  select block).FirstOrDefault();
-                                    if (podval != null)
-                                    {
-                                        acadDoc = acadDocument;
-                                        acadDoc.Activate();
-                                        System.Windows.Forms.SendKeys.Send("{ESC}");
-                                        break;
-                                    }
+                                    acadDoc = acadDocument;
+                                    acadDoc.Activate();
+                                    System.Windows.Forms.SendKeys.Send("{ESC}");
+                                    break;
+                                }
                                    
 
-                                }
-                                                                
                             }
+                                                                
                         }
                     }
-
-                    if (acadDoc == null)
-                    {
-                        
-                        
-                        string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\ShchemaASU.dwt";
-                        acadDoc = acadApp.Documents.Add(docpath);
-                        acadDoc.Activate();
-                    }
-                    MainCycle();
-
-                    //acadDoc = acadApp.ActiveDocument;
-
                 }
-                catch (System.Exception ex)
+
+                if (acadDoc == null)
                 {
-                    string message = "Не получилось найти среду для генерации схемы\n" + ex.Message + ex.StackTrace;
+                        
+                        
+                    string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\ShchemaASU.dwt";
+                    acadDoc = acadApp.Documents.Add(docpath);
+                    acadDoc.Activate();
+                }
+                MainCycle();
+
+                //acadDoc = acadApp.ActiveDocument;
+
+            }
+            catch (System.Exception ex)
+            {
+                if (ex.HResult == -2147467262)
+                {
+                    string message = "Не получилось найти среду для генерации схемы\n" +
+                                     "Генерация должна быть выполнена в Autocad 2019\n" +
+                                     "Если запущены разные версии Autocad, закройте лишние, оставьте 1 экземпляр v2019";
                     const string caption = "Ошибка!";
                     MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                    return 0;
-                    //MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
                 }
+                    
+
+                return 0;
+                //MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
 
             return result;

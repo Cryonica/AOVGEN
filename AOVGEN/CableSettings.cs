@@ -33,10 +33,6 @@ namespace AOVGEN
         {
             try
             {
-                string query, buildpreset, devider, cablename;
-                devider = cablename = string.Empty;
-
-                bool pipeA, pipeD, pipeC, pipeP, trayA, trayD, trayC, trayP, writepumpcable, writevalvecable;
                 string checkempty(string input) => input != string.Empty ? input : string.Empty;
                 bool checkpipetray(RadCheckedListDataItem item) => item.Checked;
                 string cableD = checkempty(radDropDownList1.Text);
@@ -45,60 +41,55 @@ namespace AOVGEN
                 string cableP = checkempty(radDropDownList7.Text);
 
                 bool WriteCableP = radToggleSwitch1.Value;
-                pipeA = checkpipetray(radCheckedDropDownList1.Items[0]);
-                pipeD = checkpipetray(radCheckedDropDownList2.Items[0]);
-                pipeC = checkpipetray(radCheckedDropDownList3.Items[0]);
-                pipeP = checkpipetray(radCheckedDropDownList4.Items[0]);
-                trayA = checkpipetray(radCheckedDropDownList1.Items[1]);
-                trayD = checkpipetray(radCheckedDropDownList2.Items[1]);
-                trayC = checkpipetray(radCheckedDropDownList3.Items[1]);
-                trayP = checkpipetray(radCheckedDropDownList4.Items[1]);
-                writepumpcable = checkpipetray(radCheckedDropDownList5.Items[0]);
-                writevalvecable = checkpipetray(radCheckedDropDownList5.Items[1]);
+                var pipeA = checkpipetray(radCheckedDropDownList1.Items[0]);
+                var pipeD = checkpipetray(radCheckedDropDownList2.Items[0]);
+                var pipeC = checkpipetray(radCheckedDropDownList3.Items[0]);
+                var pipeP = checkpipetray(radCheckedDropDownList4.Items[0]);
+                var trayA = checkpipetray(radCheckedDropDownList1.Items[1]);
+                var trayD = checkpipetray(radCheckedDropDownList2.Items[1]);
+                var trayC = checkpipetray(radCheckedDropDownList3.Items[1]);
+                var trayP = checkpipetray(radCheckedDropDownList4.Items[1]);
+                var writepumpcable = checkpipetray(radCheckedDropDownList5.Items[0]);
+                var writevalvecable = checkpipetray(radCheckedDropDownList5.Items[1]);
                 
 
-                buildpreset = radDropDownList9.Text;
-                devider = radDropDownList10.Text;
-                cablename = radTextBoxControl1.Text;
+                var buildpreset = radDropDownList9.Text;
+                var devider = radDropDownList10.Text;
+                var cablename = radTextBoxControl1.Text;
                 
-                bool flag = false;
-               
-                if (WriteCableP == false && cableP == string.Empty)
-                {
-                    flag = true;
-                    
-                }
+                bool flag = WriteCableP == false && cableP == string.Empty;
 
                 if
-                    (
-                        cableD != string.Empty
-                        && cableA != string.Empty
-                        && cableC != string.Empty
-                        && (flag == false)
+                (
+                    cableD != string.Empty
+                    && cableA != string.Empty
+                    && cableC != string.Empty
+                    && (flag == false)
                        
-                    )
+                )
                    
 
                 {
                     bool flagCheckExist = CheckExist("BuildSetting", "Place", this.Building.BuildGUID);
+                    string query;
                     if (flagCheckExist)
                     {
                        
                         query = $"UPDATE BuildSetting SET CableA = '{cableA}', CableD = '{cableD}', CableC = '{cableC}', CableP = '{cableP}'," +
-                        $"CableAPipe = '{pipeA}', CableDPipe = '{pipeD}', CableCPipe = '{pipeC}', CablePPipe = '{pipeP}', " +
-                        $"CableATray = '{trayA}', CableDTray = '{trayD}', CableCTray = '{trayC}', CablePTray = '{trayP}', BuildPreset = '{buildpreset}', Devider = '{devider}', CableName = '{cablename}', WriteCableP = '{WriteCableP}', " +
-                        $"WritePumpCable = '{writepumpcable}', WriteValveCable = '{writevalvecable}' " +
-                        $"WHERE Place = '{this.Building.BuildGUID}'";
+                                $"CableAPipe = '{pipeA}', CableDPipe = '{pipeD}', CableCPipe = '{pipeC}', CablePPipe = '{pipeP}', " +
+                                $"CableATray = '{trayA}', CableDTray = '{trayD}', CableCTray = '{trayC}', CablePTray = '{trayP}', BuildPreset = '{buildpreset}', Devider = '{devider}', CableName = '{cablename}', WriteCableP = '{WriteCableP}', " +
+                                $"WritePumpCable = '{writepumpcable}', WriteValveCable = '{writevalvecable}' " +
+                                $"WHERE Place = '{this.Building.BuildGUID}'";
                     }
                     else
                     {
                         query = $"INSERT INTO BuildSetting ([Project], [Place], CableA, CableD, CableC, CableP, " +
-                        "CableAPipe, CableDPipe, CableCPipe, CablePPipe, " +
-                        "CableATray, CableDTray, CableCTray, CablePTray, BuildPreset, Devider, Cablename, WriteCableP, WritePumpCable, WriteValveCable) " +
-                        $"VALUES('{this.Project.GetGUID()}','{this.Building.BuildGUID}','{cableA}','{cableD}','{cableC}', '{cableP}', " +
-                        $"'{pipeA}', '{pipeD}', '{pipeC}', '{pipeP}', " +
-                        $"'{trayA}', '{trayD}', '{trayC}', '{trayP}', '{buildpreset}', '{devider}', '{cablename}' , '{WriteCableP}', " +
-                        $"'{writepumpcable}', '{writevalvecable}');";
+                                "CableAPipe, CableDPipe, CableCPipe, CablePPipe, " +
+                                "CableATray, CableDTray, CableCTray, CablePTray, BuildPreset, Devider, Cablename, WriteCableP, WritePumpCable, WriteValveCable) " +
+                                $"VALUES('{this.Project.GetGUID()}','{this.Building.BuildGUID}','{cableA}','{cableD}','{cableC}', '{cableP}', " +
+                                $"'{pipeA}', '{pipeD}', '{pipeC}', '{pipeP}', " +
+                                $"'{trayA}', '{trayD}', '{trayC}', '{trayP}', '{buildpreset}', '{devider}', '{cablename}' , '{WriteCableP}', " +
+                                $"'{writepumpcable}', '{writevalvecable}');";
                     }
 
                     using (SQLiteConnection connection = OpenDB())
@@ -585,19 +576,23 @@ namespace AOVGEN
             radCheckedDropDownList5.Visible = radToggleSwitch1.Value;
             if (radCheckedDropDownList5.Visible == false)
             {
-                foreach (RadCheckedListDataItem item in radCheckedDropDownList5.Items){ item.Checked = false; };
+                foreach (var radListDataItem in radCheckedDropDownList5.Items)
+                {
+                    var item = (RadCheckedListDataItem) radListDataItem;
+                    item.Checked = false;
+                };
             }
         }
 
         private void radButton2_Click(object sender, EventArgs e)
         {
-            string Building = this.radDropDownList9.Text;
+            string building = radDropDownList9.Text;
             string CableD = radDropDownList1.Text;
             string CableA = radDropDownList3.Text;
             string CableC = radDropDownList5.Text;
             string CableP = radDropDownList3.Text;
             string query = $"UPDATE CablePresets SET CableD = '{CableD}', CableA = '{CableA}', CableC = '{CableC}', CableP = '{CableP}' " +
-                $"WHERE BuildingType = '{Building}'";
+                $"WHERE BuildingType = '{building}'";
             try
             {
                 SQLiteConnection connection = OpenDB();

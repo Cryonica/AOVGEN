@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using WinFormAnimation;
 using System.Data.SQLite;
+using Telerik.WinControls.UI;
 
 namespace AOVGEN
 {
@@ -22,8 +23,7 @@ namespace AOVGEN
         
         private void radTextBox4_KeyPress(object sender, KeyPressEventArgs e)
         {
-            var textbox = sender as Telerik.WinControls.UI.RadTextBox;
-            _ = textbox.Text;
+            if (sender is RadTextBox textbox) _ = textbox.Text;
             if (!char.IsDigit(e.KeyChar)) e.Handled = true;
             if (e.KeyChar == (char)8) e.Handled = false;
             
@@ -94,57 +94,51 @@ namespace AOVGEN
         }
         private void WriteToDB()
         {
-
             
-           
-
-            
-            //нужно реадизовать цикл!!!!
-            //connection.Open();
-            
-            
-            if (connection.State == ConnectionState.Open)
+            if (connection.State == ConnectionState.Closed) connection.Open();
+            try
             {
-                try
+                int.TryParse(radTextBox4.Text, out int imax);
+                int.TryParse(radTextBox6.Text, out int startvalue);
+                int.TryParse(radTextBox5.Text, out int step);
+                string prefix = radTextBox2.Text;
+                string name = radTextBox1.Text;
+                string suffix = radTextBox3.Text;
+
+                DataTable dataSource = this.RadGridView.DataSource as DataTable;
+                SQLiteCommand command = new SQLiteCommand
                 {
-                    int.TryParse(radTextBox4.Text, out int imax);
-                    int.TryParse(radTextBox6.Text, out int startvalue);
-                    int.TryParse(radTextBox5.Text, out int step);
-                    string prefix = radTextBox2.Text;
-                    string name = radTextBox1.Text;
-                    string suffix = radTextBox3.Text;
-                    string pannelname;
-                    
-                    DataTable dataSource = this.RadGridView.DataSource as DataTable;
-                    SQLiteCommand command = new SQLiteCommand
-                    {
-                        Connection = connection
-                    };
+                    Connection = connection
+                };
 
-                    for (int i = 1; i <= imax; i++)
-                    {
+                for (int i = 1; i <= imax; i++)
+                {
 
-                        var guid = Guid.NewGuid().ToString();
-                        pannelname = prefix + name + startvalue.ToString() + suffix;
-                        startvalue += step;
-                        string copy = $"INSERT INTO Pannel ([GUID], PannelName, Project, Power, Voltage, Category, FireProtect, Dispatching, Protocol, Place, Modyfied, Version, Author) " +
-                            $"SELECT '{guid}','{pannelname}', Project, Power, Voltage, Category, FireProtect, Dispatching, Protocol, Place, Modyfied, Version, Author " +
-                            $"FROM Pannel " +
-                            $"WHERE GUID ='{this.PannelGUIDForCopy}'";
-                        string NulledPower = $"UPDATE Pannel " +
-                            $"SET Power = '0' " +
-                            $"WHERE GUID = '{guid}'";
-                        command.CommandText = copy;
-                        command.ExecuteNonQuery();
-                        command.CommandText = NulledPower;
-                        command.ExecuteNonQuery();
-                        
-                        string tableselect = $"SELECT Pannel.ID, Pannel.GUID, Pannel.PannelName, Pannel.Modyfied, Pannel.Author, Pannel.Version, Pannel.Power, Pannel.Voltage, Pannel.Category, Pannel.FireProtect, Pannel.Dispatching, Pannel.Protocol FROM Pannel WHERE GUID = '{guid}'";
-                        command.CommandText = tableselect;
-                        SQLiteDataReader reader = command.ExecuteReader();
-                        while (reader.Read())
+                    var guid = Guid.NewGuid().ToString();
+                    var pannelname = prefix + name + startvalue + suffix;
+                    startvalue += step;
+                    string copy =
+                        $"INSERT INTO Pannel ([GUID], PannelName, Project, Power, Voltage, Category, FireProtect, Dispatching, Protocol, Place, Modyfied, Version, Author) " +
+                        $"SELECT '{guid}','{pannelname}', Project, Power, Voltage, Category, FireProtect, Dispatching, Protocol, Place, Modyfied, Version, Author " +
+                        $"FROM Pannel " +
+                        $"WHERE GUID ='{this.PannelGUIDForCopy}'";
+                    string NulledPower = $"UPDATE Pannel " +
+                                         $"SET Power = '0' " +
+                                         $"WHERE GUID = '{guid}'";
+                    command.CommandText = copy;
+                    command.ExecuteNonQuery();
+                    command.CommandText = NulledPower;
+                    command.ExecuteNonQuery();
+
+                    string tableselect =
+                        $"SELECT Pannel.ID, Pannel.GUID, Pannel.PannelName, Pannel.Modyfied, Pannel.Author, Pannel.Version, Pannel.Power, Pannel.Voltage, Pannel.Category, Pannel.FireProtect, Pannel.Dispatching, Pannel.Protocol FROM Pannel WHERE GUID = '{guid}'";
+                    command.CommandText = tableselect;
+                    SQLiteDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        DataRow drToAdd = dataSource?.NewRow();
+                        if (dataSource != null)
                         {
-                            DataRow drToAdd = dataSource.NewRow();
                             drToAdd["ID"] = dataSource.Rows.Count + 1;
                             pannelname = reader[2].ToString();
                             string power = reader[6].ToString();
@@ -172,7 +166,6 @@ namespace AOVGEN
                                 PannelName = pannelname,
                                 Power = power,
                                 Version = version
-                                
                             };
                             switch (voltage)
                             {
@@ -183,6 +176,7 @@ namespace AOVGEN
                                     pannel.Voltage = Pannel._Voltage.AC220;
                                     break;
                             }
+
                             switch (category)
                             {
                                 case "one":
@@ -195,6 +189,7 @@ namespace AOVGEN
                                     pannel.Category = Pannel._Category.three;
                                     break;
                             }
+
                             switch (fireprotect)
                             {
                                 case "Yes":
@@ -204,6 +199,7 @@ namespace AOVGEN
                                     pannel.FireProtect = Pannel._FireProtect.No;
                                     break;
                             }
+
                             switch (dispatching)
                             {
                                 case "Yes":
@@ -214,6 +210,7 @@ namespace AOVGEN
                                     pannel.Protocol = Pannel._Protocol.None;
                                     break;
                             }
+
                             switch (protocol)
                             {
                                 case "ModBus_RTU":
@@ -231,34 +228,30 @@ namespace AOVGEN
                                 case "None":
                                     pannel.Protocol = Pannel._Protocol.None;
                                     break;
-                                   
                             }
+
                             pannel.SetGUID(guid);
                             this.RadGridView.SelectedRows[0].Tag = pannel;
-                            if (i == imax) this.RadPropertyGrid.SelectedObject = RadGridView.SelectedRows[0].Tag;
-                            
-
                         }
-                        reader.Close();
+
+                        if (i == imax) this.RadPropertyGrid.SelectedObject = RadGridView.SelectedRows[0].Tag;
+
 
                     }
-                    command.Dispose();
-                    
+
+                    reader.Close();
 
                 }
-                catch (Exception ex)
-                {
-                    
-                    MessageBox.Show(ex.Message + ex.StackTrace);
-                }
-                finally
-                {
-                    
-                    
-                }
+
+                command.Dispose();
+
 
             }
+            catch (Exception ex)
+            {
 
+                MessageBox.Show(ex.Message + ex.StackTrace);
+            }
         }
         
         private Pannel CreatePannelClass(string pannelguid)

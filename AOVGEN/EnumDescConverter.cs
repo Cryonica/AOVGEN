@@ -78,37 +78,11 @@ namespace AOVGEN
             }
             return description;
         }
-
         public EnumDescConverter(System.Type type)
-            : base(type.GetType())
+            : base(type)
         {
             _val = type;
         }
-
-        /*
-        public static string GetEnumKeyDescription(Enum value)
-        {
-            FieldInfo fi = value.GetType().GetField(value.ToString());
-            DescriptionAttribute[] attributes =
-                (DescriptionAttribute[])fi.GetCustomAttributes(
-                typeof(DescriptionAttribute), false);
-            return (attributes.Length > 0) ? attributes[0].Description : value.ToString();
-        }
-
-        public static DataTable GetEnumAsDataTable(System.Type EnumType)
-        {
-            DataTable DTEnum = new DataTable();
-            DTEnum.Columns.Add(new DataColumn("EnumID", typeof(Int32)));
-            DTEnum.Columns.Add(new DataColumn("Enum", typeof(string)));
-            DTEnum.Columns.Add(new DataColumn("Description", typeof(string)));
-            foreach (int i in Enum.GetValues(EnumType))
-            {
-                System.Enum fooItem = (System.Enum)Enum.ToObject(EnumType, i);
-                DTEnum.Rows.Add(new object[] { i, fooItem.ToString(), GetEnumKeyDescription(fooItem) });
-            }
-            return DTEnum;
-        }
-        */
 
         public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
         {

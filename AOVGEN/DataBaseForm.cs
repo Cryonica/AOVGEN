@@ -45,8 +45,8 @@ namespace AOVGEN
             this.Configpath = path + "Config.xml";
 
             XmlElement documentElement = doc.DocumentElement;
-            XmlNodeList aNodes = documentElement.SelectNodes("/Config/DataBase");
-            XmlNodeList users = documentElement.SelectNodes("/Config/Users");
+            XmlNodeList aNodes = documentElement?.SelectNodes("/Config/DataBase");
+            XmlNodeList users = documentElement?.SelectNodes("/Config/Users");
 
             string dbname = string.Empty;
             string dbpath = string.Empty;
@@ -90,21 +90,24 @@ namespace AOVGEN
             XmlNodeList showdialognodes = documentElement.SelectNodes("/Config/STARTUP/SHOWDIALOG");
            
 
-            if (showdialognodes.Item(0).InnerText == "True")
+            if (showdialognodes != null && showdialognodes.Item(0)?.InnerText == "True")
             {
                 
             }
             
             radDropDownList1.DataSource = (from XmlNode user in users
                                           let u = user.InnerText
-                                          let l = user.Attributes["last"].Value
+                                          let xmlAttributeCollection = user.Attributes
+                                          where xmlAttributeCollection != null
+                                          let l = xmlAttributeCollection["last"].Value
                                            select (u, l))
                                           .Select(e=> 
                                           {
+                                              var (u, l) = e;
                                               RadListDataItem radListDataItem = new RadListDataItem
                                               {
-                                                  Text = e.u,
-                                                  Tag = Convert.ToBoolean(e.l)
+                                                  Text = u,
+                                                  Tag = Convert.ToBoolean(l)
                                               };
                                               return radListDataItem;
                                           })
@@ -114,7 +117,7 @@ namespace AOVGEN
                 .Where(e => (bool)e.Tag == true)
                 .Select(e => e)
                 .FirstOrDefault()
-                .Text;
+                ?.Text;
         }
         private void WriteToXMLAttr(string dbname)
         {
@@ -122,165 +125,150 @@ namespace AOVGEN
             {
                 XmlDocument doc = this.Xmldoc;
                 XmlElement documentElement = doc.DocumentElement;
-                XmlNodeList aNodes = documentElement.SelectNodes("/Config/DataBase");
-                XmlNodeList users = documentElement.SelectNodes("/Config/Users");
+                XmlNodeList aNodes = documentElement?.SelectNodes("/Config/DataBase");
+                XmlNodeList users = documentElement?.SelectNodes("/Config/Users");
                 bool flag = false;
-                foreach (XmlNode childnodes in aNodes)
-                {
-                    XmlNode root = childnodes;
-                    foreach (XmlNode child in root.ChildNodes)
+                if (aNodes != null)
+                    foreach (XmlNode childnodes in aNodes)
                     {
-
-                        if (child.Name == "DBNAME" && child.InnerText == dbname)
+                        if (childnodes.ChildNodes
+                            .Cast<XmlNode>()
+                            .Any(child => child.Name == "DBNAME" && child.InnerText == dbname)) flag = true;
+                        if (flag)
                         {
-                            flag = true;
-                            break;
+                            if (childnodes.Attributes != null)
+                            {
+                                XmlAttribute Attribute = childnodes.Attributes["last"];
+                                Attribute.Value = "true";
+                            }
+
+                            flag = false;
+                        }
+                        else
+                        {
+                            if (childnodes.Attributes == null) continue;
+                            XmlAttribute Attribute = childnodes.Attributes["last"];
+                            Attribute.Value = "false";
                         }
                     }
-                    if (flag)
-                    {
-                        XmlAttribute Attribute = root.Attributes["last"];
-                        Attribute.Value = "true";
-                        flag = false;
-                    }
-                    else
-                    {
-                        XmlAttribute Attribute = root.Attributes["last"];
-                        Attribute.Value = "false";
-                    }
-                }
+
                 (from XmlNode user in users
                  where user.Attributes["last"].Value == "true"
                  select user)
                  .FirstOrDefault()
                  .Attributes[0].Value = "false";
-                (from XmlNode user in users
-                 where user.InnerText == radDropDownList1.Text
-                 select user)
-                        .FirstOrDefault()
-                        .Attributes[0].Value = "true";
+                XmlNode first = users?
+                    .Cast<XmlNode>()
+                    .FirstOrDefault(user => user.InnerText == radDropDownList1.Text);
+
+                if (first?.Attributes != null)
+                    first.Attributes[0].Value = "true";
                 doc.Save(this.Configpath);
             }
             catch 
             {
                 Thread thread = new Thread(()=> ShowMessage("Не нужно менять фамилии"));
                 thread.Start();
-                RadButton2_Click(this, new EventArgs());
+                RadButton2_Click(this, EventArgs.Empty);
                 connectOK = false;
             }
             
         }
-        void ShowMessage(string message) => MessageBox.Show(message, "Ахтунг!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        private static void ShowMessage(string message) => 
+            MessageBox.Show(message, "Ахтунг!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         #endregion
 
         #region ButtonsClick
         private void RadButton1_Click(object sender, EventArgs e)
         {
-            
-            
             //check selected item
-            if (radListView1.SelectedItem != null)
-            {
-                string FileExtension= System.IO.Path.GetExtension(radListView1.SelectedItem.Tag.ToString());
-                string connectionstr;
-                string BDPath = radListView1.SelectedItem.Text;
-                string DBFileName = radListView1.SelectedItem.Tag.ToString();
+            if (radListView1.SelectedItem == null) return;
+            string FileExtension= System.IO.Path.GetExtension(radListView1.SelectedItem.Tag.ToString());
+            string BDPath = radListView1.SelectedItem.Text;
+            string DBFileName = radListView1.SelectedItem.Tag.ToString();
                 
-                string DataBaseType = string.Empty;
-                if (!string.IsNullOrEmpty(BDPath))
+            string DataBaseType = string.Empty;
+            if (!string.IsNullOrEmpty(BDPath))
+            {
+                string connectionstr;
+                switch (FileExtension)
                 {
-                    
-                    switch (FileExtension)
-                    {
-                        case ".sqlite":
-
-                            connectionstr = "Data Source=" + BDPath;
-                            try
-                            {
-                                SQLiteConnection connection = new SQLiteConnection(connectionstr);
-                                connection.Open();
-                                if (connection.State == ConnectionState.Open) connectOK = true;
-                                connection.Close();
-                                DataBaseType = "SQLite";
-                                WriteToXMLAttr(radListView1.SelectedItem.Tag.ToString());
-
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show(ex.Message);
-                            }
-                            break;
-                        case ".mdb":
-                        case ".accdb":
-
-                            connectionstr = "Provider=" + FindProvider() + ";Data Source=" + BDPath + ";";
-                            //connectionstr = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + BDPath + ";";
-                            //connectionstr = @"Provider=Microsoft.ACE.OLEDB.16.0;Data Source=" + BDPath + ";";
-                            try
-                            {
-                                
-                                OleDbConnection connection = new OleDbConnection(connectionstr);
-                                connection.Open();
-                                if (connection.State == ConnectionState.Open) connectOK = true;
-                                connection.Close();
-                                DataBaseType = "Access";
-                                WriteToXMLAttr(radListView1.SelectedItem.Tag.ToString());
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show(ex.Message);
-                                //MessageBox.Show(ex.StackTrace);
-                            }
-                            break;
-                    }
-                   
-
-                }
-                if (connectOK)
-                {
-
-                    Thread _thread = new Thread(() =>
-                    {
-                        if (Service != null)
+                    case ".sqlite":
+                        connectionstr = "Data Source=" + BDPath;
+                        try
                         {
-                            string username = radDropDownList1.Text;
-                            MainForm mainForm = new MainForm(DBFileName, BDPath, DataBaseType, Service, username);
-                            mainForm.Load += MainForm_Load;
-                            Application.Run(mainForm);
+                            SQLiteConnection connection = new SQLiteConnection(connectionstr);
+                            connection.Open();
+                            if (connection.State == ConnectionState.Open) connectOK = true;
+                            connection.Close();
+                            DataBaseType = "SQLite";
+                            WriteToXMLAttr(radListView1.SelectedItem.Tag.ToString());
+
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
+                        break;
+                    case ".mdb":
+                    case ".accdb":
+
+                        connectionstr = "Provider=" + FindProvider() + ";Data Source=" + BDPath + ";";
+                        try
+                        {
+                                
+                            OleDbConnection connection = new OleDbConnection(connectionstr);
+                            connection.Open();
+                            if (connection.State == ConnectionState.Open) connectOK = true;
+                            connection.Close();
+                            DataBaseType = "Access";
+                            WriteToXMLAttr(radListView1.SelectedItem.Tag.ToString());
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                            //MessageBox.Show(ex.StackTrace);
+                        }
+                        break;
+                }
+            }
+
+            if (!connectOK) return;
+            Thread _thread = new Thread(() =>
+            {
+                if (Service != null)
+                {
+                    string username = radDropDownList1.Text;
+                    MainForm mainForm = new MainForm(DBFileName, BDPath, DataBaseType, Service, username);
+                    mainForm.Load += MainForm_Load;
+                    Application.Run(mainForm);
                             
 
-                        }
-                        else
-                        {
-                            string username = radDropDownList1.Text;
-                            MainForm mainForm = new MainForm(DBFileName, BDPath, DataBaseType, username);
-                            mainForm.Load += MainForm_Load;
-                            Application.Run(mainForm);
-                            mainForm.Load += MainForm_Load;
-
-                        }
-                        
-                    });
-                    _thread.SetApartmentState(ApartmentState.STA);
-                    _thread.Start();
-                    System.Timers.Timer aTimer = new System.Timers.Timer();
-                    System.Windows.Forms.Timer t = new System.Windows.Forms.Timer
-                    {
-                        Interval = 10 // specify interval time as you want
-                    };
-                    t.Tick += new EventHandler(Timer_Tick);
-                    this.Visible = false;
-                    Loading loading = new Loading();
-                    loading.Show();
-                    
-                    t.Start();
-
-
-                   // this.Close();
-                   
                 }
+                else
+                {
+                    string username = radDropDownList1.Text;
+                    MainForm mainForm = new MainForm(DBFileName, BDPath, DataBaseType, username);
+                    mainForm.Load += MainForm_Load;
+                    Application.Run(mainForm);
+                    mainForm.Load += MainForm_Load;
 
-            }
+                }
+                        
+            });
+            _thread.SetApartmentState(ApartmentState.STA);
+            _thread.Start();
+            System.Timers.Timer aTimer = new System.Timers.Timer();
+            System.Windows.Forms.Timer t = new System.Windows.Forms.Timer
+            {
+                Interval = 10 // specify interval time as you want
+            };
+            t.Tick += Timer_Tick;
+            Visible = false;
+            Loading loading = new Loading();
+            loading.Show();
+            t.Start();
+            
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -295,22 +283,6 @@ namespace AOVGEN
         }
         private void RadButton3_Click(object sender, EventArgs e)
         {
-            //string sqlpath = @"C:\Users\akoltakov\Desktop\testbdSQLLite.db";
-            //string consql = "Data Source=" + sqlpath + "; Version=3";
-            //SQLiteConnection connection1 = new SQLiteConnection(consql);
-            //connection1.Open();
-            //string qury = "SELECT [ID], [TestCol] FROM [TestTable] ORDER BY [ID] DESC LIMIT 500";
-            //SQLiteCommand command = new SQLiteCommand(consql);
-
-            //command.CommandText = qury;
-            //SQLiteDataReader sqliteDataReader = command.ExecuteReader();
-
-            //while (sqliteDataReader.Read())
-            //{
-            //    MessageBox.Show(sqliteDataReader[1].ToString());
-            //}
-            //sqliteDataReader.Close();
-            //connection1.Close();
             string BDPath = radListView1.SelectedItem.Text;
             if (BDPath.Contains("sqlite"))
             {
@@ -415,12 +387,9 @@ namespace AOVGEN
         }
         private class BDMessage
         {
-            public static string MessageOk = "Соединение установлено";
-            public static string MessageAccessFail = "Невозможно открыть базу данных \n Возможно не установлен Microsoft Access 2010 \n" +
-                "или программа запущена в режиеме x32";
-            public static string MessageSQLLiteFail = "Невозможно открыть базу данных SQL Lite";
-
-
+            internal const string MessageOk = "Соединение установлено";
+            internal const string MessageAccessFail = "Невозможно открыть базу данных \n Возможно не установлен Microsoft Access 2010 \n" + "или программа запущена в режиеме x32";
+            internal const string MessageSQLLiteFail = "Невозможно открыть базу данных SQL Lite";
         }
 
         private void DataBaseForm_Load(object sender, EventArgs e)
@@ -431,45 +400,24 @@ namespace AOVGEN
 
         private void Timer2_Tick(object sender, EventArgs e)
         {
-            if (timer2.Enabled)
+            if (!timer2.Enabled) return;
+            if (Opacity ==0)
             {
-                if (this.Opacity ==0)
-                {
-                    AnimationEmergence();
-                }
-                else
-                {
-                    timer2.Stop();
-                }
-
+                AnimationEmergence();
             }
-            
-            
+            else
+            {
+                timer2.Stop();
+            }
+
+
         }
-        //private static bool IsAlreadyRunning()
-        //{
-        //    string strLoc = Assembly.GetExecutingAssembly().Location;
-        //    FileSystemInfo fileInfo = new FileInfo(strLoc);
-        //    string sExeName = fileInfo.Name;
-        //    bool bCreatedNew;
-
-        //    Mutex mutex = new Mutex(true, "Global\\" + sExeName, out bCreatedNew);
-        //    if (bCreatedNew)
-        //        mutex.ReleaseMutex();
-
-        //    return !bCreatedNew;
-        //}
-        void Timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object sender, EventArgs e)
         {
             System.Windows.Forms.Timer timer = (System.Windows.Forms.Timer)sender;
-            if (mainformload)
-            {
-                timer.Stop();
-
-                this.Close();
-            }
-
-            //Call method
+            if (!mainformload) return;
+            timer.Stop();
+            Close();
         }
         public static int SpawnProcessSynchronous(string fileName, string args, out string stdOut, bool isVisible, DataReceivedEventHandler OutputDataReceivedDelegate)
         {
@@ -490,15 +438,19 @@ namespace AOVGEN
             {
                 if (OutputDataReceivedDelegate != null)
                 {
-                    process.OutputDataReceived += OutputDataReceivedDelegate;
-                    process.BeginOutputReadLine();
+                    if (process != null)
+                    {
+                        process.OutputDataReceived += OutputDataReceivedDelegate;
+                        process.BeginOutputReadLine();
+                    }
                 }
                 else
                 {
-                    stdOut = process.StandardOutput.ReadToEnd();
+                    if (process != null) stdOut = process.StandardOutput.ReadToEnd();
                 }
                 // do not reverse order of synchronous read to end and WaitForExit or deadlock
                 // Wait for the process to end.  
+                if (process == null) return returnValue;
                 process.WaitForExit();
                 returnValue = process.ExitCode;
             }

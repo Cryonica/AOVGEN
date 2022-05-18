@@ -169,7 +169,6 @@ namespace AOVGEN
             
             SQLiteConnection connection = OpenDB();
 
-            SQLiteDataReader dataReader;
             //string queryString = "SELECT Project FROM Buildings  Pannel SET PannelName= @newpannelname WHERE GUID= @GUID";
             string prgGUID = string.Empty;
             connection.Open();
@@ -180,7 +179,7 @@ namespace AOVGEN
                     
                     string selectprjguid = $"SELECT Buildings.Project FROM Buildings WHERE GUID = '{this.BUILDGUID}'";
                     SQLiteCommand command = new SQLiteCommand(selectprjguid, connection);
-                    dataReader = command.ExecuteReader();
+                    var dataReader = command.ExecuteReader();
                     while (dataReader.Read())
                     {
                         prgGUID = dataReader[0].ToString();
@@ -350,13 +349,13 @@ namespace AOVGEN
                 };
 
                 PropertyInfo pinfoVoltage = pannel.GetType().GetProperty("Voltage");
-                pinfoVoltage.SetValue(pannel, Enum.Parse(pinfoVoltage.PropertyType, voltage));
+                pinfoVoltage?.SetValue(pannel, Enum.Parse(pinfoVoltage.PropertyType, voltage));
                 PropertyInfo pinfoCategory = pannel.GetType().GetProperty("Category");
-                pinfoCategory.SetValue(pannel, Enum.Parse(pinfoCategory.PropertyType, category));
+                pinfoCategory?.SetValue(pannel, Enum.Parse(pinfoCategory.PropertyType, category));
                 PropertyInfo pinfoFireProtect = pannel.GetType().GetProperty("FireProtect");
-                pinfoFireProtect.SetValue(pannel, Enum.Parse(pinfoFireProtect.PropertyType, fireprotect));
+                pinfoFireProtect?.SetValue(pannel, Enum.Parse(pinfoFireProtect.PropertyType, fireprotect));
                 PropertyInfo pinfoDispatching = pannel.GetType().GetProperty("Dispatching");
-                pinfoDispatching.SetValue(pannel, Enum.Parse(pinfoFireProtect.PropertyType, dispatching));
+                pinfoDispatching?.SetValue(pannel, Enum.Parse(pinfoFireProtect.PropertyType, dispatching));
                 //PropertyInfo pinfoProtocol = pannel.GetType().GetProperty("Protocol");
                 //pinfoProtocol.SetValue(pannel, Enum.Parse(pinfoFireProtect.PropertyType, protocol));
                 

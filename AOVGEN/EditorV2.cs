@@ -6,7 +6,6 @@ using System.Data.SQLite;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -15,13 +14,15 @@ using Bunifu.UI.WinForms;
 using Telerik.WinControls.UI;
 using WinFormAnimation;
 using Path = WinFormAnimation.Path;
+using Point = System.Drawing.Point;
 using PositionChangedEventArgs = Telerik.WinControls.UI.Data.PositionChangedEventArgs;
+using Size = System.Drawing.Size;
 using Timer = System.Windows.Forms.Timer;
 
 namespace AOVGEN
 {
 #pragma warning disable IDE1006
-     public partial class EditorV2 : RadForm
+     public partial class EditorV2
      {
         #region Global Variables
         internal VentSystem VentSystem { get; set; }
@@ -534,18 +535,13 @@ namespace AOVGEN
                                             electroHeater.Power = param.InnerText;
                                             break;
                                         case "Stairs":
-                                            //electroHeater.Stairs = ElectroHeater._Stairs.S1
+                                            
                                             break;
                                         case "ControlType":
-                                            string controlType = param.InnerText;
-                                            //pinfo = supplyVent.GetType().GetProperty("ControlType");
-                                            //pinfo?.SetValue(supplyVent,
-                                            //    Enum.Parse(pinfo.PropertyType, controlType));
+                                            
                                             break;
                                         case "Protect":
-                                            string protect = param.InnerText;
-                                            //pinfo = supplyVent.GetType().GetProperty("Protect");
-                                            //pinfo?.SetValue(supplyVent, Enum.Parse(pinfo.PropertyType, protect));
+
                                             break;
 
                                     }
@@ -849,16 +845,11 @@ namespace AOVGEN
 
             foreach (KeyValuePair<(string, string), List<PosInfo>> keyValuePair in presetsDictionary)
             {
-                var s = keyValuePair.Value;
-
                 RadListDataItem dataItem = new RadListDataItem();
                 dataItem.Text = keyValuePair.Key.Item1;
                 dataItem.Tag = keyValuePair.Value;
                 radDropDownList2.Items.Add(dataItem);
-
-                
             }
-
         }
         private static PosInfo SetXmlProPertyToPosInfo(XmlNode posInfoNode)
         {
@@ -892,32 +883,80 @@ namespace AOVGEN
         }
         private void mouseEvent(object sender, MouseEventArgs e)
         {
-            if (currObject == null) return;
-            var newPoint = new Point(GetCellPos(Type.Missing)[0] , GetCellPos(Type.Missing)[1]);
-            currObject.GetType().GetProperty("Location")
-                ?.SetValue(currObject, newPoint);
+            //radButton2.Text = currObjects?.Count().ToString();
+            if (currObject != null)
+            {
+                if (currObjects == null)
+                {
+                    int[] pos = GetCellPos(currObject);
+                    var newPoint = new Point(pos[0], pos[1]);
+                    currObject.GetType().GetProperty("Location")
+                        ?.SetValue(currObject, newPoint);
+                }
+                
+            }
+            if (currObjects == null || activeObject == null) return;
+            DoubleBufferedBunifuImageButton button = (DoubleBufferedBunifuImageButton)activeObject;
+            PosInfo posInfo = (PosInfo)button.Tag;
+            var oldX = posInfo.PozX;
+            var oldY = posInfo.PozY;
+            int[] pos1 = GetCellPos(activeObject);
+            var newPoint1 = new Point(pos1[0], pos1[1]);
+            button.Location = newPoint1;
+                    
+            int dX = posInfo.PozX - oldX;
+            int dY = posInfo.PozY - oldY;
+            if (dX ==0 && dY ==0) return;
+            foreach (var curButton in currObjects
+                .Where(objCurrObject => objCurrObject != activeObject)
+                .Cast<DoubleBufferedBunifuImageButton>())
+            {
+                PosInfo curobjPosInfo = (PosInfo)curButton.Tag;
+                
+
+                curobjPosInfo.Pos = new[]
+                {
+                    curobjPosInfo.PozX + dX,
+                    curobjPosInfo.PozY + dY
+                };
+
+                radButton2.Text = curobjPosInfo.PozY.ToString();
+                if (curobjPosInfo.PozY == 4 && curobjPosInfo.SizeY > 0 || curobjPosInfo.PozX<0 || curobjPosInfo.PozY > 4)
+                {
+                    curButton.BackColor = Color.Red;
+                }
+
+                else
+                {
+                    
+                    curButton.BackColor = button.BackColor;
+                }
+                curButton.Location = CreatePointFromCell(curobjPosInfo.Pos);
+                curButton.Visible = curButton.BackColor != Color.Red;
+                
+            }
+
+
+
         }
 
         private void mouseClick(object s, MouseEventArgs e)
         {
+            
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    if (currObject is DoubleBufferedBunifuImageButton button1)
+                    if (currObject is DoubleBufferedBunifuImageButton Button)
                     {
-                        var posInfo = (PosInfo)button1.Tag;
+                        var posInfo = (PosInfo)Button.Tag;
                         if (posInfo.Pos[0] > 14 || posInfo.Pos[1] > 5)
                         {
-                            Controls.Remove(button1);
+                            Controls.Remove(Button);
                             OccupDict.Remove(MD5HashGenerator.GenerateKey(posInfo.Pos));
 
                         }
                         currObject.GetType().GetProperty("BackColor")?.SetValue(currObject, Color.Transparent);
-                        
-
                         currObject = null;
-
-
                     }
                     break;
                 case MouseButtons.Right:
@@ -929,7 +968,7 @@ namespace AOVGEN
                         }
                         else
                         {
-                            //CreateBigButton(lastSelectedImage, lastComponent.GetType(), lastPosInfo.SizeX, lastPosInfo.SizeY, ((dynamic)currObject).Tag);
+                            
                             if (lastPosInfo != null && lastComponent != null)
                             {
                                 CreateBigButton(lastSelectedImage, lastComponent.GetType(), lastPosInfo.SizeX, lastPosInfo.SizeY, ((dynamic)lastPosInfo.ImageName));
@@ -944,190 +983,388 @@ namespace AOVGEN
                         var posInfo = (PosInfo)button.Tag;
                         if (posInfo.PozX == 50 || posInfo.PozY == 50)
                         {
-                            Controls.Remove(currObject as Control);
+                            Controls.Remove((Control)currObject);
                             currObject = null;
                         }
                     }
                     break;
             }
         }
-        //private Image animation = Image.FromFile(@"C:\Users\akoltakov\Downloads\delete-animation1.gif");
-        //private int animationFrames = 0;
-        //private int currentFrame = 0;
-        //private int animationMaxLoops = 1;
-        //private int loops = 0;
-        //private PictureBox pictureBox1;
-        //private void AnimateImage()
-        //{
-        //    if (ImageAnimator.CanAnimate(animation))
-        //    {
-        //        ImageAnimator.Animate(animation, OnFrameChanged);
-        //    }
-        //}
-        //private void OnFrameChanged(object sender, EventArgs e)
-        //{
-        //    if (currentFrame >= animationFrames)
-        //    {
-        //        currentFrame = 0;
-        //        loops += 1;
-        //        if (loops >= animationMaxLoops)
-        //        {
-        //            animationFrames = 0;
-        //            loops = 0;
-        //            ImageAnimator.StopAnimate(animation, OnFrameChanged);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        pictureBox1.Invalidate();
-               
-        //        currentFrame += 1;
-        //    }
-        //}
-        //private void pictureBox1_Paint(object sender, PaintEventArgs e)
-        //{
-        //    if (animationFrames > 0)
-        //    {
-        //        ImageAnimator.UpdateFrames();
-        //        e.Graphics.DrawImage(animation, Point.Empty);
-        //    }
-        //}
+
+        private void EndSelectGroup()
+        {
+            foreach (var sbutton in currObjects)
+            {
+                DoubleBufferedBunifuImageButton b = (DoubleBufferedBunifuImageButton)sbutton;
+                PosInfo sPosInfo = (PosInfo)b.Tag;
+                //remove wrond buttons
+                if ((sPosInfo.Pos[0] > 14 || sPosInfo.Pos[1] > 4) || (sPosInfo.PozY == 4 && sPosInfo.SizeY == 1))
+                {
+                    if (OccupDict != null)
+                    {
+
+                        foreach (var i in OccupDict.Where(d => (d.Value == sPosInfo)).ToList())
+                        {
+                            OccupDict.Remove(i.Key);
+                        }
 
 
+                    }
+                    Controls.Remove(b);
+                    switch (sPosInfo.Tag.GetType().Name)
+                    {
+                        case nameof(SupplyVent):
+                        case nameof(SpareSuplyVent):
+                            SupplyVentPresent = false;
+                            SupplyVentSparePresent = false;
+                            break;
+                        case nameof(ExtVent):
+                        case nameof(SpareExtVent):
+                            ExtVentPresent = false;
+                            ExtVentSparePresent = false;
+                            break;
+
+                    }
+                    continue;
+                }
+                //write correct buttons
+                string generateKey = MD5HashGenerator.GenerateKey(sPosInfo.Pos);
+                var occupied = OccupDict != null && OccupDict.ContainsKey(generateKey);
+                if (!occupied)
+                {
+                    OccupDict?.Add(generateKey, sPosInfo);
+                }
+
+                if (sPosInfo.SizeY > 0)
+                {
+                    for (int i = 0; i <= sPosInfo.SizeY; i++)
+                    {
+                        string genGen = MD5HashGenerator.GenerateKey(new[] {sPosInfo.PozX, sPosInfo.PozY + i});
+                        if (OccupDict != null && !OccupDict.ContainsKey(genGen)) OccupDict.Add(genGen, sPosInfo);
+                    }
+                }
+
+                b.BackColor = Color.Transparent;
+            }
+            activeObject = null;
+            currObjects = null;
+        }
         private void button_Click(object sender, EventArgs e)
         {
             var args = (MouseEventArgs)e;
-            
 
             switch (args.Button)
             {
                 case MouseButtons.Left:
-                    //Object selected
-                    int[] hashmas;
-                    if (currObject is DoubleBufferedBunifuImageButton button1)
+                    
+                    if (currObjects != null)// if selected group
                     {
-                        
-                        if (currObject.Equals(sender))
+                        if (activeObject == null) // start select 
                         {
-                            var posInfo1 = (PosInfo)button1.Tag;
-                            hash = MD5HashGenerator.GenerateKey(posInfo1.Pos);
-                            if (posInfo1.Pos[0] > 14 || posInfo1.Pos[1] > 4)
+                            activeObject = sender;
+                            
+                            //delete occupied positions
+                            var forreemove = currObjects
+                                .Cast<DoubleBufferedBunifuImageButton>()
+                                .Select(e1 => (PosInfo)e1.Tag)
+                                .Select(e1=> MD5HashGenerator.GenerateKey(e1.Pos))
+                                .ToList();
+                            var forremove2 = currObjects
+                                .Cast<DoubleBufferedBunifuImageButton>()
+                                .Select(e2 => (PosInfo) e2.Tag)
+                                .Where(e2 => e2.SizeY > 0)
+                                .ToList();
+                            if (forremove2.Count>0)
                             {
-                                //pictureBox1 = new PictureBox();
-                                //pictureBox1.Size = button1.Size;
-                                //pictureBox1.Image = Image.FromFile(@"C:\Users\akoltakov\Downloads\delete-animation1.gif");
-                                //pictureBox1.Location = button1.Location;
-                                //this.Controls.Add(pictureBox1);
-                                
-                                //animationFrames = animation.GetFrameCount(new FrameDimension(animation.FrameDimensionsList[0]));
-                                //AnimateImage();
-
-                                Controls.Remove(button1);
-                                currObject = null;
-                                switch (posInfo1.Tag.GetType().Name)
+                                List<string> addhashes = new List<string>();
+                                foreach (var pos in forremove2)
                                 {
-                                    case nameof(SupplyVent) :
-                                    case nameof(SpareSuplyVent):
-                                        SupplyVentPresent = false;
-                                        SupplyVentSparePresent = false;
-                                        break;
-                                    case nameof(ExtVent):
-                                    case nameof(SpareExtVent):
-                                        ExtVentPresent = false;
-                                        ExtVentSparePresent = false;
-                                        break;
-                                    
+                                    for (int i = 0; i <= pos.SizeY; i++)
+                                    {
+                                        addhashes.Add(MD5HashGenerator.GenerateKey(new[]{pos.PozX, pos.PozY+i}));
+                                    }
                                 }
-
-                                return;
-
+                                forreemove.AddRange(addhashes);
                             }
 
-                            if (!present)
+                            foreach (var hashForRemove in forreemove
+                                .Where(hashForRemove => OccupDict.ContainsKey(hashForRemove)))
                             {
-                                if (posInfo1.SizeX > 0 || posInfo1.SizeY > 0)
+                                OccupDict.Remove(hashForRemove);
+                            }
+                        }
+                        else //end select
+                        {
+                            EndSelectGroup();
+                        }
+                    }
+                    else //if selected one object
+                    {
+                        switch (currObject)
+                        {
+                            case null: //start select
+                            {
+                                currObject = sender;
+                                DoubleBufferedBunifuImageButton sbutton = (DoubleBufferedBunifuImageButton) currObject;
+                                OccupDict.Remove(MD5HashGenerator.GenerateKey(((PosInfo) sbutton.Tag).Pos));
+                                PosInfo posInfo = (PosInfo) ((DoubleBufferedBunifuImageButton) currObject).Tag;
+                                if (posInfo.SizeY > 0)
                                 {
-                                    for (var Y1 = 0; Y1 <= posInfo1.SizeY; Y1++)
+                                    for (int i = 0; i <= posInfo.SizeY; i++)
                                     {
-                                        for (var X1 = 0; X1 <= posInfo1.SizeX; X1++)
+                                        string genGen =
+                                            MD5HashGenerator.GenerateKey(new[] {posInfo.PozX, posInfo.PozY + i});
+                                        if (OccupDict.ContainsKey(genGen)) OccupDict.Remove(genGen);
+                                    }
+                                }
+                                break;
+                            }
+                            case DoubleBufferedBunifuImageButton button1: //end select
+                            {
+                                if (currObject.Equals(sender))
+                                {
+                                    var posInfo1 = (PosInfo)button1.Tag;
+                                    hash = MD5HashGenerator.GenerateKey(posInfo1.Pos);
+                                    if (posInfo1.Pos[0] > 14 || posInfo1.Pos[1] > 4)
+                                    {
+                                        Controls.Remove(button1);
+                                        currObject = null;
+                                        switch (posInfo1.Tag.GetType().Name)
                                         {
-                                            hashmas = new[] { posInfo1.PozX + X1, posInfo1.PozY + Y1 };
-                                            var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
-                                            if (!occupied)
+                                            case nameof(SupplyVent):
+                                            case nameof(SpareSuplyVent):
+                                                SupplyVentPresent = false;
+                                                SupplyVentSparePresent = false;
+                                                break;
+                                            case nameof(ExtVent):
+                                            case nameof(SpareExtVent):
+                                                ExtVentPresent = false;
+                                                ExtVentSparePresent = false;
+                                                break;
+
+                                        }
+                                        return;
+                                    }
+                                    if (!present)
+                                    {
+                                        if (posInfo1.SizeX > 0 || posInfo1.SizeY > 0)
+                                        {
+                                            for (var Y1 = 0; Y1 <= posInfo1.SizeY; Y1++)
                                             {
-                                                OccupDict.Add(MD5HashGenerator.GenerateKey(hashmas), posInfo1);
+                                                for (var X1 = 0; X1 <= posInfo1.SizeX; X1++)
+                                                {
+                                                    var hashmas = new[] { posInfo1.PozX + X1, posInfo1.PozY + Y1 };
+                                                    var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
+                                                    if (!occupied)
+                                                    {
+                                                        OccupDict.Add(MD5HashGenerator.GenerateKey(hashmas), posInfo1);
+
+                                                    }
+                                                }
 
                                             }
                                         }
+                                        else
+                                        {
+                                            OccupDict.Add(hash, posInfo1);
+                                        }
+                                        currObject?.GetType().GetProperty("BackColor")?.SetValue(currObject, Color.Transparent);
+                                        switch (posInfo1.Tag?.GetType().Name)
+                                        {
+                                            case nameof(SupplyVent):
+                                                SupplyVentPresent = true;
+                                                break;
+                                            case nameof(ExtVent):
+                                                ExtVentPresent = true;
+                                                break;
+                                            case nameof(SpareSuplyVent):
+                                                SupplyVentSparePresent = true;
+                                                break;
+                                            case nameof(SpareExtVent):
+                                                ExtVentSparePresent = true;
+                                                break;
+                                        }
 
+                                        currObject = null;
                                     }
-                                }
-                                else
-                                {
-                                    OccupDict.Add(hash, posInfo1);
-                                }
-                                currObject?.GetType().GetProperty("BackColor")?.SetValue(currObject, Color.Transparent);
-                                switch (posInfo1?.Tag?.GetType().Name)
-                                {
-                                    case nameof(SupplyVent):
-                                        SupplyVentPresent = true;
-                                        break;
-                                    case nameof(ExtVent):
-                                        ExtVentPresent = true;
-                                        break;
-                                    case nameof(SpareSuplyVent):
-                                        SupplyVentSparePresent = true;
-                                        break;
-                                    case nameof(SpareExtVent):
-                                        ExtVentSparePresent = true;
-                                        break;
+                                    else
+                                    {
+                                        currObject = null;
+                                    }
+
+
                                 }
 
-                                currObject = null;
-                            }
-                            else
-                            {
-                                currObject = null;
+                                break;
                             }
                         }
+                    }
+                    
+
+
+
+
+
+                    //if (currObject is DoubleBufferedBunifuImageButton button1)
+                    //{
+                        
+                    //    if (currObject.Equals(sender))
+                    //    {
+                    //        if (currObjects != null && activeObject == null)
+                    //        {
+                    //            activeObject = currObject;
+                    //        }
+                    //        else
+                    //        {
+                    //            activeObject = null;
+                    //        }
+                    //        var posInfo1 = (PosInfo)button1.Tag;
+                    //        hash = MD5HashGenerator.GenerateKey(posInfo1.Pos);
+                    //        if (posInfo1.Pos[0] > 14 || posInfo1.Pos[1] > 4)
+                    //        {
+                                
+                    //            Controls.Remove(button1);
+                    //            if (currObjects != null)
+                    //            {
+                    //                var forreemove = OccupDict
+                    //                    .Where(e1 => e1.Value.PozX > 14 || e1.Value.PozY >= 14)
+                    //                    .Select(e1 => e1.Key)
+                    //                    .ToList();
+                    //                foreach (var obj in currObjects)
+                    //                {
+                    //                    DoubleBufferedBunifuImageButton buffered = (DoubleBufferedBunifuImageButton) obj;
+                    //                    PosInfo posInfo = (PosInfo) buffered.Tag;
+
+
+                    //                    if (forreemove != null)
+                    //                        foreach (var hashForRemove in forreemove)
+                    //                        {
+                    //                            OccupDict.Remove(hashForRemove);
+                    //                        }
+
+                    //                    forreemove = null;
+
+                                        
+
+                                        
+                    //                    if (OccupDict.ContainsKey(hash)) OccupDict.Remove(hash);
+                                        
+                    //                    Controls.Remove((DoubleBufferedBunifuImageButton) obj);
+                    //                }
+
+                    //                currObjects = null;
+                    //            }
+                    //            currObject = null;
+                    //            switch (posInfo1.Tag.GetType().Name)
+                    //            {
+                    //                case nameof(SupplyVent) :
+                    //                case nameof(SpareSuplyVent):
+                    //                    SupplyVentPresent = false;
+                    //                    SupplyVentSparePresent = false;
+                    //                    break;
+                    //                case nameof(ExtVent):
+                    //                case nameof(SpareExtVent):
+                    //                    ExtVentPresent = false;
+                    //                    ExtVentSparePresent = false;
+                    //                    break;
+                                    
+                    //            }
+
+                    //            return;
+
+                    //        }
+
+                    //        if (!present)
+                    //        {
+                    //            if (posInfo1.SizeX > 0 || posInfo1.SizeY > 0)
+                    //            {
+                    //                for (var Y1 = 0; Y1 <= posInfo1.SizeY; Y1++)
+                    //                {
+                    //                    for (var X1 = 0; X1 <= posInfo1.SizeX; X1++)
+                    //                    {
+                    //                        hashmas = new[] { posInfo1.PozX + X1, posInfo1.PozY + Y1 };
+                    //                        var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
+                    //                        if (!occupied)
+                    //                        {
+                    //                            OccupDict.Add(MD5HashGenerator.GenerateKey(hashmas), posInfo1);
+
+                    //                        }
+                    //                    }
+
+                    //                }
+                    //            }
+                    //            else
+                    //            {
+                    //                OccupDict.Add(hash, posInfo1);
+                    //            }
+                    //            currObject?.GetType().GetProperty("BackColor")?.SetValue(currObject, Color.Transparent);
+                    //            switch (posInfo1?.Tag?.GetType().Name)
+                    //            {
+                    //                case nameof(SupplyVent):
+                    //                    SupplyVentPresent = true;
+                    //                    break;
+                    //                case nameof(ExtVent):
+                    //                    ExtVentPresent = true;
+                    //                    break;
+                    //                case nameof(SpareSuplyVent):
+                    //                    SupplyVentSparePresent = true;
+                    //                    break;
+                    //                case nameof(SpareExtVent):
+                    //                    ExtVentSparePresent = true;
+                    //                    break;
+                    //            }
+
+                    //            currObject = null;
+                    //        }
+                    //        else
+                    //        {
+                    //            currObject = null;
+                    //        }
+                    //    }
 
                         
-                    }
-                    //Object not selected
-                    else
-                    {
-                        currObject = sender;
-                        var button3 = (DoubleBufferedBunifuImageButton)sender;
-                        var posInfo = (PosInfo)button3.Tag;
-                        Controls.SetChildIndex(button3, 0);
-                        if (posInfo.SizeX > 0 || posInfo.SizeY > 0)
-                        {
-                            for (var Y1 = 0; Y1 <= posInfo.SizeY; Y1++)
-                            {
-                                for (var X1 = 0; X1 <= posInfo.SizeX; X1++)
-                                {
-                                    hashmas = new[] { posInfo.PozX + X1, posInfo.PozY + Y1 };
-                                    var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
-                                    if (occupied)
-                                    {
-                                        OccupDict.Remove(MD5HashGenerator.GenerateKey(hashmas));
-                                    }
-                                }
+                    //}
+                    ////Object not selected
+                    //else
+                    //{
 
-                            }
+                    //    if (currObjects != null)
+                    //    {
+                    //        activeObject = sender;
+                    //    }
+                        
+                    //    currObject = sender;
+                    //    var button3 = (DoubleBufferedBunifuImageButton)sender;
+                    //    var posInfo = (PosInfo)button3.Tag;
+                    //    Controls.SetChildIndex(button3, 0);
+                    //    if (posInfo.SizeX > 0 || posInfo.SizeY > 0)
+                    //    {
+                    //        for (var Y1 = 0; Y1 <= posInfo.SizeY; Y1++)
+                    //        {
+                    //            for (var X1 = 0; X1 <= posInfo.SizeX; X1++)
+                    //            {
+                    //                hashmas = new[] { posInfo.PozX + X1, posInfo.PozY + Y1 };
+                    //                var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
+                    //                if (occupied)
+                    //                {
+                    //                    OccupDict.Remove(MD5HashGenerator.GenerateKey(hashmas));
+                    //                }
+                    //            }
 
-                        }
-                        else
-                        {
-                            hashmas = new[] { posInfo.PozX, posInfo.PozY };
-                            var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
-                            if (occupied)
-                            {
-                                OccupDict.Remove(MD5HashGenerator.GenerateKey(hashmas));
-                            }
-                        }
-                        radPropertyGrid1.SelectedObject = null;
-                    }
+                    //        }
+
+                    //    }
+                    //    else
+                    //    {
+                    //        hashmas = new[] { posInfo.PozX, posInfo.PozY };
+                    //        var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
+                    //        if (occupied)
+                    //        {
+                    //            OccupDict.Remove(MD5HashGenerator.GenerateKey(hashmas));
+                    //        }
+                    //    }
+                    //    radPropertyGrid1.SelectedObject = null;
+                    //}
                     break;
                 case MouseButtons.Right:
                     var button = (DoubleBufferedBunifuImageButton)sender;
@@ -1157,229 +1394,235 @@ namespace AOVGEN
         }
         private async void BunifuImageButton1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && currObject == null)
+            try
             {
-                var islongpress = await CheckLongPress(sender as BunifuImageButton, 650);
-                if (!islongpress) return;
-                //string[] layouts = new string[] { "Test 1", "Test 2", "Test 3" };
-                var items = new List<ToolStripButton>();
+                if (e.Button == MouseButtons.Left && currObject == null)
+                {
+                    var islongpress = await CheckLongPress(sender as BunifuImageButton, 650);
+                    if (!islongpress) return;
+                    //string[] layouts = new string[] { "Test 1", "Test 2", "Test 3" };
+                    var items = new List<ToolStripButton>();
 
-                var SupplyItem = new ToolStripButton("Приточный вентилятор", Resources.fan_right, imageButton1LayoutClicked, "Приток")
-                {
-                    Tag = "fan_right"
-                };
-                
-                var ExtItem = new ToolStripButton("Вытяжной вентилятор", Resources.fan_left, imageButton1LayoutClicked, "Вытяжка")
-                {
-                    Tag = "fan_left"
-                };
-                
-                var SupplyItemDual = new ToolStripButton("Приточный вентилятор с резервом", Resources.fan_right_dual, imageButton1LayoutClicked, "Приток сдвоенный")
-                {
-                    Tag = "fan_right_dual"
-                };
-                var ExtItemDual = new ToolStripButton("Вытяжной вентилятор с резервом", Resources.fan_left_dual, imageButton1LayoutClicked, "Вытяжка сдвоенный")
-                {
-                    Tag = "fan_left_dual"
-                };
-                if (SupplyVentPresent || SupplyVentSparePresent)
-                {
-                    SupplyItem.Enabled = false;
-                    SupplyItemDual.Enabled = false;
-                }
-
-                if (ExtVentPresent || ExtVentSparePresent)
-                {
-                    ExtItem.Enabled = false;
-                    ExtItemDual.Enabled = false;
-
-                }
-
-                items.Add(SupplyItem);
-                items.Add(ExtItem);
-                items.Add(SupplyItemDual);
-                items.Add(ExtItemDual);
-
-                
-                    
-                var layoutMenus = new ContextMenuStrip
-                {
-                    ImageScalingSize = new Size(40, 40),
-                    AutoSize = false,
-                    Width = 300,
-                    Height = 200
-                };
-                layoutMenus.Items.Clear();
-                layoutMenus.Items.AddRange(items.ToArray());
-                layoutMenus.Show(Cursor.Position.X, Cursor.Position.Y);
-
-            }
-            else
-            {
-                if (currObject != null && currObject is PosInfo posInfo)
-                {
-                    
-                    if (posInfo.PozX == 50 || posInfo.PozY == 50)
+                    var SupplyItem = new ToolStripButton("Приточный вентилятор", Resources.fan_right, imageButton1LayoutClicked, "Приток")
                     {
-                        Controls.Remove(currObject as Control);
-                        currObject = null;
+                        Tag = "fan_right"
+                    };
+
+                    var ExtItem = new ToolStripButton("Вытяжной вентилятор", Resources.fan_left, imageButton1LayoutClicked, "Вытяжка")
+                    {
+                        Tag = "fan_left"
+                    };
+
+                    var SupplyItemDual = new ToolStripButton("Приточный вентилятор с резервом", Resources.fan_right_dual, imageButton1LayoutClicked, "Приток сдвоенный")
+                    {
+                        Tag = "fan_right_dual"
+                    };
+                    var ExtItemDual = new ToolStripButton("Вытяжной вентилятор с резервом", Resources.fan_left_dual, imageButton1LayoutClicked, "Вытяжка сдвоенный")
+                    {
+                        Tag = "fan_left_dual"
+                    };
+                    if (SupplyVentPresent || SupplyVentSparePresent)
+                    {
+                        SupplyItem.Enabled = false;
+                        SupplyItemDual.Enabled = false;
                     }
+
+                    if (ExtVentPresent || ExtVentSparePresent)
+                    {
+                        ExtItem.Enabled = false;
+                        ExtItemDual.Enabled = false;
+
+                    }
+
+                    items.Add(SupplyItem);
+                    items.Add(ExtItem);
+                    items.Add(SupplyItemDual);
+                    items.Add(ExtItemDual);
+
+
+
+                    var layoutMenus = new ContextMenuStrip
+                    {
+                        ImageScalingSize = new Size(40, 40),
+                        AutoSize = false,
+                        Width = 300,
+                        Height = 200
+                    };
+                    layoutMenus.Items.Clear();
+                    layoutMenus.Items.AddRange(items.ToArray());
+                    layoutMenus.Show(Cursor.Position.X, Cursor.Position.Y);
+
                 }
-                
+                else
+                {
+                    if (!(currObject is PosInfo posInfo)) return;
+                    if (posInfo.PozX != 50 && posInfo.PozY != 50) return;
+                    Controls.Remove((Control)currObject);
+                    currObject = null;
+                }
+            }
+            catch 
+            {
+                //ignored
             }
         }
         private async void BunifuImageButton3_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && currObject ==null)
+            try
             {
-                var islongpress = await CheckLongPress(sender as BunifuImageButton, 650);
-                if (!islongpress) return;
-                //string[] layouts = new string[] { "Test 1", "Test 2", "Test 3" };
-                var items = new List<ToolStripButton>();
-                var SupplyItem = new ToolStripButton("Приточная заслонка", Resources.shutter_right, imageButton3LayoutClicked, "Приток")
+                if (e.Button == MouseButtons.Left && currObject == null)
                 {
-                    Tag = "shutter_right"
-                };
-                var ExtItem = new ToolStripButton("Вытяжная заслонка", Resources.shutter_left, imageButton3LayoutClicked, "Вытяжка")
-                {
-                    Tag = "shutter_left"
-                };
-                var SupplyItemT = new ToolStripButton("Приточная заслонка с датчком наружной Т", Resources.shutter_right_T, imageButton3LayoutClicked, "ПритокТ")
-                {
-                    Tag = "shutter_right_T"
-                };
-                items.Add(SupplyItemT);
-                items.Add(SupplyItem);
-                items.Add(ExtItem);
-                //foreach (string layout in layouts)
-                //{
-                //    ToolStripButton item = new ToolStripButton(layout, TestApp.Properties.Resources.air_filter, LayoutClicked);
-                //    //item.AutoSize = false;
-                //    //item.Height = 50;
-                //    //item.Width = 50;
-                //    items.Add(item);
-                //}
-                var layoutMenus = new ContextMenuStrip
-                {
-                    ImageScalingSize = new Size(40, 40),
-                    AutoSize = false,
-                    Width = 350,
-                    Height = 150
-                };
-                layoutMenus.Items.Clear();
-                layoutMenus.Items.AddRange(items.ToArray());
-                layoutMenus.Show(Cursor.Position.X, Cursor.Position.Y);
-            }
-            else
-            {
-                
-                if (currObject != null && currObject is PosInfo posInfo)
-                {
-                    
-                    if (posInfo.PozX == 50 || posInfo.PozY == 50)
+                    var islongpress = await CheckLongPress(sender as BunifuImageButton, 650);
+                    if (!islongpress) return;
+                    //string[] layouts = new string[] { "Test 1", "Test 2", "Test 3" };
+                    var items = new List<ToolStripButton>();
+                    var SupplyItem = new ToolStripButton("Приточная заслонка", Resources.shutter_right, imageButton3LayoutClicked, "Приток")
                     {
-                        Controls.Remove(currObject as Control);
-                        currObject = null;
-                    }
+                        Tag = "shutter_right"
+                    };
+                    var ExtItem = new ToolStripButton("Вытяжная заслонка", Resources.shutter_left, imageButton3LayoutClicked, "Вытяжка")
+                    {
+                        Tag = "shutter_left"
+                    };
+                    var SupplyItemT = new ToolStripButton("Приточная заслонка с датчком наружной Т", Resources.shutter_right_T, imageButton3LayoutClicked, "ПритокТ")
+                    {
+                        Tag = "shutter_right_T"
+                    };
+                    items.Add(SupplyItemT);
+                    items.Add(SupplyItem);
+                    items.Add(ExtItem);
+                    //foreach (string layout in layouts)
+                    //{
+                    //    ToolStripButton item = new ToolStripButton(layout, TestApp.Properties.Resources.air_filter, LayoutClicked);
+                    //    //item.AutoSize = false;
+                    //    //item.Height = 50;
+                    //    //item.Width = 50;
+                    //    items.Add(item);
+                    //}
+                    var layoutMenus = new ContextMenuStrip
+                    {
+                        ImageScalingSize = new Size(40, 40),
+                        AutoSize = false,
+                        Width = 350,
+                        Height = 150
+                    };
+                    layoutMenus.Items.Clear();
+                    layoutMenus.Items.AddRange(items.ToArray());
+                    layoutMenus.Show(Cursor.Position.X, Cursor.Position.Y);
                 }
-                
+                else
+                {
+
+                    if (currObject != null && currObject is PosInfo posInfo)
+                    {
+
+                        if (posInfo.PozX == 50 || posInfo.PozY == 50)
+                        {
+                            Controls.Remove(currObject as Control);
+                            currObject = null;
+                        }
+                    }
+
+                }
             }
+            catch 
+            {
+                //ignored
+            }
+            
         }
         private async void BunifuImageButton9_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && currObject == null)
+            try
             {
-                var islongpress = await CheckLongPress(sender as BunifuImageButton, 650);
-                if (!islongpress) return;
-                
-                var layoutMenus = new ContextMenuStrip
+                if (e.Button == MouseButtons.Left && currObject == null)
                 {
-                    ImageScalingSize = new Size(40, 40),
-                    AutoSize = false,
-                    Width = 300,
-                    Height = 650
-                };
-                layoutMenus.Items.Clear();
-                layoutMenus.Items.AddRange(CrossectionButtons.ToArray());
-                layoutMenus.Show(Cursor.Position.X, Cursor.Position.Y);
-            }
-            else
-            {
-                if (currObject != null && currObject is PosInfo posInfo)
-                {
-                    if (posInfo.PozX == 50 || posInfo.PozY == 50)
+                    var islongpress = await CheckLongPress(sender as BunifuImageButton, 650);
+                    if (!islongpress) return;
+
+                    var layoutMenus = new ContextMenuStrip
                     {
-                        Controls.Remove(currObject as Control);
-                        currObject = null;
-                    }
+                        ImageScalingSize = new Size(40, 40),
+                        AutoSize = false,
+                        Width = 300,
+                        Height = 650
+                    };
+                    layoutMenus.Items.Clear();
+                    layoutMenus.Items.AddRange(CrossectionButtons.ToArray());
+                    layoutMenus.Show(Cursor.Position.X, Cursor.Position.Y);
                 }
-                
+                else
+                {
+                    if (currObject == null || !(currObject is PosInfo posInfo)) return;
+                    if (posInfo.PozX != 50 && posInfo.PozY != 50) return;
+                    Controls.Remove(currObject as Control);
+                    currObject = null;
+                }
             }
+            catch 
+            {
+                //ignored
+            }
+            
         }
         private async void BunifuImageButton10_MouseDown(object sender, MouseEventArgs e)
         {
-            var button = sender as BunifuImageButton;
-            if (e.Button == MouseButtons.Left && currObject ==null)
+            try
             {
-                var islongpress = await CheckLongPress(sender as BunifuImageButton, 650);
-                if (!islongpress) return;
-                //string[] layouts = new string[] { "Test 1", "Test 2", "Test 3" };
-                var items = new List<ToolStripButton>();
-                var Item1 = new ToolStripButton("Помещение, приток", Resources.room__arrow_supply, imageButton10LayoutClicked, "Соединение1");
-                var Item1T = new ToolStripButton("Помещение, приток с датчик.Т ", Resources.room__arrow_supply_T, imageButton10LayoutClicked, "Соединение1Т");//Соединение1ТН
-                var Item1TH = new ToolStripButton("Помещение, приток с датчик.Т, Н", Resources.room__arrow_supply_TH, imageButton10LayoutClicked, "Соединение1ТН");
-                var Item2 = new ToolStripButton("Помещение, вытяжка влево", Resources.room__arrow_exhaust_L, imageButton10LayoutClicked, "Соединение2");
-                var Item3 = new ToolStripButton("Помещение, вытяжка вправо", Resources.room__arrow_exhaust_R, imageButton10LayoutClicked, "Соединение3");
-                var Item4 = new ToolStripButton("Помещение, приток, вытяжка", Resources.room__arrow_supp_exh, imageButton10LayoutClicked, "Соединение4");
-                var Item5 = new ToolStripButton("Помещение, приток, вытяжка, с датч.Т", Resources.room__arrow_supp_exh_T, imageButton10LayoutClicked, "Соединение5");
-                var Item6 = new ToolStripButton("Помещение, приток, вытяжка, с датч.Т, Н", Resources.room__arrow_supp_exh_TH, imageButton10LayoutClicked, "Соединение6");
-                string[] images = {
+                if (e.Button == MouseButtons.Left && currObject == null)
+                {
+                    var islongpress = await CheckLongPress(sender as BunifuImageButton, 650);
+                    if (!islongpress) return;
+                    //string[] layouts = new string[] { "Test 1", "Test 2", "Test 3" };
+                    var items = new List<ToolStripButton>();
+                    var Item1 = new ToolStripButton("Помещение, приток", Resources.room__arrow_supply, imageButton10LayoutClicked, "Соединение1");
+                    var Item1T = new ToolStripButton("Помещение, приток с датчик.Т ", Resources.room__arrow_supply_T, imageButton10LayoutClicked, "Соединение1Т");//Соединение1ТН
+                    var Item1TH = new ToolStripButton("Помещение, приток с датчик.Т, Н", Resources.room__arrow_supply_TH, imageButton10LayoutClicked, "Соединение1ТН");
+                    var Item2 = new ToolStripButton("Помещение, вытяжка влево", Resources.room__arrow_exhaust_L, imageButton10LayoutClicked, "Соединение2");
+                    var Item3 = new ToolStripButton("Помещение, вытяжка вправо", Resources.room__arrow_exhaust_R, imageButton10LayoutClicked, "Соединение3");
+                    var Item4 = new ToolStripButton("Помещение, приток, вытяжка", Resources.room__arrow_supp_exh, imageButton10LayoutClicked, "Соединение4");
+                    var Item5 = new ToolStripButton("Помещение, приток, вытяжка, с датч.Т", Resources.room__arrow_supp_exh_T, imageButton10LayoutClicked, "Соединение5");
+                    var Item6 = new ToolStripButton("Помещение, приток, вытяжка, с датч.Т, Н", Resources.room__arrow_supp_exh_TH, imageButton10LayoutClicked, "Соединение6");
+                    string[] images = {
                     "room__arrow_supply", "room__arrow_supply_T", "room__arrow_supply_TH", "room__arrow_exhaust_L", "room__arrow_exhaust_R", "room__arrow_supp_exh", "room__arrow_supp_exh_T", "room__arrow_supp_exh_TH"
                 };
-                items.Add(Item1);
-                items.Add(Item1T);
-                items.Add(Item1TH);
-                items.Add(Item2);
-                items.Add(Item3);
-                items.Add(Item4);
-                items.Add(Item5);
-                items.Add(Item6);
-                for (var t = 0; t <= items.Count - 1; t++)
-                {
-                    items[t].Tag = images[t];
-                }
-                //foreach (string layout in layouts)
-                //{
-                //    ToolStripButton item = new ToolStripButton(layout, TestApp.Properties.Resources.air_filter, LayoutClicked);
-                //    //item.AutoSize = false;
-                //    //item.Height = 50;
-                //    //item.Width = 50;
-                //    items.Add(item);
-                //}
-                var layoutMenus = new ContextMenuStrip
-                {
-                    ImageScalingSize = new Size(40, 40),
-                    AutoSize = false,
-                    Width = 350,
-                    Height = 400
-                };
-                layoutMenus.Items.Clear();
-                layoutMenus.Items.AddRange(items.ToArray());
-                layoutMenus.Show(Cursor.Position.X, Cursor.Position.Y);
-            }
-            else
-            {
-                if (currObject != null && currObject is PosInfo posInfo)
-                {
-                    if (posInfo.PozX == 50 || posInfo.PozY == 50)
+                    items.Add(Item1);
+                    items.Add(Item1T);
+                    items.Add(Item1TH);
+                    items.Add(Item2);
+                    items.Add(Item3);
+                    items.Add(Item4);
+                    items.Add(Item5);
+                    items.Add(Item6);
+                    for (var t = 0; t <= items.Count - 1; t++)
                     {
-                        Controls.Remove(currObject as Control);
-                        currObject = null;
+                        items[t].Tag = images[t];
                     }
+
+                    var layoutMenus = new ContextMenuStrip
+                    {
+                        ImageScalingSize = new Size(40, 40),
+                        AutoSize = false,
+                        Width = 350,
+                        Height = 400
+                    };
+                    layoutMenus.Items.Clear();
+                    layoutMenus.Items.AddRange(items.ToArray());
+                    layoutMenus.Show(Cursor.Position.X, Cursor.Position.Y);
                 }
-                    
-                
+                else
+                {
+                    if (!(currObject is PosInfo posInfo)) return;
+                    if (posInfo.PozX != 50 && posInfo.PozY != 50) return;
+                    Controls.Remove(currObject as Control);
+                    currObject = null;
+                }
             }
+            catch 
+            {
+                //ignored
+            }
+            
 
         }
         private void imageButton1LayoutClicked(object sender, EventArgs eventArgs)
@@ -1406,7 +1649,7 @@ namespace AOVGEN
         }
         private void imageButton3LayoutClicked(object sender, EventArgs eventArgs)
         {
-            switch (sender.GetType().GetProperty("Name").GetValue(sender, null))
+            switch (sender.GetType().GetProperty("Name")?.GetValue(sender, null))
             {
                 case ("Приток"):
                     CreateButton(Resources.shutter_right, typeof(SupplyDamper), ((dynamic)sender).Tag);
@@ -1425,7 +1668,7 @@ namespace AOVGEN
         private void imageButton9LayoutClicked(object sender, EventArgs eventArgs)
         {
 
-            switch (sender.GetType().GetProperty("Name").GetValue(sender, null))
+            switch (sender.GetType().GetProperty("Name")?.GetValue(sender, null))
             {
                 case ("Соединение1"):
                     CreateButton(Resources.cross1, typeof(CrossSection), ((dynamic)sender).Tag);
@@ -1474,7 +1717,7 @@ namespace AOVGEN
         private void imageButton10LayoutClicked(object sender, EventArgs eventArgs)
         {
            
-            switch (sender.GetType().GetProperty("Name").GetValue(sender, null))
+            switch (sender.GetType().GetProperty("Name")?.GetValue(sender, null))
             {
                 case ("Соединение1"):
                     CreateButton(Resources.room__arrow_supply, typeof(Room), ((dynamic)sender).Tag);
@@ -1798,11 +2041,10 @@ namespace AOVGEN
 
         private void radButton1_Click(object sender, EventArgs e)
         {
-            
             Controls
                 .Cast<Control>()
                 .All(cntl => cntl.Enabled = false);
-           
+
             try
             {
                 var timer = new Timer
@@ -1820,9 +2062,6 @@ namespace AOVGEN
             {
                 // ignored
             }
-
-
-            //DialogResult = DialogResult.Cancel;
         }
         private void Timer_Tick(object sender, EventArgs e)
         {
@@ -1837,6 +2076,7 @@ namespace AOVGEN
             if (e.Button == MouseButtons.Left)
             {
                 isDrag = true;
+                
             }
 
             var control = (Control)sender;
@@ -1973,7 +2213,6 @@ namespace AOVGEN
             base.OnKeyDown(e);
         }
 
-       
 
         private void radDropDownList1_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
         {
@@ -2105,12 +2344,20 @@ namespace AOVGEN
                     button.Zoom = posInfo.SizeY > 0 ? 5 : 15;
 
                     OccupDict.Add(MD5HashGenerator.GenerateKey(posInfo.Pos), posInfo);
+                    if (posInfo.SizeY > 0)
+                    {
+                        for (int i = 0; i <= posInfo.SizeY; i++)
+                        {
+                            string genGey = MD5HashGenerator.GenerateKey(new[] {posInfo.PozX, posInfo.PozY + i});
+                            if (!OccupDict.ContainsKey(genGey)) OccupDict.Add(genGey, posInfo);
+                        }
+                    }
                     button.Click += button_Click;
                     Controls.Add(button);
                     Controls.SetChildIndex(button, 0);
                 }
             }
-            catch (Exception ex)
+            catch 
             {
                 MessageBox.Show("Вероятно, не выбран тип установки");
             }
@@ -2144,7 +2391,7 @@ namespace AOVGEN
 
                 // add body
                 XmlElement body = xmlDoc.CreateElement(string.Empty, "Compontents", string.Empty);
-                xmlDoc.DocumentElement.AppendChild(body);
+                xmlDoc.DocumentElement?.AppendChild(body);
                 foreach (PosInfo posInfo in controlsWithPosInfo)
                 {
                     object component = posInfo.Tag;

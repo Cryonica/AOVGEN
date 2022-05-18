@@ -8,7 +8,6 @@ using System.Data.SQLite;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -16,7 +15,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Serialization;
 using Telerik.WinControls.UI;
 
 namespace AOVGEN
@@ -24,22 +22,34 @@ namespace AOVGEN
     public partial class EditorV2 : Telerik.WinControls.UI.RadForm
     {
         #region Global variables
-        object currObject = null;
-        List<object> currObjects = null;
-        Image lastSelectedImage = null;
-        PosInfo lastPosInfo = null;
-        object lastComponent = null;
-        readonly Dictionary<string, PosInfo> OccupDict = new Dictionary<string, PosInfo>();
-        readonly int[] mymas = new int[2];
-        readonly int[] sizeMas = new int[2];
-        string hash;
-        readonly PosInfo GlobalPosInfo = new PosInfo();
-        bool present;
-        
-        bool isDrag = false;
-        Rectangle theRectangle = new Rectangle(new Point(0, 0), new Size(0, 0));
-        Point startPoint;
-        
+
+        private object currObject;
+        private object activeObject;
+        private List<object> currObjects;
+        private Image lastSelectedImage;
+        private PosInfo lastPosInfo;
+        private object lastComponent;
+        private readonly Dictionary<string, PosInfo> OccupDict = new Dictionary<string, PosInfo>();
+        private readonly int[] mymas = new int[2];
+        private readonly int[] sizeMas = new int[2];
+        private string hash;
+        private readonly PosInfo GlobalPosInfo = new PosInfo();
+        private bool present;
+        private bool isDrag;
+        private Rectangle theRectangle = new Rectangle(new Point(0, 0), new Size(0, 0));
+        private Point startPoint;
+        private static readonly Dictionary<string, string> imageDictionary = new Dictionary<string, string>
+        {
+            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supp_exh_T), "room__arrow_supp_exh_T"},
+            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supp_exh_T_big), "room__arrow_supp_exh_T_big"},
+            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supply_T), "room__arrow_supply_T"},
+            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supp_exh_TH), "room__arrow_supp_exh_TH"},
+            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supp_exh_TH_big), "room__arrow_supp_exh_TH_big"},
+            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supply_TH), "room__arrow_supply_TH"},
+
+
+        };
+
         #endregion
         #region User functions
         internal static Point CreatePointFromCell(int[] cell)
@@ -48,7 +58,7 @@ namespace AOVGEN
         }
         private void GenerateCells()
         {
-            var cellSize = 60;
+            const int cellSize = 60;
             for (var t = 0; t <= 15; t++)
             {
                 var pictureBox = new PictureBox
@@ -127,229 +137,105 @@ namespace AOVGEN
                 }
             }
         }
-        private int[] GetCellPos()
-        {
-            //correct position in mattrix
-            if (currObject != null)
-            {
-                //DoubleBufferedPictureBox pictureBox = (DoubleBufferedPictureBox)currObject;
-                if (currObject is Bunifu.Framework.UI.BunifuImageButton button)
-                {
-                    
-                    PosInfo posInfo = (PosInfo)button.Tag;
-                    bool bigout = posInfo.SizeX > 0 & posInfo.PozX == 14 & posInfo.PozX < 50 & posInfo.SizeY > 0 & posInfo.PozY == 4;
-                    if (Cursor.Position.X > 389 && Cursor.Position.Y >= 390 && Cursor.Position.Y <= 675 && Cursor.Position.X < 1281 && !bigout)
-                    {
-                        var oldLocation = button.Location;
-                        int mod1 = Cursor.Position.X % 60;
-                        int mod2 = Cursor.Position.Y % 60;
-                        int x;
-                        int y;
-                        if (mod1 < 30)
-                        {
-                            x = Cursor.Position.X - mod1;
-                        }
-                        else
-                        {
-                            x = Cursor.Position.X + 60 - mod1;
-                        }
-
-                        if (mod2 < 30)
-                        {
-                            y = (Cursor.Position.Y - 60) - mod2;
-                        }
-                        else
-                        {
-                            y = Cursor.Position.Y - mod2;
-                        }
-
-                        int CellX = (x - 400) / 60;
-                        int CellY = (y - 360) / 60;
-
-                        if ((posInfo.SizeY > 0 & CellY == 4) || (posInfo.SizeX > 0 & CellX == 14)) //if big object on edge of mattrix
-                        {
-                            OutOfMattrix(posInfo, button);
-                            return new int[] { Cursor.Position.X + 20, Cursor.Position.Y - 50 };
-                        }
-
-                        mymas[0] = CellX; //calculated CellX
-                        mymas[1] = CellY;//calculated CellY
-                        int sizeX = posInfo.SizeX; //Object SizeX
-                        int sizeY = posInfo.SizeY; //Object SizeY
-                        bool occupied; //set occupied cell to false
-                        if (currObject != null && CellX <= 15 && CellX >= 0)
-                        {
-                           
-                            occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(mymas));
-                            if (sizeX > 0 || sizeY > 0)
-                            {
-                                for (int Y1 = 0; Y1 <= sizeY; Y1++)
-                                {
-                                    if (occupied) break;
-                                    for (int X1 = 0; X1 <= sizeX; X1++)
-                                    {
-                                        sizeMas[0] = CellX + X1;
-                                        sizeMas[1] = CellY + Y1;
-                                        occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(sizeMas));
-                                        if (occupied)
-                                        {
-                                            mymas[0] = sizeMas[0];
-                                            mymas[1] = sizeMas[1];
-                                            break;
-                                        }
-                                    }
-
-                                }
-                            }
-                            if (occupied)
-                            {
-                                //совпадает позиция                            
-                                present = true;
-                                return new int[] { oldLocation.X, oldLocation.Y};
-                            }
-                            else
-                            {
-                                present = false;
-                                GlobalPosInfo.Pos = mymas;
-                                posInfo.Pos = new int[] { CellX, CellY };
-                                posInfo.Pos[0] = CellX;
-                                posInfo.Pos[1] = CellY;
-                                button.BackColor = Color.FromArgb(250, 4, 243, 100);
-                            }
-                            return new int[] { x, y };
-                        }
-                    }
-                    //out of mattrix
-                    OutOfMattrix(posInfo, button);
-                }
-
-            }
-            return new int[] { Cursor.Position.X + 20, Cursor.Position.Y - 50 };
-            void OutOfMattrix(PosInfo posInfo, Bunifu.Framework.UI.BunifuImageButton pictureBox)
-            {
-                posInfo.Pos[0] = 50;
-                posInfo.Pos[1] = 50;
-                pictureBox.BackColor = Color.Red;
-                
-            }
-        }
         private int[] GetCellPos(object s)
         {
             //correct position in mattrix
             Point pursor = this.PointToClient(Cursor.Position);
-            if (currObject != null)
+            if (s is Bunifu.Framework.UI.BunifuImageButton button)
             {
-                
-                if (currObject is Bunifu.Framework.UI.BunifuImageButton button)
+                PosInfo posInfo = (PosInfo)button.Tag;
+                bool bigout = posInfo.SizeX > 0 & posInfo.PozX == 14 & posInfo.PozX < 50 & posInfo.SizeY > 0 & posInfo.PozY == 4;
+                if (pursor.X >= 180 && pursor.Y >= 180 && pursor.Y <= 480 && pursor.X < 1080 && !bigout)
                 {
-                    PosInfo posInfo = (PosInfo)button.Tag;
-                    bool bigout = posInfo.SizeX > 0 & posInfo.PozX == 14 & posInfo.PozX < 50 & posInfo.SizeY > 0 & posInfo.PozY == 4;
-                    if (pursor.X >= 180 && pursor.Y >= 180 && pursor.Y <= 480 && pursor.X < 1080 && !bigout)
+
+                    int mod1 = pursor.X % 60;
+                    int mod2 = pursor.Y % 60;
+                    int x;
+                    int y;
+                    if (mod1 < 60)
+                    {
+                        x = pursor.X - mod1;
+                    }
+                    else
+                    {
+                        x = pursor.X + 60 - mod1;
+                    }
+
+                    if (mod2 < 60)
+                    {
+                        y = (pursor.Y - mod2) ;
+                    }
+                    else
+                    {
+                        y = pursor.Y - mod2 + 60;
+                    }
+                        
+                    var oldLocation = button.Location;
+                    int CellX = (x - 180) / 60;
+                    int CellY = (y - 180) / 60;
+                    if ((posInfo.SizeY > 0 & CellY == 4) || (posInfo.SizeX > 0 & CellX == 14) || (CellY >= 5) || (CellX >= 15))  //if big object on edge of mattrix
+                    {
+                        OutOfMattrix(posInfo, button);
+                        return new[] { pursor.X, pursor.Y };
+                    }
+                    mymas[0] = CellX; //calculated CellX
+                    mymas[1] = CellY;//calculated CellY
+                    int sizeX = posInfo.SizeX; //Object SizeX
+                    int sizeY = posInfo.SizeY; //Object SizeY
+                    if (s != null && CellX <= 15 && CellX >= 0)
                     {
 
-                        int mod1 = pursor.X % 60;
-                        int mod2 = pursor.Y % 60;
-                        int x;
-                        int y;
-                        if (mod1 < 60)
+                        var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(mymas)); //set occupied cell to false
+                        if (sizeX > 0 || sizeY > 0)
                         {
-                            x = pursor.X - mod1;
-                        }
-                        else
-                        {
-                            x = pursor.X + 60 - mod1;
-                        }
-
-                        if (mod2 < 60)
-                        {
-                            y = (pursor.Y - mod2) ;
-                        }
-                        else
-                        {
-                            y = pursor.Y - mod2 + 60;
-                        }
-                        
-                        var oldLocation = button.Location;
-                        int CellX = (x - 180) / 60;
-                        int CellY = (y - 180) / 60;
-                        
-                        
-                        
-                       
-
-                        if ((posInfo.SizeY > 0 & CellY == 4) || (posInfo.SizeX > 0 & CellX == 14) || (CellY >= 5) || (CellX >= 15))  //if big object on edge of mattrix
-                        {
-                            OutOfMattrix(posInfo, button);
-                            return new int[] { pursor.X, pursor.Y };
-                        }
-                        
-
-                        mymas[0] = CellX; //calculated CellX
-                        mymas[1] = CellY;//calculated CellY
-                        int sizeX = posInfo.SizeX; //Object SizeX
-                        int sizeY = posInfo.SizeY; //Object SizeY
-                        bool occupied; //set occupied cell to false
-                        if (currObject != null && CellX <= 15 && CellX >= 0)
-                        {
-
-                            occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(mymas));
-                            if (sizeX > 0 || sizeY > 0)
+                            for (int Y1 = 0; Y1 <= sizeY; Y1++)
                             {
-                                for (int Y1 = 0; Y1 <= sizeY; Y1++)
+                                if (occupied) break;
+                                for (int X1 = 0; X1 <= sizeX; X1++)
                                 {
-                                    if (occupied) break;
-                                    for (int X1 = 0; X1 <= sizeX; X1++)
-                                    {
-                                        sizeMas[0] = CellX + X1;
-                                        sizeMas[1] = CellY + Y1;
-                                        occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(sizeMas));
-                                        if (occupied)
-                                        {
-                                            mymas[0] = sizeMas[0];
-                                            mymas[1] = sizeMas[1];
-                                            break;
-                                        }
-                                    }
-
+                                    sizeMas[0] = CellX + X1;
+                                    sizeMas[1] = CellY + Y1;
+                                    occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(sizeMas));
+                                    if (!occupied) continue;
+                                    mymas[0] = sizeMas[0];
+                                    mymas[1] = sizeMas[1];
+                                    break;
                                 }
-                            }
-                            if (occupied)
-                            {
-                                //совпадает позиция                            
-                                present = true;
-                                return new int[] { oldLocation.X, oldLocation.Y};
-                            }
-                            else
-                            {
-                                present = false;
-                                GlobalPosInfo.Pos = mymas;
-                                posInfo.Pos = new int[] { CellX, CellY };
-                                posInfo.Pos[0] = CellX;
-                                posInfo.Pos[1] = CellY;
-                                button.BackColor = Color.FromArgb(250, 4, 243, 100);
-                            }
 
-                            int kX =0, KY = 0;
-                            switch (posInfo.SizeY)
-                            {
-                                case 0:
-                                    kX = (60 - button.Width) / 2;
-                                    KY = (60 - button.Height) / 2;
-                                    break;
-                                case 1:
-                                    kX = (60 - button.Width) / 2;
-                                    KY = (120 - button.Height) / 2;
-                                    break;
                             }
-                            return new int[] { x + kX , y + KY };
                         }
-                    }
-                    //out of mattrix
-                    OutOfMattrix(posInfo, button);
-                }
+                        if (occupied)
+                        {
+                            //совпадает позиция                            
+                            present = true;
+                            return new[] { oldLocation.X, oldLocation.Y};
+                        }
+                        present = false;
+                        GlobalPosInfo.Pos = mymas;
+                        posInfo.Pos = new int[] { CellX, CellY };
+                        posInfo.Pos[0] = CellX;
+                        posInfo.Pos[1] = CellY;
+                        button.BackColor = Color.FromArgb(250, 4, 243, 100);
 
+                        int kX =0, KY = 0;
+                        switch (posInfo.SizeY)
+                        {
+                            case 0:
+                                kX = (60 - button.Width) / 2;
+                                KY = (60 - button.Height) / 2;
+                                break;
+                            case 1:
+                                kX = (60 - button.Width) / 2;
+                                KY = (120 - button.Height) / 2;
+                                break;
+                        }
+                        return new[] { x + kX , y + KY };
+                    }
+                }
+                //out of mattrix
+                OutOfMattrix(posInfo, button);
             }
-            return new int[] { pursor.X , pursor.Y  };
+            return new[] { pursor.X , pursor.Y  };
             void OutOfMattrix(PosInfo posInfo, Bunifu.Framework.UI.BunifuImageButton pictureBox)
             {
                 posInfo.Pos[0] = 50;
@@ -357,41 +243,6 @@ namespace AOVGEN
                 pictureBox.BackColor = Color.Red;
 
             }
-        }
-
-
-
-
-
-        private void CreateButton(Image image)
-        {
-            lastSelectedImage = image;
-            DoubleBufferedBunifuImageButton button = new DoubleBufferedBunifuImageButton
-            {
-                Image = image,
-                Width = 50,
-                Height = 50,
-                BackgroundImageLayout = ImageLayout.Stretch,
-                BackColor = Color.Red,
-                Location = new Point(Cursor.Position.X - 140, Cursor.Position.Y - 200),
-                Padding = new Padding(10),
-                InitialImage = image,
-                SizeMode = PictureBoxSizeMode.StretchImage,
-                Zoom = 10
-
-
-            };
-
-            PosInfo posInfo = new PosInfo();
-            lastPosInfo = posInfo;
-
-            button.Tag = posInfo;
-            button.Click += button_Click;
-            
-            Controls.Add(button);
-            this.Controls.SetChildIndex(button, 0);
-            currObject = button;
-            //Cursor.Position = new Point(Cursor.Position.X+50, Cursor.Position.Y );
         }
         private void CreateButton(Image image, Type type, dynamic ImageName )
         {
@@ -410,7 +261,7 @@ namespace AOVGEN
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Zoom= 15
             };
-            button.LocationChanged += Button_LocationChanged;
+            //button.LocationChanged += Button_LocationChanged;
             object comp = CreateComp(type, image);
             PosInfo posInfo = new PosInfo
             {
@@ -470,7 +321,7 @@ namespace AOVGEN
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Zoom = 15
             };
-            button.LocationChanged += Button_LocationChanged;
+            //button.LocationChanged += Button_LocationChanged;
             object comp = CreateComp(type, image);
             PosInfo posInfo = new PosInfo
             {
@@ -489,11 +340,9 @@ namespace AOVGEN
 
         }
 
-        private void Button_LocationChanged(object sender, EventArgs e)
+        private static void Button_LocationChanged(object sender, EventArgs e)
         {
             var button = (DoubleBufferedBunifuImageButton)sender;
-            
-
         }
         private void CreateBigButton(Image image, Type type, int x, int y, dynamic ImageName)
         {
@@ -568,20 +417,24 @@ namespace AOVGEN
             lastComponent = comp;
 
         }
-        private object CreateComp(Type type, Image image)
+
+        void rrr()
+        {
+            
+        }
+        
+        
+        
+        private static object CreateComp(Type type, Image image)
         {
             object comp = null;
             bool equalObjects(object obj1, object obj2) => MD5HashGenerator.GenerateKey(obj1) == MD5HashGenerator.GenerateKey(obj2);
+           
             string GetRoomImageName()
             {
 
-                if (equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_T, image)) return "room__arrow_supp_exh_T";
-                if (equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_T_big, image)) return "room__arrow_supp_exh_T_big";
-                if (equalObjects(AOVGEN.Properties.Resources.room__arrow_supply_T, image)) return "room__arrow_supply_T";
-                if (equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_TH, image)) return "room__arrow_supp_exh_TH";
-                if (equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_TH_big, image)) return "room__arrow_supp_exh_TH_big";
-                if (equalObjects(AOVGEN.Properties.Resources.room__arrow_supply_TH, image)) return "room__arrow_supply_TH";
-                return string.Empty;
+                return imageDictionary[MD5HashGenerator.GenerateKey(image)];
+                
             }
             
             switch (type.Name)
@@ -654,11 +507,13 @@ namespace AOVGEN
                             equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_TH, image) ||
                             equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_TH_big, image) ||
                             equalObjects(AOVGEN.Properties.Resources.room__arrow_supply_TH, image);
-                        if (isT) comp = new Room(true, false, GetRoomImageName());
-                        if (isTH) comp = new Room(true, true, GetRoomImageName());
+                        string RoomImageName = GetRoomImageName();
+                        if (isT) comp = new Room(true, false, RoomImageName);
+                        if (isTH) comp = new Room(true, true, RoomImageName);
                         comp = comp ?? new Room(false, false);
                     }
                     break;
+                
 
                 case nameof(SupplyDamper):
 
@@ -683,6 +538,7 @@ namespace AOVGEN
             }
             return comp;
         }
+        
         private SQLiteConnection OpenDB()
         {
             string BDPath = this.DBFilePath;

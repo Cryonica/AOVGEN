@@ -344,11 +344,8 @@ namespace AOVGEN
                         
                     }
                     else isdeleted = false;
-
-                    
-
-                };
-                    //write data to database!!!!
+                }
+                //write data to database!!!!
                 
                 IEnumerable<string> cellsinfo(GridViewDataRowInfo inputrow)
                 {

@@ -67,7 +67,7 @@ namespace AOVGEN
                     radDropDownList1.Items.Add(famtypes.Key);
                 }
 
-                DataTable datatable = new DataTable("PannelsTable"); ;
+                DataTable datatable = new DataTable("PannelsTable");
                 datatable.Columns.Add("ID", typeof(string));
                 datatable.Columns.Add("Имя шкафа", typeof(string));
                 datatable.Columns.Add("Уровень", typeof(string));
@@ -234,10 +234,10 @@ namespace AOVGEN
 
             try
             {
-                (string GUID, string PannelName, string Level, string Room, string Power, string Family, string FamilyType, string Attrib, string AttribValue, double Height) info;
                 foreach (var row in radGridView1.Rows)
                 {
                     RevitDataInfo revitDataInfo = (RevitDataInfo)row.Cells["RevitInfo"].Value;
+                    (string GUID, string PannelName, string Level, string Room, string Power, string Family, string FamilyType, string Attrib, string AttribValue, double Height) info;
                     info.GUID = revitDataInfo.PannelGUID;
                     info.PannelName = revitDataInfo.PannelName;
                     info.Level = revitDataInfo.LevelRevitID;
