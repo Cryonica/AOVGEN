@@ -417,13 +417,6 @@ namespace AOVGEN
             lastComponent = comp;
 
         }
-
-        void rrr()
-        {
-            
-        }
-        
-        
         
         private static object CreateComp(Type type, Image image)
         {
@@ -1059,24 +1052,18 @@ namespace AOVGEN
                 }
             }
         }
-        class DoubleBufferedPictureBox : PictureBox
-        {
-            public DoubleBufferedPictureBox() : base()
-            {
-                DoubleBuffered = true;
-            }
-        }
+        
         class DoubleBufferedBunifuImageButton : Bunifu.Framework.UI.BunifuImageButton
         {
             public DoubleBufferedBunifuImageButton() : base()
             {
                 DoubleBuffered = true;
+                
 
             }
+            
 
         }
-
-
         
         internal class PosInfo
         {

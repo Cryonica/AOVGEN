@@ -1777,6 +1777,7 @@ namespace AOVGEN
                             var connectionstring = command.Connection.ConnectionString;
                             // Write Ventsystem components to DataBase
                             WriteVentSystemToDB.Execute(connectionstring, VentSystem, Project, Building);
+                           
                             
                             command.Dispose();
                             connection.Close();
