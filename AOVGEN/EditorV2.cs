@@ -920,12 +920,15 @@ namespace AOVGEN
                     curobjPosInfo.PozY + dY
                 };
 
-                radButton2.Text = curobjPosInfo.PozY.ToString();
-                if (curobjPosInfo.PozY == 4 && curobjPosInfo.SizeY > 0 || curobjPosInfo.PozX<0 || curobjPosInfo.PozY > 4)
+                //radButton2.Text = curobjPosInfo.PozY.ToString();
+                if (curobjPosInfo.PozY == 4 && curobjPosInfo.SizeY > 0 || curobjPosInfo.PozX<0 || curobjPosInfo.PozY > 4 || curobjPosInfo.PozX >14)
                 {
                     curButton.BackColor = Color.Red;
                 }
-
+                else if (OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(curobjPosInfo.Pos)))
+                {
+                    curButton.BackColor = Color.Red;
+                }
                 else
                 {
                     
@@ -998,12 +1001,13 @@ namespace AOVGEN
                 DoubleBufferedBunifuImageButton b = (DoubleBufferedBunifuImageButton)sbutton;
                 PosInfo sPosInfo = (PosInfo)b.Tag;
                 //remove wrond buttons
-                if ((sPosInfo.Pos[0] > 14 || sPosInfo.Pos[1] > 4) || (sPosInfo.PozY == 4 && sPosInfo.SizeY == 1))
+                if ((sPosInfo.Pos[0] > 14 || sPosInfo.Pos[1] > 4) || (sPosInfo.PozY == 4 && sPosInfo.SizeY == 1) || b.Visible == false)
                 {
                     if (OccupDict != null)
                     {
 
-                        foreach (var i in OccupDict.Where(d => (d.Value == sPosInfo)).ToList())
+                        foreach (var i in OccupDict
+                            .Where(d => (d.Value == sPosInfo)).ToList())
                         {
                             OccupDict.Remove(i.Key);
                         }
@@ -1200,171 +1204,6 @@ namespace AOVGEN
                         }
                     }
                     
-
-
-
-
-
-                    //if (currObject is DoubleBufferedBunifuImageButton button1)
-                    //{
-                        
-                    //    if (currObject.Equals(sender))
-                    //    {
-                    //        if (currObjects != null && activeObject == null)
-                    //        {
-                    //            activeObject = currObject;
-                    //        }
-                    //        else
-                    //        {
-                    //            activeObject = null;
-                    //        }
-                    //        var posInfo1 = (PosInfo)button1.Tag;
-                    //        hash = MD5HashGenerator.GenerateKey(posInfo1.Pos);
-                    //        if (posInfo1.Pos[0] > 14 || posInfo1.Pos[1] > 4)
-                    //        {
-                                
-                    //            Controls.Remove(button1);
-                    //            if (currObjects != null)
-                    //            {
-                    //                var forreemove = OccupDict
-                    //                    .Where(e1 => e1.Value.PozX > 14 || e1.Value.PozY >= 14)
-                    //                    .Select(e1 => e1.Key)
-                    //                    .ToList();
-                    //                foreach (var obj in currObjects)
-                    //                {
-                    //                    DoubleBufferedBunifuImageButton buffered = (DoubleBufferedBunifuImageButton) obj;
-                    //                    PosInfo posInfo = (PosInfo) buffered.Tag;
-
-
-                    //                    if (forreemove != null)
-                    //                        foreach (var hashForRemove in forreemove)
-                    //                        {
-                    //                            OccupDict.Remove(hashForRemove);
-                    //                        }
-
-                    //                    forreemove = null;
-
-                                        
-
-                                        
-                    //                    if (OccupDict.ContainsKey(hash)) OccupDict.Remove(hash);
-                                        
-                    //                    Controls.Remove((DoubleBufferedBunifuImageButton) obj);
-                    //                }
-
-                    //                currObjects = null;
-                    //            }
-                    //            currObject = null;
-                    //            switch (posInfo1.Tag.GetType().Name)
-                    //            {
-                    //                case nameof(SupplyVent) :
-                    //                case nameof(SpareSuplyVent):
-                    //                    SupplyVentPresent = false;
-                    //                    SupplyVentSparePresent = false;
-                    //                    break;
-                    //                case nameof(ExtVent):
-                    //                case nameof(SpareExtVent):
-                    //                    ExtVentPresent = false;
-                    //                    ExtVentSparePresent = false;
-                    //                    break;
-                                    
-                    //            }
-
-                    //            return;
-
-                    //        }
-
-                    //        if (!present)
-                    //        {
-                    //            if (posInfo1.SizeX > 0 || posInfo1.SizeY > 0)
-                    //            {
-                    //                for (var Y1 = 0; Y1 <= posInfo1.SizeY; Y1++)
-                    //                {
-                    //                    for (var X1 = 0; X1 <= posInfo1.SizeX; X1++)
-                    //                    {
-                    //                        hashmas = new[] { posInfo1.PozX + X1, posInfo1.PozY + Y1 };
-                    //                        var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
-                    //                        if (!occupied)
-                    //                        {
-                    //                            OccupDict.Add(MD5HashGenerator.GenerateKey(hashmas), posInfo1);
-
-                    //                        }
-                    //                    }
-
-                    //                }
-                    //            }
-                    //            else
-                    //            {
-                    //                OccupDict.Add(hash, posInfo1);
-                    //            }
-                    //            currObject?.GetType().GetProperty("BackColor")?.SetValue(currObject, Color.Transparent);
-                    //            switch (posInfo1?.Tag?.GetType().Name)
-                    //            {
-                    //                case nameof(SupplyVent):
-                    //                    SupplyVentPresent = true;
-                    //                    break;
-                    //                case nameof(ExtVent):
-                    //                    ExtVentPresent = true;
-                    //                    break;
-                    //                case nameof(SpareSuplyVent):
-                    //                    SupplyVentSparePresent = true;
-                    //                    break;
-                    //                case nameof(SpareExtVent):
-                    //                    ExtVentSparePresent = true;
-                    //                    break;
-                    //            }
-
-                    //            currObject = null;
-                    //        }
-                    //        else
-                    //        {
-                    //            currObject = null;
-                    //        }
-                    //    }
-
-                        
-                    //}
-                    ////Object not selected
-                    //else
-                    //{
-
-                    //    if (currObjects != null)
-                    //    {
-                    //        activeObject = sender;
-                    //    }
-                        
-                    //    currObject = sender;
-                    //    var button3 = (DoubleBufferedBunifuImageButton)sender;
-                    //    var posInfo = (PosInfo)button3.Tag;
-                    //    Controls.SetChildIndex(button3, 0);
-                    //    if (posInfo.SizeX > 0 || posInfo.SizeY > 0)
-                    //    {
-                    //        for (var Y1 = 0; Y1 <= posInfo.SizeY; Y1++)
-                    //        {
-                    //            for (var X1 = 0; X1 <= posInfo.SizeX; X1++)
-                    //            {
-                    //                hashmas = new[] { posInfo.PozX + X1, posInfo.PozY + Y1 };
-                    //                var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
-                    //                if (occupied)
-                    //                {
-                    //                    OccupDict.Remove(MD5HashGenerator.GenerateKey(hashmas));
-                    //                }
-                    //            }
-
-                    //        }
-
-                    //    }
-                    //    else
-                    //    {
-                    //        hashmas = new[] { posInfo.PozX, posInfo.PozY };
-                    //        var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(hashmas));
-                    //        if (occupied)
-                    //        {
-                    //            OccupDict.Remove(MD5HashGenerator.GenerateKey(hashmas));
-                    //        }
-                    //    }
-                    //    radPropertyGrid1.SelectedObject = null;
-                    //}
                     break;
                 case MouseButtons.Right:
                     var button = (DoubleBufferedBunifuImageButton)sender;
