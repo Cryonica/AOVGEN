@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Data;
+using System.Data.SQLite;
 using System.Drawing;
 using System.Windows.Forms;
-using WinFormAnimation;
-using System.Data.SQLite;
 using Telerik.WinControls.UI;
+using WinFormAnimation;
 
 namespace AOVGEN
 {
-    public partial class CreateAnalogue : Telerik.WinControls.UI.RadForm
+    public partial class CreateAnalogue : RadForm
     {
         readonly SQLiteConnection connection;
         public CreateAnalogue(SQLiteConnection Connection)
@@ -18,8 +18,8 @@ namespace AOVGEN
         }
         public string PannelGUIDForCopy { get; set; }
         public string DBFilePath { get; set; }
-        public Telerik.WinControls.UI.RadGridView RadGridView { get; set; }
-        public Telerik.WinControls.UI.RadPropertyGrid RadPropertyGrid { get; set; }
+        public RadGridView RadGridView { get; set; }
+        public RadPropertyGrid RadPropertyGrid { get; set; }
         
         private void radTextBox4_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -85,7 +85,7 @@ namespace AOVGEN
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (this.Opacity == 0)
+            if (Opacity == 0)
             {
                 timer1.Stop();
                 WriteToDB();
@@ -105,7 +105,7 @@ namespace AOVGEN
                 string name = radTextBox1.Text;
                 string suffix = radTextBox3.Text;
 
-                DataTable dataSource = this.RadGridView.DataSource as DataTable;
+                DataTable dataSource = RadGridView.DataSource as DataTable;
                 SQLiteCommand command = new SQLiteCommand
                 {
                     Connection = connection
@@ -118,12 +118,12 @@ namespace AOVGEN
                     var pannelname = prefix + name + startvalue + suffix;
                     startvalue += step;
                     string copy =
-                        $"INSERT INTO Pannel ([GUID], PannelName, Project, Power, Voltage, Category, FireProtect, Dispatching, Protocol, Place, Modyfied, Version, Author) " +
+                        "INSERT INTO Pannel ([GUID], PannelName, Project, Power, Voltage, Category, FireProtect, Dispatching, Protocol, Place, Modyfied, Version, Author) " +
                         $"SELECT '{guid}','{pannelname}', Project, Power, Voltage, Category, FireProtect, Dispatching, Protocol, Place, Modyfied, Version, Author " +
-                        $"FROM Pannel " +
-                        $"WHERE GUID ='{this.PannelGUIDForCopy}'";
-                    string NulledPower = $"UPDATE Pannel " +
-                                         $"SET Power = '0' " +
+                        "FROM Pannel " +
+                        $"WHERE GUID ='{PannelGUIDForCopy}'";
+                    string NulledPower = "UPDATE Pannel " +
+                                         "SET Power = '0' " +
                                          $"WHERE GUID = '{guid}'";
                     command.CommandText = copy;
                     command.ExecuteNonQuery();
@@ -231,10 +231,10 @@ namespace AOVGEN
                             }
 
                             pannel.SetGUID(guid);
-                            this.RadGridView.SelectedRows[0].Tag = pannel;
+                            RadGridView.SelectedRows[0].Tag = pannel;
                         }
 
-                        if (i == imax) this.RadPropertyGrid.SelectedObject = RadGridView.SelectedRows[0].Tag;
+                        if (i == imax) RadPropertyGrid.SelectedObject = RadGridView.SelectedRows[0].Tag;
 
 
                     }
@@ -310,7 +310,7 @@ namespace AOVGEN
             if (suffix == "Суффикс") suffix = string.Empty;
             string summary = radTextBox6.Text;
             if (summary == "Количество") summary = string.Empty;
-            this.radLabel7.Text = prefix + name + summary + suffix;
+            radLabel7.Text = prefix + name + summary + suffix;
         }
 
         private void radTextBox6_KeyUp(object sender, KeyEventArgs e)

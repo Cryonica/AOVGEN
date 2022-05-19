@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Telerik.WinControls;
 using Telerik.WinControls.UI;
+using PositionChangedEventArgs = Telerik.WinControls.UI.Data.PositionChangedEventArgs;
 
 namespace AOVGEN
 {
-    public partial class PlacePannelsForm : Telerik.WinControls.UI.RadForm
+    public partial class PlacePannelsForm : RadForm
     {
         private readonly RadTreeView LevelsTree;
         private readonly Dictionary<string, List<string>> FamDictionary;
@@ -37,7 +36,7 @@ namespace AOVGEN
         
         private void radButton2_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void radToggleSwitch1_ValueChanged(object sender, EventArgs e)
@@ -112,16 +111,16 @@ namespace AOVGEN
                 radGridView1.Columns.Add(new GridViewTextBoxColumn("Значение атрибута"));
                 radGridView1.Columns.Add(new GridViewTextBoxColumn("Высота установки"));
                 radGridView1.Columns.Add(new GridViewTextBoxColumn("RevitInfo"));
-                this.radGridView1.Columns["ID"].IsVisible = false;
-                this.radGridView1.Columns["RevitInfo"].IsVisible = false;
+                radGridView1.Columns["ID"].IsVisible = false;
+                radGridView1.Columns["RevitInfo"].IsVisible = false;
                
-                foreach (var column in this.radGridView1.Columns)
+                foreach (var column in radGridView1.Columns)
                 {
                     column.TextAlignment = ContentAlignment.MiddleCenter;
                 }
-                this.radGridView1.AutoSizeColumnsMode = Telerik.WinControls.UI.GridViewAutoSizeColumnsMode.Fill;
+                radGridView1.AutoSizeColumnsMode = GridViewAutoSizeColumnsMode.Fill;
 
-                this.radGridView1.DataSource = datatable;
+                radGridView1.DataSource = datatable;
 
                 DataTable dataSource = radGridView1.DataSource as DataTable;
                 List<RadTreeNode> pannelnodes = LevelsTree.TreeViewElement.GetNodes()
@@ -191,9 +190,9 @@ namespace AOVGEN
 
         private void radButton3_Click(object sender, EventArgs e)
         {
-            if (this.radGridView1.Rows.Count >0)
+            if (radGridView1.Rows.Count >0)
             {
-                foreach (var row in this.radGridView1.Rows)
+                foreach (var row in radGridView1.Rows)
                 {
                     
                     if (radToggleSwitch1.Value)
@@ -217,7 +216,7 @@ namespace AOVGEN
             
         }
 
-        private void radDropDownList1_SelectedIndexChanged(object sender, Telerik.WinControls.UI.Data.PositionChangedEventArgs e)
+        private void radDropDownList1_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
         {
             List<string> devices = FamDictionary[radDropDownList1.SelectedItem.Text];
             radDropDownList2.Items.Clear();
@@ -256,7 +255,6 @@ namespace AOVGEN
             catch
             {
                 MessageBox.Show("Каждый шкаф должен иметь сведения как минимум о семействе для размещения в Ревит");
-                return;
             }
             
            

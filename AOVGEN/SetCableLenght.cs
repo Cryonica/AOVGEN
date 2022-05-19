@@ -1,16 +1,15 @@
-﻿using System.Data;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Telerik.WinControls.UI;
-using System;
-using AutoCAD;
+using System.Data;
 using System.Data.SQLite;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.IO;
-using DataTable = System.Data.DataTable;
-using MessageBox = System.Windows.MessageBox;
-
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Windows;
+using AutoCAD;
+using Telerik.WinControls.UI;
 
 namespace AOVGEN
 {
@@ -36,7 +35,7 @@ namespace AOVGEN
             Maximize = 3, ShowNormalNoActivate = 4, Show = 5,
             Minimize = 6, ShowMinNoActivate = 7, ShowNoActivate = 8,
             Restore = 9, ShowDefault = 10, ForceMinimized = 11
-        };
+        }
 
         #endregion
         internal SetCableLenght (RadGridView radGridView, SQLiteConnection sQLiteConnection)
@@ -49,7 +48,7 @@ namespace AOVGEN
         {
             
             DataTable dt = new DataTable();
-            foreach (GridViewDataColumn column in this.RadGridView.Columns)
+            foreach (GridViewDataColumn column in RadGridView.Columns)
             {
                 dt.Columns.Add(column.Name, column.DataType);
             }
@@ -77,7 +76,7 @@ namespace AOVGEN
             }
 
             SQLiteCommand command = new SQLiteCommand { Connection = connection };
-            foreach (var row in this.RadGridView.SelectedRows)
+            foreach (var row in RadGridView.SelectedRows)
             {
                 Cable cable = (Cable)row.Tag;
                 if (cable.Attrubute == Cable.CableAttribute.P)
@@ -146,7 +145,6 @@ namespace AOVGEN
                 }
                 else
                 {
-                    continue;
                 }
             }
 
@@ -240,7 +238,7 @@ namespace AOVGEN
                             
                             //System.Windows.Forms.SendKeys.Send("{ESC}");
                             acadApp.Visible = true;
-                            string alltext = File.ReadAllText(filename, System.Text.Encoding.Default);
+                            string alltext = File.ReadAllText(filename, Encoding.Default);
                             alltext = alltext.Replace("(", "").Replace(")", "");
                             string[] arr = alltext.Split(' ');
                             
@@ -321,11 +319,11 @@ namespace AOVGEN
 
         const int SW_RESTORE = 9;
 
-        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        [DllImport("User32.dll")]
         private static extern bool SetForegroundWindow(IntPtr handle);
-        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        [DllImport("User32.dll")]
         private static extern bool ShowWindow(IntPtr handle, int nCmdShow);
-        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        [DllImport("User32.dll")]
         private static extern bool IsIconic(IntPtr handle);
     }
 

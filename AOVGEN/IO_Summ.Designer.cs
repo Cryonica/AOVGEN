@@ -1,11 +1,14 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class IO_Summ
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -71,6 +74,6 @@
 
         #endregion
 
-        private Telerik.WinControls.UI.RadTextBox radTextBox1;
+        private RadTextBox radTextBox1;
     }
 }

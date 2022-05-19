@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Drawing;
-
+using Telerik.WinControls.UI;
 
 namespace AOVGEN
 {
-    public partial class CableImage : Telerik.WinControls.UI.RadForm
+    public partial class CableImage : RadForm
     {
         internal Bitmap Bitmap { get; set; }
         public CableImage()
@@ -14,7 +14,7 @@ namespace AOVGEN
 
         private void CableImage_Load(object sender, EventArgs e)
         {
-            if (this.Bitmap != null)
+            if (Bitmap != null)
             {
                 pictureBox1.Image = Bitmap;
             }

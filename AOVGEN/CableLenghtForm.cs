@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Windows.Forms;
-
+using Telerik.WinControls.UI;
 
 namespace AOVGEN
 {
-    public partial class CableLenghtForm : Telerik.WinControls.UI.RadForm
+    public partial class CableLenghtForm : RadForm
     {
         internal double Lenght { get; set; }
         internal double Addition { get; set; }
@@ -22,21 +22,21 @@ namespace AOVGEN
         }
 
         
-        private void RadCheckBox2_ToggleStateChanged(object sender, Telerik.WinControls.UI.StateChangedEventArgs args)
+        private void RadCheckBox2_ToggleStateChanged(object sender, StateChangedEventArgs args)
         {
             if (radCheckBox2.Checked)
             {
                 radCheckBox1.Checked = false;
                 radCheckBox3.Checked = false;
-                this.ReadTranslationFie = true;
+                ReadTranslationFie = true;
             }
             else
             {
-                this.ReadTranslationFie = false;
+                ReadTranslationFie = false;
             }
         }
 
-        private void RadCheckBox3_ToggleStateChanged(object sender, Telerik.WinControls.UI.StateChangedEventArgs args)
+        private void RadCheckBox3_ToggleStateChanged(object sender, StateChangedEventArgs args)
         {
             if (radCheckBox3.Checked)
             {
@@ -56,38 +56,38 @@ namespace AOVGEN
         {
             if (radCheckBox3.Checked)
             {
-                double.TryParse(this.radTextBox1.Text, out double lenght);
-                double.TryParse(this.radTextBox2.Text, out double addition);
+                double.TryParse(radTextBox1.Text, out double lenght);
+                double.TryParse(radTextBox2.Text, out double addition);
                 Addition = addition;
                 Lenght = lenght;
-                this.SetRandom = true;
+                SetRandom = true;
             }
             if (radCheckBox4.Checked) AllowPowerCables = true;
             if (radCheckBox5.Checked) UseGenPowerCables = true;
-            double.TryParse(this.radTextBox3.Text, out double tmp);
+            double.TryParse(radTextBox3.Text, out double tmp);
             PowerCableLenght = tmp;
             
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
             
         }
-        private void RadCheckBox1_ToggleStateChanged(object sender, Telerik.WinControls.UI.StateChangedEventArgs args)
+        private void RadCheckBox1_ToggleStateChanged(object sender, StateChangedEventArgs args)
         {
             if (radCheckBox1.Checked)
             {
                 radCheckBox2.Checked = false;
                 radCheckBox3.Checked = false;
-                this.ReadAcadFile = true;
+                ReadAcadFile = true;
             }
             else
             {
-                this.ReadAcadFile = false;
+                ReadAcadFile = false;
             }
 
             
         }
 
-        private void RadCheckBox4_ToggleStateChanged(object sender, Telerik.WinControls.UI.StateChangedEventArgs args)
+        private void RadCheckBox4_ToggleStateChanged(object sender, StateChangedEventArgs args)
         {
             if (radCheckBox4.Checked)
             {
@@ -101,7 +101,7 @@ namespace AOVGEN
             }
         }
 
-        private void RadCheckBox5_ToggleStateChanged(object sender, Telerik.WinControls.UI.StateChangedEventArgs args)
+        private void RadCheckBox5_ToggleStateChanged(object sender, StateChangedEventArgs args)
         {
             if (!radCheckBox5.Checked && radCheckBox4.Checked)
             {

@@ -1,14 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.Collections;
-using AutoCAD;
-//using Autodesk.AutoCAD.Runtime;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
-using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using AutoCAD; //using Autodesk.AutoCAD.Runtime;
 
 namespace AOVGEN
 {
@@ -18,50 +19,85 @@ namespace AOVGEN
         
         [DllImport("user32.dll")]
         internal static extern IntPtr SetForegroundWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        [DllImport("ole32.dll")]
+        static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
+        [DllImport("ole32.dll")]
+        public static extern void GetRunningObjectTable(
+            int reserved,
+            out IRunningObjectTable prot);
+        private static List<object> GetRunningInstances(IEnumerable<string> AcadIDs)
+        {
+
+            // get the app clsid
+            List<string> clsIds = (from progId in AcadIDs select Type.GetTypeFromProgID(progId) into type where type != null select type.GUID.ToString().ToUpper()).ToList();
+            // get Running Object Table ...
+            GetRunningObjectTable(0, out var Rot);
+            if (Rot == null) return null;
+            // get enumerator for ROT entries
+            Rot.EnumRunning(out var monikerEnumerator);
+            if (monikerEnumerator == null) return null;
+            monikerEnumerator.Reset();
+            List<object> instances = new List<object>();
+            IntPtr pNumFetched = new IntPtr();
+            IMoniker[] monikers = new IMoniker[1];
+            // go through all entries and identifies app instances
+            while (monikerEnumerator.Next(1, monikers, pNumFetched) == 0)
+            {
+                CreateBindCtx(0, out IBindCtx bindCtx);
+                if (bindCtx == null) continue;
+                monikers[0].GetDisplayName(bindCtx, null, out var displayName);
+                foreach (var clsId in clsIds.Where(clsId => displayName.ToUpper().IndexOf(clsId) > 0))
+                {
+                    Rot.GetObject(monikers[0], out var ComObject);
+                    if (ComObject == null) continue;
+                    instances.Add(ComObject);
+                    break;
+                }
+            }
+            return instances;
+
+        }
+        private static readonly string[] progIds =
+        {
+            "AutoCAD.Application.17",
+            "AutoCAD.Application.17.1",
+            "AutoCAD.Application.17.2",
+            "AutoCAD.Application.18",
+            "AutoCAD.Application.18.1",
+            "AutoCAD.Application.18.2",
+            "AutoCAD.Application.19",
+            "AutoCAD.Application.19.1",
+            "AutoCAD.Application.19.2",
+            "AutoCAD.Application.20",
+            "AutoCAD.Application.20.1",
+            "AutoCAD.Application.20.2",
+            "AutoCAD.Application.21",
+            "AutoCAD.Application.21.1",
+            "AutoCAD.Application.21.2",
+            "AutoCAD.Application.23",
+            "AutoCAD.Application.23.0"
+        };
         internal string Author { get; set; }
         internal string BuildingName { get; set; }
         internal string Project { get; set; }
 
-        
-        AcadDocument acadDoc;
+
+        private AcadDocument acadDoc;
         #region Custom Exception
-        
-        protected class BlockTroubleException : System.Exception
-        {
-            public string BlockName { get; set; }
-            public BlockTroubleException()
-            { 
-                
-            }
 
-            public BlockTroubleException(string message)
-                : base(String.Format("Invalid block: {0}", message))
-            { 
-                
-            }
-
-            public BlockTroubleException(string message, System.Exception innerException)
-                : base(message, innerException)
-            { }
-            
-        }
-
-        readonly Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> level3;
-        readonly Dictionary<string, VentSystem> ventsystemDict = new Dictionary<string, VentSystem>();
-        readonly Dictionary<string, Pannel> checkedpannels = new Dictionary<string, Pannel>();
-        readonly Dictionary<Cable.CableAttribute, AutoCAD.AcadBlockReference> firstCable = new Dictionary<Cable.CableAttribute, AutoCAD.AcadBlockReference>();
-        Pannel Pannel;
-        readonly List<AutoCAD.AcadBlockReference> cableP3_Down = new List<AutoCAD.AcadBlockReference>();
-        readonly List<AutoCAD.AcadBlockReference> cableP5_Down = new List<AutoCAD.AcadBlockReference>();
-        readonly bool writecabeP;
-        readonly bool writecablePump;
-        readonly bool writecableValve;
-        readonly bool[] cabsettings = new bool[3];
-        double[] min;
-        double[] max;
-        AutoCAD.AcadBlockReference PrevioscablePblock { get; set; }
+        private readonly Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> level3;
+        private readonly Dictionary<string, VentSystem> ventsystemDict = new Dictionary<string, VentSystem>();
+        private readonly Dictionary<string, Pannel> checkedpannels = new Dictionary<string, Pannel>();
+        private readonly Dictionary<Cable.CableAttribute, AcadBlockReference> firstCable = new Dictionary<Cable.CableAttribute, AcadBlockReference>();
+        private Pannel Pannel;
+        private readonly List<AcadBlockReference> cableP3_Down = new List<AcadBlockReference>();
+        private readonly List<AcadBlockReference> cableP5_Down = new List<AcadBlockReference>();
+        private readonly bool writecabeP;
+        private readonly bool writecablePump;
+        private readonly bool writecableValve;
+        private double[] min;
+        private double[] max;
+        private AcadBlockReference PrevioscablePblock { get; set; }
         //Dictionary<Cable.CableAttribute, string> lastdict = new Dictionary<Cable.CableAttribute, string>();
 
         #endregion
@@ -69,425 +105,382 @@ namespace AOVGEN
         internal int Execute()
         {
 
+            int result = 0;
+            List<object> instances = GetRunningInstances(progIds);
+            dynamic GetAutoCad2019()
+            {
+                return instances
+                    .Cast<dynamic>()
+                    .FirstOrDefault(e => ((string)e.Version).Contains("23"));
+            }
+
             (string path, string progID) Acad2019;
             Acad2019.progID = "AutoCAD.Application";
             Acad2019.path = @"\Autodesk\AutoCAD 2019\acad.exe";
-            dynamic cadApp = null;
-            int result = 0;
+            dynamic Acad2019COM = null;
+            Task<dynamic> StartAcadTask = null;
             try
             {
-                cadApp = Marshal.GetActiveObject(Acad2019.progID);
+
+                Acad2019COM = GetAutoCad2019();
+                if (Acad2019COM == null)
+                {
+                    MessageBox.Show(@"Попытка запуска Autocad 2019\n" +
+                                    @"Или попробуйте запустить его вручную");
+                    StartAcadTask = Task.Factory.StartNew(() => StartAutocad(Acad2019));
+                }
 
             }
             catch
             {
-               cadApp = StartAutocad(Acad2019);
+                //cadApp = StartAutocad(Acad2019); //MessageBox.Show("Не нашел акад");
             }
-            if (cadApp != null)
+
+            StartAcadTask?.Wait();
+            if (Acad2019COM == null)
             {
-                AutoCAD.AcadApplication acadApp;
-                try
+
+                Acad2019COM = Marshal.GetActiveObject(Acad2019.progID);
+                if (Acad2019COM == null) return result;
+            }
+            try
+            {
+                AcadApplication acadApp = Acad2019COM;
                 {
-                    
-                    Process[] localByName = Process.GetProcessesByName("acad");
-                    Process process = localByName[0];
-                    IntPtr hWnd = process.MainWindowHandle;
+                    IntPtr hWnd = new IntPtr(Acad2019COM.HWND);
                     if (hWnd != IntPtr.Zero)
                     {
                         SetForegroundWindow(hWnd);
-                        
                     }
-
-
-                    acadApp = cadApp;
-                    if (acadApp != null)
-                    {
-                        acadApp.WindowState =  AutoCAD.AcWindowState.acMax;
+                    acadApp.WindowState = AcWindowState.acMax;
+                    SendKeys.Send("{ESC}");
                     
-                        if (acadApp.Documents.Count>0)
-                        {
+                    if (acadApp.Documents.Count > 0)
+                    {
 
-                            foreach (AcadDocument acadDocument in acadApp.Documents) //
+                        foreach (AcadDocument acadDocument in acadApp.Documents) //
+                        {
+                            if (acadDocument.Name == "Блоки.dwg")
                             {
-                                if (acadDocument.Name == "Блоки.dwg")
-                                {
-                                    acadDoc = acadDocument;
-                                    acadDoc.Activate();
-                                    System.Windows.Forms.SendKeys.Send("{ESC}");
-                                    break;
-                                }
-                                else
-                                {
-                                    AcadBlocks blocks = acadDocument.Blocks;
-                                    if (blocks.Count > 0)
-                                    {
-                                        AcadBlock shapka = (from AcadBlock block in blocks.AsParallel()
-                                                            where block.Name == "Шапка-11"
-                                                            select block).FirstOrDefault();
-                                        if (shapka != null)
-                                        {
-                                            acadDoc = acadDocument;
-                                            acadDoc.Activate();
-                                            System.Windows.Forms.SendKeys.Send("{ESC}");
-                                        }
-
-
-                                    }
-                                }
+                                acadDoc = acadDocument;
+                                acadDoc.Activate();
+                                SendKeys.Send("{ESC}");
+                                break;
                             }
-                        }
-                        if (acadDoc == null)
-                        {
-                            string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\Blocks.dwt";
-                            acadDoc = acadApp.Documents.Add(docpath);
+
+                            AcadBlocks blocks = acadDocument.Blocks;
+                            if (blocks == null) continue;
+                            if (blocks.Count <= 0) continue;
+
+                            AcadBlock shapka = blocks
+                                .Cast<AcadBlock>()
+                                .FirstOrDefault(e => e.Name == "Шапка-11");
+                            if (shapka == null) continue;
+                            acadDoc = acadDocument;
                             acadDoc.Activate();
-                        
-                        }
-                    
-                        string prompt1 = "Вставьте блок";
-                        double[] startPnt = acadDoc.Utility.GetPoint(Type.Missing, prompt1);
+                            SendKeys.Send("{ESC}");
+                            break;
 
-                        double xi = startPnt[0];
-                        double yi = startPnt[1];
-                        double size;
-                        Dictionary<string, List<Cable>> allcables = new Dictionary<string, List<Cable>>();
-                        
-
-                        //foreach (KeyValuePair<string, Dictionary<string, Dictionary<string, List<Cable>>>> keyValuePair1 in level3)
-                        level3.AsParallel().ForAll(keyValuePair1 =>
-                        {
-                            Dictionary<string, Dictionary<string, List<Cable>>> level2 = keyValuePair1.Value;
-                            List<Cable> cablelist = new List<Cable>();
-                            foreach (KeyValuePair<string, Dictionary<string, List<Cable>>> keyValuePair in level2)
-                            {
-                                string ventname = keyValuePair.Key;
-                                VentSystem ventSystem = ventsystemDict[ventname];
-                                Dictionary<string, List<Cable>> ventcompdic = keyValuePair.Value;
-
-                                foreach (KeyValuePair<string, List<Cable>> ventcomp in ventcompdic)
-                                {
-                                    string comppos = ventcomp.Key;
-                                    List<Cable> cables = ventcomp.Value;
-                                    foreach (Cable cable in cables)
-                                    {
-                                        cablelist.Add(cable);
-                                    }
-                                }
-                            }
-                            allcables.Add(keyValuePair1.Key, cablelist);
-
-                        });   
-                        foreach (KeyValuePair<string, Dictionary<string, Dictionary<string, List<Cable>>>> keyValuePair1 in level3)
-                        {
-                            Dictionary<string, Dictionary<string, List<Cable>>> level2 = keyValuePair1.Value;
-                            Dictionary<string, string> lastdict = new Dictionary<string, string>();
-                            List<Cable> cablelist = allcables[keyValuePair1.Key];
-                        
-                            Pannel = new Pannel();
-                            Pannel = checkedpannels[keyValuePair1.Key];
-
-                            Cable lastP3 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.P && s.WireNumbers == 3)
-                                .LastOrDefault();
-                            Cable lastP5 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.P && s.WireNumbers == 5)
-                                .LastOrDefault();
-                            Cable lastA2 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.A && s.WireNumbers == 2)
-                                .LastOrDefault();
-                            Cable lastA3 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.A && s.WireNumbers == 3)
-                                .LastOrDefault();
-                            Cable lastD2 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.D && s.WireNumbers == 2)
-                                .LastOrDefault();
-                            Cable lastD3 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.D && s.WireNumbers == 3)
-                                .LastOrDefault();
-                            Cable lastD4 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.D && s.WireNumbers == 4)
-                                .LastOrDefault();
-                            Cable lastC2 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.C && s.WireNumbers == 2)
-                                .LastOrDefault();
-                            Cable lastC3 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.C && s.WireNumbers == 3)
-                                .LastOrDefault();
-                            Cable lastPL3 = cablelist.AsParallel()
-                                .Where(s => s.Attrubute == Cable.CableAttribute.PL && s.WireNumbers == 3)
-                                .LastOrDefault();
-                            if (lastP3 != null) lastdict.Add(lastP3.Attrubute.ToString() + lastP3.WireNumbers.ToString(), lastP3.cableGUID);
-                            if (lastP5 != null) lastdict.Add(lastP5.Attrubute.ToString() + lastP5.WireNumbers.ToString(), lastP5.cableGUID);
-                            if (lastA2 != null) lastdict.Add(lastA2.Attrubute.ToString() + lastA2.WireNumbers.ToString(), lastA2.cableGUID);
-                            if (lastA3 != null) lastdict.Add(lastA3.Attrubute.ToString() + lastA3.WireNumbers.ToString(), lastA3.cableGUID);
-                            if (lastD2 != null) lastdict.Add(lastD2.Attrubute.ToString() + lastD2.WireNumbers.ToString(), lastD2.cableGUID);
-                            if (lastD3 != null) lastdict.Add(lastD3.Attrubute.ToString() + lastD3.WireNumbers.ToString(), lastD3.cableGUID);
-                            if (lastD4 != null) lastdict.Add(lastD4.Attrubute.ToString() + lastD4.WireNumbers.ToString(), lastD4.cableGUID);
-                            if (lastC2 != null) lastdict.Add(lastC2.Attrubute.ToString() + lastC2.WireNumbers.ToString(), lastC2.cableGUID);
-                            if (lastC3 != null) lastdict.Add(lastC3.Attrubute.ToString() + lastC3.WireNumbers.ToString(), lastC3.cableGUID);
-                            if (lastPL3 != null) lastdict.Add(lastPL3.Attrubute.ToString() + lastPL3.WireNumbers.ToString(), lastPL3.cableGUID);
-                        
-                            //insert first element
-                            var blockObj = acadDoc.ModelSpace.InsertBlock(startPnt, "Шапка-11", 1, 1, 1, 0, Type.Missing);
-                            // end insert first element
-                            (blockObj as AutoCAD.AcadEntity).GetBoundingBox(out object minPt, out object maxPt);
-                            min = (double[])minPt;
-                            max = (double[])maxPt;
-                            size = max[0] - min[0];
-
-                            startPnt[0] += size;
-
-                            foreach (KeyValuePair<string, Dictionary<string, List<Cable>>> keyValuePair in level2)
-                            {
-
-                                string ventname = keyValuePair.Key;
-                                VentSystem ventSystem = ventsystemDict[ventname];
-                                Dictionary<string, List<Cable>> ventcompdic = keyValuePair.Value;
-                                foreach (KeyValuePair<string, List<Cable>> ventcomp in ventcompdic)
-                                {
-                                    string comppos = ventcomp.Key;
-                                    List<Cable> cables = ventcomp.Value;
-                                    int cnt = cables.Count;
-                                    int cabcnt = 1;
-                                    double displacement = 0;
-                                    int i = 0;
-                                    double[] cablearrpt = new double[] { 0, 0, 0 };
-                                    foreach (Cable cable in cables)
-                                    {
-
-                                        bool printblock = cable.WriteBlock;
-
-                                        if (printblock)
-                                        {
-
-                                            ArrayList list = InsertDevBlock(startPnt, cable.ToBlockName);
-                                            AutoCAD.AcadBlockReference acadBlock = (AutoCAD.AcadBlockReference)list[0];
-                                            switch (cable.CompTable)
-                                            {
-                                                case "KKB":
-                                                    Froster froster = ventSystem.ComponentsV2.AsParallel()
-                                                        .Select(e => e.Tag)
-                                                        .Where(e => e.GetType().Name == nameof(Froster))
-                                                        .Cast<Froster>()
-                                                        .Where(e => e.KKBGUID == cable.ToGUID)
-                                                        .FirstOrDefault();
-
-                                                    displacement = froster._KKB.Displacement;
-                                                    if (acadBlock.IsDynamicBlock)
-                                                    {
-                                                        var propsKKB = acadBlock.GetDynamicBlockProperties();
-                                                        foreach (AutoCAD.AcadDynamicBlockReferenceProperty prop in propsKKB)
-                                                        {
-
-                                                            switch (prop.PropertyName)
-                                                            {
-                                                                case "Выбор1":
-                                                                    //EnumExtensionMethods.GetEnumDescription(ventSystem._Froster._KKB.Stairs);
-                                                                    prop.Value = EnumExtensionMethods.GetEnumDescription(froster._KKB.Stairs);
-                                                                    break;
-                                                            }
-
-                                                        }
-
-                                                    }
-                                                    break;
-
-                                                case "ElectroHeater":
-
-                                                    ElectroHeater electroheater = ventSystem.ComponentsV2.AsParallel()
-                                                        .Select(e => e.Tag)
-                                                        .Where(e => e.GetType().Name == nameof(ElectroHeater))
-                                                        .Cast<ElectroHeater>()
-                                                        .Where(e => e.GUID == cable.ToGUID)
-                                                        .FirstOrDefault();
-                                                    displacement = electroheater.Displacement;
-                                                    if (acadBlock.IsDynamicBlock)
-                                                    {
-                                                        var propsEH = acadBlock.GetDynamicBlockProperties();
-                                                        foreach (AutoCAD.AcadDynamicBlockReferenceProperty prop in propsEH)
-                                                        {
-
-                                                            switch (prop.PropertyName)
-                                                            {
-                                                                case "Выбор1":
-                                                                    prop.Value = ventSystem._ElectroHeater.StairString.ToString();
-                                                                    break;
-                                                            }
-
-                                                        }
-                                                    }
-
-                                                    break;
-                                                case "Humidifier":
-                                                    if (acadBlock.IsDynamicBlock)
-                                                    {
-                                                        var propsHUM = acadBlock.GetDynamicBlockProperties();
-                                                        Humidifier humidifier = ventSystem.ComponentsV2.AsParallel()
-                                                            .Select(e => e.Tag)
-                                                            .Where(e => e.GetType().Name == nameof(Humidifier))
-                                                            .Cast<Humidifier>()
-                                                            .Where(e => e.GUID == cable.ToGUID)
-                                                            .FirstOrDefault();
-                                                        displacement = humidifier.Displacement;
-                                                        foreach (AutoCAD.AcadDynamicBlockReferenceProperty prop in propsHUM)
-                                                        {
-
-                                                            switch (prop.PropertyName)
-                                                            {
-                                                                case "Выбор1":
-                                                                    switch (acadBlock.EffectiveName)
-                                                                    {
-                                                                        case "ED-220-HC":
-                                                                            prop.Value = "1";
-                                                                            break;
-                                                                        case "ED-380-HC":
-                                                                            prop.Value = "Упр. Вкл./Выкл.";
-                                                                            break;
-
-                                                                    }
-
-                                                                    break;
-                                                            }
-
-                                                        }
-                                                    }
-                                                    break;
-
-
-                                            } //read displacement
-                                            size = Convert.ToDouble(list[1]);
-                                            WriteDevAttribute(acadBlock, cable);
-                                            cablearrpt = acadBlock.InsertionPoint;
-                                            InsertCableBlock(cablearrpt, cable, i, lastdict);
-                                        }
-                                        else
-                                        {
-                                            InsertCableBlock(cablearrpt, cable, i, lastdict);//, FLCables);
-                                        }
-                                        cabcnt++;
-                                        if (cabcnt > cnt)
-                                        {
-                                            startPnt[0] += size + displacement;
-                                            //listBox1.Items.Add("change coord " + displacement);
-                                        }
-                                        i++;
-                                        //acadDoc.Regen(AcRegenType.acActiveViewport);
-                                    }
-                                }
-
-                            }
-                            if (cableP3_Down.Count > 0)
-                            {
-                                AutoCAD.AcadBlockReference P3DownLast = cableP3_Down.Last();
-                                SetLastLine(P3DownLast, min[0]);
-                            }
-                            if (cableP5_Down.Count > 0)
-                            {
-                                AutoCAD.AcadBlockReference P5DownLast = cableP5_Down.Last();
-                                SetLastLine(P5DownLast, min[0]);
-                            }
-                            AutoCAD.AcadBlockReference PannelBlock = InsertPannelBlock(min, startPnt[0], Pannel); // вставка символа шкафа
-                            double[] Fire_DispatchingLastPoint = InsertFire_Dispatching(PannelBlock);
-                            startPnt = SetNoteAndStamp(PannelBlock);
-                            startPnt[0] += 20;
-                            startPnt[1] -= 5;
-
-                            acadDoc.Regen(AutoCAD.AcRegenType.acActiveViewport);
-                        
                         }
                     }
-                    else
+
+                    if (acadDoc == null)
                     {
-                        MessageBox.Show("Не удалось найти Autocad в авт.режиме\nЗапустите Autocad самостоятельно\nи дождитесь полной его загрузки");
+                        string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                                         @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\Blocks.dwt";
+                        acadDoc = acadApp.Documents.Add(docpath);
+                        //acadDoc.Activate();
+
                     }
-                                        
-                    
-                }
-                catch (System.Exception ex)
-                {
-                    MessageBox.Show(ex.StackTrace + ex.Message);
-                    result = 1;
-                    //MessageBox.Show(ex.StackTrace);
-                }
 
-                
+                    const string prompt1 = "Вставьте блок";
+                    double[] startPnt;
+                    Thread.Sleep(500);
+                    try
+                    {
+                        startPnt = acadDoc.Utility.GetPoint(Type.Missing, prompt1); //дальше начанется обычный алгоритм построения
+                    }
+                    catch
+                    {
+                        const string message = "Не смог получить точку вставки";
+                        const string caption = "Ошибка!";
+                        MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                        return 0;
+                    }
+
+                    Dictionary<string, List<Cable>> allcables = new Dictionary<string, List<Cable>>();
+                    level3.AsParallel().ForAll(keyValuePair1 =>
+                    {
+                        Dictionary<string, Dictionary<string, List<Cable>>> level2 = keyValuePair1.Value;
+                        List<Cable> cablelist = new List<Cable>();
+                        foreach (var ventcompdic in
+                            from keyValuePair in level2
+                            let ventname = keyValuePair.Key
+                            select keyValuePair.Value)
+                        {
+                            cablelist.AddRange(from ventcomp in ventcompdic
+                                let comppos = ventcomp.Key
+                                from cable in ventcomp.Value
+                                select cable);
+                        }
+
+                        allcables.Add(keyValuePair1.Key, cablelist);
+
+                    });
+                    Cable GetCableFromCableList(IEnumerable<Cable> cabs, Cable.CableAttribute attr, int cableNums)
+                    {
+                        return cabs
+                            .AsParallel()
+                            .LastOrDefault(e => e.Attrubute == attr && e.WireNumbers == cableNums);
+                    }
+
+                    foreach (KeyValuePair<string, Dictionary<string, Dictionary<string, List<Cable>>>> keyValuePair1 in
+                        level3)
+                    {
+                        Dictionary<string, Dictionary<string, List<Cable>>> level2 = keyValuePair1.Value;
+                        List<Cable> cablelist = allcables[keyValuePair1.Key];
+
+                        Pannel = new Pannel();
+                        Pannel = checkedpannels[keyValuePair1.Key];
+
+                        Cable[] lastCables =
+                        {
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.P, 3),
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.P, 5),
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.A, 2),
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.A, 3),
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.D, 2),
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.D, 3),
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.D, 4),
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.C, 2),
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.C, 3),
+                            GetCableFromCableList(cablelist, Cable.CableAttribute.PL, 3)
+                        };
+
+                        Dictionary<string, string> lastdict = lastCables
+                            .Where(lastCable => lastCable != null)
+                            .ToDictionary(lastCable =>
+                                    lastCable.Attrubute + lastCable.WireNumbers.ToString(),
+                                lastCable => lastCable.cableGUID);
+
+                        //Cable lastP3 = GetCableFromCableList(cablelist, Cable.CableAttribute.P, 3);
+                        //Cable lastP5 = GetCableFromCableList(cablelist, Cable.CableAttribute.P, 5);
+                        //Cable lastA2 = GetCableFromCableList(cablelist, Cable.CableAttribute.A, 2);
+                        //Cable lastA3 = GetCableFromCableList(cablelist, Cable.CableAttribute.A, 3);
+                        //Cable lastD2 = GetCableFromCableList(cablelist, Cable.CableAttribute.D, 2);
+                        //Cable lastD3 = GetCableFromCableList(cablelist, Cable.CableAttribute.D, 3);
+                        //Cable lastD4 = GetCableFromCableList(cablelist, Cable.CableAttribute.D, 4);
+                        //Cable lastC2 = GetCableFromCableList(cablelist, Cable.CableAttribute.C, 2);
+                        //Cable lastC3 = GetCableFromCableList(cablelist, Cable.CableAttribute.C, 3);
+                        //Cable lastPL3 = GetCableFromCableList(cablelist, Cable.CableAttribute.PL, 3);
+
+                        //if (lastP3 != null) lastdict.Add(lastP3.Attrubute + lastP3.WireNumbers.ToString(), lastP3.cableGUID);
+                        //if (lastP5 != null) lastdict.Add(lastP5.Attrubute + lastP5.WireNumbers.ToString(), lastP5.cableGUID);
+                        //if (lastA2 != null) lastdict.Add(lastA2.Attrubute + lastA2.WireNumbers.ToString(), lastA2.cableGUID);
+                        //if (lastA3 != null) lastdict.Add(lastA3.Attrubute + lastA3.WireNumbers.ToString(), lastA3.cableGUID);
+                        //if (lastD2 != null) lastdict.Add(lastD2.Attrubute + lastD2.WireNumbers.ToString(), lastD2.cableGUID);
+                        //if (lastD3 != null) lastdict.Add(lastD3.Attrubute + lastD3.WireNumbers.ToString(), lastD3.cableGUID);
+                        //if (lastD4 != null) lastdict.Add(lastD4.Attrubute + lastD4.WireNumbers.ToString(), lastD4.cableGUID);
+                        //if (lastC2 != null) lastdict.Add(lastC2.Attrubute + lastC2.WireNumbers.ToString(), lastC2.cableGUID);
+                        //if (lastC3 != null) lastdict.Add(lastC3.Attrubute + lastC3.WireNumbers.ToString(), lastC3.cableGUID);
+                        //if (lastPL3 != null) lastdict.Add(lastPL3.Attrubute + lastPL3.WireNumbers.ToString(), lastPL3.cableGUID);
+
+                        //insert first element
+                        var blockObj = acadDoc.ModelSpace.InsertBlock(startPnt, "Шапка-11", 1, 1, 1, 0, Type.Missing);
+                        // end insert first element
+                        ((AcadEntity)blockObj).GetBoundingBox(out object minPt, out object maxPt);
+                        min = (double[])minPt;
+                        max = (double[])maxPt;
+                        var size = max[0] - min[0];
+
+                        startPnt[0] += size;
+
+                        foreach (KeyValuePair<string, Dictionary<string, List<Cable>>> keyValuePair in level2)
+                        {
+
+                            string ventname = keyValuePair.Key;
+                            VentSystem ventSystem = ventsystemDict[ventname];
+                            Dictionary<string, List<Cable>> ventcompdic = keyValuePair.Value;
+                            foreach (KeyValuePair<string, List<Cable>> ventcomp in ventcompdic)
+                            {
+                                List<Cable> cables = ventcomp.Value;
+                                int cnt = cables.Count;
+                                int cabcnt = 1;
+                                double displacement = 0;
+                                int i = 0;
+                                double[] cablearrpt = { 0, 0, 0 };
+                                foreach (Cable cable in cables)
+                                {
+
+                                    bool printblock = cable.WriteBlock;
+
+                                    if (printblock)
+                                    {
+
+                                        ArrayList list = InsertDevBlock(startPnt, cable.ToBlockName);
+                                        AcadBlockReference acadBlock = (AcadBlockReference)list[0];
+                                        switch (cable.CompTable)
+                                        {
+                                            case "KKB":
+                                                Froster froster = ventSystem.ComponentsV2
+                                                    .AsParallel()
+                                                    .Select(e => e.Tag)
+                                                    .Where(e => e.GetType().Name == nameof(Froster))
+                                                    .Cast<Froster>()
+                                                    .FirstOrDefault(e => e.KKBGUID == cable.ToGUID);
+
+                                                displacement = froster._KKB.Displacement;
+                                                if (acadBlock.IsDynamicBlock)
+                                                {
+                                                    var propsKKB = acadBlock.GetDynamicBlockProperties();
+                                                    foreach (AcadDynamicBlockReferenceProperty prop in propsKKB)
+                                                    {
+                                                        if (prop.PropertyName == "Выбор1")
+                                                            prop.Value = froster._KKB.Stairs.GetEnumDescription();
+                                                    }
+                                                }
+
+                                                break;
+
+                                            case "ElectroHeater":
+
+                                                ElectroHeater electroheater = ventSystem.ComponentsV2
+                                                    .AsParallel()
+                                                    .Select(e => e.Tag)
+                                                    .Where(e => e.GetType().Name == nameof(ElectroHeater))
+                                                    .Cast<ElectroHeater>()
+                                                    .FirstOrDefault(e => e.GUID == cable.ToGUID);
+                                                displacement = electroheater.Displacement;
+                                                if (acadBlock.IsDynamicBlock)
+                                                {
+                                                    var propsEH = acadBlock.GetDynamicBlockProperties();
+                                                    foreach (AcadDynamicBlockReferenceProperty prop in propsEH)
+                                                    {
+                                                        if (prop.PropertyName == "Выбор1")
+                                                            prop.Value = ventSystem._ElectroHeater.StairString;
+                                                    }
+                                                }
+
+                                                break;
+                                            case "Humidifier":
+                                                if (acadBlock.IsDynamicBlock)
+                                                {
+                                                    var propsHUM = acadBlock.GetDynamicBlockProperties();
+                                                    Humidifier humidifier = ventSystem.ComponentsV2
+                                                        .AsParallel()
+                                                        .Select(e => e.Tag)
+                                                        .Where(e => e.GetType().Name == nameof(Humidifier))
+                                                        .Cast<Humidifier>()
+                                                        .FirstOrDefault(e => e.GUID == cable.ToGUID);
+                                                    displacement = humidifier.Displacement;
+                                                    foreach (AcadDynamicBlockReferenceProperty prop in propsHUM)
+                                                    {
+                                                        if (prop.PropertyName == "Выбор1")
+                                                            switch (acadBlock.EffectiveName)
+                                                            {
+                                                                case "ED-220-HC":
+                                                                    prop.Value = "1";
+                                                                    break;
+                                                                case "ED-380-HC":
+                                                                    prop.Value = "Упр. Вкл./Выкл.";
+                                                                    break;
+                                                            }
+                                                    }
+                                                }
+
+                                                break;
+
+
+                                        } //read displacement
+
+                                        size = Convert.ToDouble(list[1]);
+                                        WriteDevAttribute(acadBlock, cable);
+                                        cablearrpt = acadBlock.InsertionPoint;
+                                        InsertCableBlock(cablearrpt, cable, i, lastdict);
+                                    }
+                                    else
+                                    {
+                                        InsertCableBlock(cablearrpt, cable, i, lastdict); //, FLCables);
+                                    }
+
+                                    cabcnt++;
+                                    if (cabcnt > cnt)
+                                    {
+                                        startPnt[0] += size + displacement;
+                                        //listBox1.Items.Add("change coord " + displacement);
+                                    }
+
+                                    i++;
+
+                                }
+                            }
+
+                        }
+
+                        if (cableP3_Down.Count > 0)
+                        {
+                            AcadBlockReference P3DownLast = cableP3_Down.Last();
+                            SetLastLine(P3DownLast, min[0]);
+                        }
+
+                        if (cableP5_Down.Count > 0)
+                        {
+                            AcadBlockReference P5DownLast = cableP5_Down.Last();
+                            SetLastLine(P5DownLast, min[0]);
+                        }
+
+                        AcadBlockReference
+                            PannelBlock = InsertPannelBlock(min, startPnt[0], Pannel); // вставка символа шкафа
+                        InsertFire_Dispatching(PannelBlock);
+                        startPnt = SetNoteAndStamp(PannelBlock);
+                        startPnt[0] += 20;
+                        startPnt[1] -= 5;
+
+                        acadDoc.Regen(AcRegenType.acActiveViewport);
+
+                    }
+                }
             }
-            
-               
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.StackTrace + ex.Message);
+                result = 1;
+                //MessageBox.Show(ex.StackTrace);
+            }
 
-
-                
-                //string strTemplatePath = "acad.dwt";
-                //DocumentCollection acDocMgr = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager;
-                //Document acDoc = acDocMgr.Add(strTemplatePath);
-                //acDocMgr.MdiActiveDocument = acDoc;
-
-            
             return result;
             
         }
-        private void WriteDevAttribute(AutoCAD.AcadBlockReference acadBlock, Cable cable)
+        private static void WriteDevAttribute(IAcadBlockReference acadBlock, Cable cable)
         {
-            if (acadBlock != null)
-            {
-                //if (acadBlock.IsDynamicBlock)
-                //{
-                object[] prop = acadBlock.GetAttributes();
-                IEnumerable<AutoCAD.AcadAttributeReference> ppp1 = prop.OfType<AutoCAD.AcadAttributeReference>().Where(i => i.TagString == "DEVNAME1"); 
-                IEnumerable<AutoCAD.AcadAttributeReference> ppp2 = prop.OfType<AutoCAD.AcadAttributeReference>().Where(i => i.TagString == "DEVNAME2"); 
-                if (ppp1 != null) 
-                    if (ppp1.Count()>0)
-                        ppp1.ElementAt(0).TextString = cable.Description;
-               
-                if (ppp2 != null) 
-                    if (ppp2.Count()>0)
-                        ppp2.ElementAt(0).TextString = cable.ToPosName;
+            if (acadBlock == null) return;
+            object[] prop = acadBlock.GetAttributes();
+            IEnumerable<AcadAttributeReference> ppp1 = prop.OfType<AcadAttributeReference>().Where(i => i.TagString == "DEVNAME1"); 
+            IEnumerable<AcadAttributeReference> ppp2 = prop.OfType<AcadAttributeReference>().Where(i => i.TagString == "DEVNAME2");
+            var acadAttributeReferences = ppp1 as AcadAttributeReference[] ?? ppp1.ToArray();
+            if (acadAttributeReferences.Any())
+                acadAttributeReferences.ElementAt(0).TextString = cable.Description;
 
-                //for (int c = 0; c < prop.Length; c++)
-                //    {
-
-                //        AcadAttributeReference reference = prop[c] as AcadAttributeReference;
-                //        string PropertyName = reference.TagString;
-                //        switch (PropertyName)
-                //        {
-                //            case "DEVNAME1":
-                //                reference.TextString = cable.Description;
-                //                break;
-                //            case "DEVNAME2":
-                //                reference.TextString = cable.ToPosName;
-                //                break;
-                //        }
-                //    }
-              
-            }
+            var attributeReferences = ppp2 as AcadAttributeReference[] ?? ppp2.ToArray();
+            if (attributeReferences.Any())
+                attributeReferences.ElementAt(0).TextString = cable.ToPosName;
         }
         private ArrayList InsertDevBlock(double[] insertPoint, string blockname)
         {
-            double[] min;
-            double[] max;
-            double size;
             var blockObj1 = acadDoc.ModelSpace.InsertBlock(insertPoint, blockname, 1, 1, 1, 0, Type.Missing);
-            (blockObj1 as AutoCAD.AcadEntity).GetBoundingBox(out object minPt, out object maxPt);
-            min = (double[])minPt;
-            max = (double[])maxPt;
-            size = max[0] - min[0];
-            //startPnt[0] += size;
-
-            AutoCAD.AcadBlockReference acadBlock = blockObj1;
+            ((AcadEntity) blockObj1).GetBoundingBox(out object minPt, out object maxPt);
+            var minPoint = (double[])minPt;
+            var maxPoint = (double[])maxPt;
+            var size = maxPoint[0] - minPoint[0];
             ArrayList list = new ArrayList
             {
-                acadBlock,
+                blockObj1,
                 size
             };
-
             return list;
-
         }
-        private void InsertCableBlock(double[] cablearrpt, Cable cable, int index, Dictionary<string, string> lastdict)
+        private void InsertCableBlock(IReadOnlyList<double> cablearrpt, Cable cable, int index, Dictionary<string, string> lastdict)
         {
-            
-
-
             double startx = cablearrpt[0];
             double starty = cablearrpt[1];
             double[] cabpt = new double[3];
@@ -807,19 +800,19 @@ namespace AOVGEN
                             cabpt[1] = starty - 72.16543687;
                             break;
                         case 1:
-                            cabpt[0] = startx + 25.0980425 + (10 * (index-1));
+                            cabpt[0] = startx + 25.0980425 + 10 * (index-1);
                             cabpt[1] = starty - 72.16543687;
                             break;
                         case 2:
-                            cabpt[0] = startx + 25.0980425 + (10 * (index - 1));
+                            cabpt[0] = startx + 25.0980425 + 10 * (index - 1);
                             cabpt[1] = starty - 72.16543687;
                             break;
                         case 3:
-                            cabpt[0] = startx + 25.0980425 + (10 * (index - 1));
+                            cabpt[0] = startx + 25.0980425 + 10 * (index - 1);
                             cabpt[1] = starty - 72.16543687;
                             break;
                         case 4:
-                            cabpt[0] = startx + 25.0980425 + (10 * (index - 1));
+                            cabpt[0] = startx + 25.0980425 + 10 * (index - 1);
                             cabpt[1] = starty - 72.16543687;
                             break;
                         case 5:
@@ -891,7 +884,6 @@ namespace AOVGEN
             string cableblockname;
             string cabletype;
             string cablename;
-            var blockObj1 = (dynamic)null;
             if (writecabeP && cable.Attrubute == Cable.CableAttribute.P)
             {
                 cableblockname = "cable_dummy";
@@ -926,21 +918,20 @@ namespace AOVGEN
                 cablename = cable.CableName;
             }
            
-            blockObj1 = acadDoc.ModelSpace.InsertBlock(cabpt, cableblockname, 1, 1, 1, 0, Type.Missing); //вставка блока
-            AutoCAD.AcadBlockReference cableblock = blockObj1;
-           
-            string CableID = cableblock.Handle;
+            dynamic blockObj1 = acadDoc.ModelSpace.InsertBlock(cabpt, cableblockname, 1, 1, 1, 0, Type.Missing);
+            AcadBlockReference cableblock = blockObj1;
+
             object[] attributes = cableblock.GetAttributes();
             object[] blockproperies = cableblock.GetDynamicBlockProperties();
-            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> distprop1 = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+            IEnumerable<AcadDynamicBlockReferenceProperty> distprop1 = blockproperies.OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                 .Where(i => i.PropertyName == "Расстояние1");
-            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> distprop2 = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+            IEnumerable<AcadDynamicBlockReferenceProperty> distprop2 = blockproperies.OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                .Where(i => i.PropertyName == "Расстояние2");
-            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> visible = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>()
+            IEnumerable<AcadDynamicBlockReferenceProperty> visible = blockproperies.OfType<AcadDynamicBlockReferenceProperty>()
                 .Where(i => i.PropertyName == "Видимость");
-            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> cabYpos = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>()
+            IEnumerable<AcadDynamicBlockReferenceProperty> cabYpos = blockproperies.OfType<AcadDynamicBlockReferenceProperty>()
                 .Where(i => i.PropertyName == "Положение марки кабеля Y");
-            IEnumerable<AutoCAD.AcadAttributeReference> cablenameattr = attributes.OfType<AcadAttributeReference>()
+            IEnumerable<AcadAttributeReference> cablenameattr = attributes.OfType<AcadAttributeReference>()
                 .Where(i => i.TagString == "НОМЕР_КАБЕЛЯ");
             IEnumerable<AcadAttributeReference> cabletypeattr = attributes.OfType<AcadAttributeReference>()
                 .Where(i => i.TagString == "ТИП_КАБЕЛЯ");
@@ -957,7 +948,7 @@ namespace AOVGEN
             crosssection.ElementAt(0).TextString = string.Empty;
             if (cabletype != "Кабель по проекту ЭОМ" && cabletype != string.Empty)
             {
-                //string[] splittype = cable.CableType.Split(' ');
+                
                 cabletypeattr.ElementAt(0).TextString = cable.CableType;
                 
                    
@@ -967,7 +958,6 @@ namespace AOVGEN
                 if (cabletype != "Кабель по проекту ЭОМ")
                 {
                     cabletypeattr.ElementAt(0).TextString = "Null";
-                    //crosssection.ElementAt(0).TextString = "";
                 }
                 
             }
@@ -975,7 +965,7 @@ namespace AOVGEN
             if (cable.Lenght != 0 && cabletype != "Кабель по проекту ЭОМ")
             {
               
-                cablelenght.ElementAt(0).TextString = cable.Lenght.ToString() + " м";
+                cablelenght.ElementAt(0).TextString = cable.Lenght + " м";
             }
 
 
@@ -985,10 +975,10 @@ namespace AOVGEN
                 blockGUIDattr.ElementAt(0).TextString = cable.cableGUID;
             }
 
-            switch (cable.Attrubute.ToString() + cable.WireNumbers.ToString())
+            switch (cable.Attrubute + cable.WireNumbers.ToString())
             {
                 case "P3":
-                    //cabYpos.ElementAt(0).Value += 9.30395688;
+                    
                     cabYpos.ElementAt(0).Value += 4.86;
                     if (cabpt[1] < starty - 133)
                     {
@@ -1037,7 +1027,7 @@ namespace AOVGEN
 
             }
             
-            lastdict.TryGetValue(cable.Attrubute.ToString() + cable.WireNumbers.ToString(), out string lastguid);
+            lastdict.TryGetValue(cable.Attrubute + cable.WireNumbers.ToString(), out string lastguid);
             if (lastguid != string.Empty)
             {
                 
@@ -1055,7 +1045,8 @@ namespace AOVGEN
                         double tempmaxx = cabpt[0];
                         double tempsize = tempmaxx - tempminx - 53.7;
                         previoscablePblock_visible.ElementAt(0).Value = "ВСЁ_овал";
-                        previoscablePblock_cableline.ElementAt(0).Value = previoscablePblock_cableline.ElementAt(0).Value + tempsize;
+                        var acadDynamicBlockReferenceProperties = previoscablePblock_cableline as AcadDynamicBlockReferenceProperty[] ?? previoscablePblock_cableline.ToArray();
+                        acadDynamicBlockReferenceProperties.ElementAt(0).Value += tempsize;
 
                     }
                     
@@ -1066,10 +1057,8 @@ namespace AOVGEN
                     double minx = min[0];
                     double maxx = cabpt[0];
                     double size = (maxx - minx - 53.7 < 0) ? 0 : maxx - minx - 53.7;
-                    
-                    //cablename.ElementAt(0).TextString = cable.Attrubute.ToString() + cable.WireNumbers.ToString();
-                   
-                    cableline.ElementAt(0).Value = cableline.ElementAt(0).Value + size;
+                    var dynamicBlockReferenceProperties = cableline as AcadDynamicBlockReferenceProperty[] ?? cableline.ToArray();
+                    dynamicBlockReferenceProperties.ElementAt(0).Value += size;
 
                 }
                 else
@@ -1085,36 +1074,37 @@ namespace AOVGEN
                     firstCable.Add(cable.Attrubute, cableblock);
                 }
             }
-            if (cable.Attrubute == Cable.CableAttribute.P) this.PrevioscablePblock = cableblock;
+            if (cable.Attrubute == Cable.CableAttribute.P) PrevioscablePblock = cableblock;
 
         }
-        private void SetLastLine(AutoCAD.AcadBlockReference acadBlock, double minx)
+        private static void SetLastLine(IAcadBlockReference acadBlock, double minx)
         {
             object[] blockproperies = acadBlock.GetDynamicBlockProperties();
-            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> visible = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>()
+            IEnumerable<AcadDynamicBlockReferenceProperty> visible = blockproperies.OfType<AcadDynamicBlockReferenceProperty>()
                 .Where(i => i.PropertyName == "Видимость");
-            if (visible.ElementAt(0).Value != "ВСЁ_овал")
+            var acadDynamicBlockReferenceProperties = visible as AcadDynamicBlockReferenceProperty[] ?? visible.ToArray();
+            if (acadDynamicBlockReferenceProperties.ElementAt(0).Value == "ВСЁ_овал") return;
             {
-                visible.ElementAt(0).Value = "ВСЁ_овал";
-                IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> cableline = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>()
+                acadDynamicBlockReferenceProperties.ElementAt(0).Value = "ВСЁ_овал";
+                IEnumerable<AcadDynamicBlockReferenceProperty> cableline = blockproperies.OfType<AcadDynamicBlockReferenceProperty>()
                     .Where(i => i.PropertyName == "Расстояние5");
                 double maxx = acadBlock.InsertionPoint[0];
                 double size = maxx - minx - 53.7;
                 if (size < 0) size = 0;
-                cableline.ElementAt(0).Value = cableline.ElementAt(0).Value + size;
+                var dynamicBlockReferenceProperties = cableline as AcadDynamicBlockReferenceProperty[] ?? cableline.ToArray();
+                dynamicBlockReferenceProperties.ElementAt(0).Value += size;
             }
 
         }
-        private AutoCAD.AcadBlockReference InsertPannelBlock(double[] min, double maxX, Pannel pannel)
+        private AcadBlockReference InsertPannelBlock(double[] min, double maxX, Pannel pannel)
         {
-            var blockObj = (dynamic)null;
             double[] PannelPoint = new double[3];
             PannelPoint[0] = min[0];
             PannelPoint[1] = min[1] - 170.46952812;
-            blockObj = acadDoc.ModelSpace.InsertBlock(PannelPoint, "Шкаф", 1, 1, 1, 0, Type.Missing); //вставка блока
-            AutoCAD.AcadBlockReference pannelblock = blockObj;
+            dynamic blockObj = acadDoc.ModelSpace.InsertBlock(PannelPoint, "Шкаф", 1, 1, 1, 0, Type.Missing);
+            AcadBlockReference pannelblock = blockObj;
             object[] blockproperies = pannelblock.GetDynamicBlockProperties();
-            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> distance1 = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>()
+            IEnumerable<AcadDynamicBlockReferenceProperty> distance1 = blockproperies.OfType<AcadDynamicBlockReferenceProperty>()
                 .Where(i => i.PropertyName == "Расстояние1");
             double[] pannelNamePoint = new double[3];
             double distance = maxX - min[0];
@@ -1122,14 +1112,13 @@ namespace AOVGEN
             pannelNamePoint[1] = PannelPoint[1] - 8;
             distance1.ElementAt(0).Value = distance + 24.51687801;
             double heighttext = 3;
-            dynamic textObj = acadDoc.ModelSpace.AddText(pannel.PannelName, pannelNamePoint, heighttext);
+            acadDoc.ModelSpace.AddText(pannel.PannelName, pannelNamePoint, heighttext);
             return pannelblock;
 
         }
-        private double[] InsertFire_Dispatching(AutoCAD.AcadBlockReference PannelBlock)
+        private void InsertFire_Dispatching(AcadBlockReference PannelBlock)
         {
-            object insertpoint;
-            insertpoint = PannelBlock.InsertionPoint;
+            object insertpoint = PannelBlock.InsertionPoint;
             double[] ip = (double[])insertpoint;
             PannelBlock.GetBoundingBox(out _, out object maxPt);
             double[] maxP = (double[])maxPt;
@@ -1140,26 +1129,20 @@ namespace AOVGEN
             if (Pannel.FireProtect == Pannel._FireProtect.Yes)
             {
                 acadDoc.ModelSpace.InsertBlock(latpoint, "Fire_Alarm", 1, 1, 1, 0, Type.Missing);
-                latpoint[0] = latpoint[0] + 12.258439;
+                latpoint[0] += 12.258439;
                 
             }
-            if (Pannel.Dispatching == Pannel._Dispatching.Yes)
-            {
-                dynamic blockObj = acadDoc.ModelSpace.InsertBlock(latpoint, "dispatching", 1, 1, 1, 0, Type.Missing); //вставка блока
-                AutoCAD.AcadBlockReference dispatchingblock = blockObj;
-                object[] dispatchingAttributes = dispatchingblock.GetAttributes();
-                IEnumerable<AutoCAD.AcadAttributeReference> dispatching = dispatchingAttributes.OfType<AutoCAD.AcadAttributeReference>()
-                    .Where(i => i.TagString == "ПРОТОКОЛ");
-                dispatching.ElementAt(0).TextString = Pannel.Protocol.ToString();
-
-            }
-            return latpoint;
-
+            if (Pannel.Dispatching != Pannel._Dispatching.Yes) return;
+            dynamic blockObj = acadDoc.ModelSpace.InsertBlock(latpoint, "dispatching", 1, 1, 1, 0, Type.Missing); //вставка блока
+            IAcadBlockReference dispatchingblock = blockObj;
+            object[] dispatchingAttributes = dispatchingblock.GetAttributes();
+            IEnumerable<AcadAttributeReference> dispatching = dispatchingAttributes.OfType<AcadAttributeReference>()
+                .Where(i => i.TagString == "ПРОТОКОЛ");
+            dispatching.ElementAt(0).TextString = Pannel.Protocol.ToString();
         }
-        private double[] SetNoteAndStamp(AutoCAD.AcadBlockReference PannelBlock)
+        private double[] SetNoteAndStamp(AcadBlockReference PannelBlock)
         {
-            object insertpoint;
-            insertpoint = PannelBlock.InsertionPoint;
+            object insertpoint = PannelBlock.InsertionPoint;
             PannelBlock.GetBoundingBox(out object minPt, out object maxPt);
             double[] szminPt = (double[])minPt;
             double[] szmaxPt = (double[])maxPt;
@@ -1176,24 +1159,24 @@ namespace AOVGEN
             
             acadDoc.ModelSpace.InsertBlock(noteIP, "note", 1, 1, 1, 0, Type.Missing); //вставка блока примечаний
             dynamic frame= acadDoc.ModelSpace.InsertBlock(frameIP, "_Рамка", 1, 1, 1, 0, Type.Missing); //вставка блока рамки
-            AutoCAD.AcadBlockReference frameblock = frame;
+            AcadBlockReference frameblock = frame;
             object[] blockproperies = frameblock.GetDynamicBlockProperties();
-            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+            IEnumerable<AcadDynamicBlockReferenceProperty> frameType = blockproperies.OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                 .Where(i => i.PropertyName == "Выбор формата");
-            
-            
-            
+
+
+            var acadDynamicBlockReferenceProperties = frameType as AcadDynamicBlockReferenceProperty[] ?? frameType.ToArray();
             if (multiplicity < 3 && multiplicity > 0)
             {
-                frameType.ElementAt(0).Value = "A3альбом";
+                acadDynamicBlockReferenceProperties.ElementAt(0).Value = "A3альбом";
             }
             if (multiplicity >2 && multiplicity <10)
             {
-                frameType.ElementAt(0).Value = $"А4х{Convert.ToInt32(multiplicity)}";
+                acadDynamicBlockReferenceProperties.ElementAt(0).Value = $"А4х{Convert.ToInt32(multiplicity)}";
             }
             
             double[] StampInsertionPoint = new double[3];
-            double newpt = 0;
+            double newpt;
             if ( multiplicity==1)
             {
                 newpt = 210 * 2 + frameIP[0] - 5;
@@ -1205,15 +1188,15 @@ namespace AOVGEN
             StampInsertionPoint[0] = newpt;
             StampInsertionPoint[1] = frameIP[1] + 5;
             //dynamic stampobj = acadDoc.ModelSpace.InsertBlock(StampInsertionPoint, "Штамп_новый", 1, 1, 1, 0, Type.Missing); //вставка блока штампа
-            AutoCAD.AcadBlockReference StampBlock = acadDoc.ModelSpace.InsertBlock(StampInsertionPoint, "Штамп_новый", 1, 1, 1, 0, Type.Missing);// stampobj;
+            AcadBlockReference StampBlock = acadDoc.ModelSpace.InsertBlock(StampInsertionPoint, "Штамп_новый", 1, 1, 1, 0, Type.Missing);// stampobj;
             object[] StampAttributes = StampBlock.GetAttributes();
-            IEnumerable<AutoCAD.AcadAttributeReference> drawingname = StampAttributes.OfType<AutoCAD.AcadAttributeReference>()
+            IEnumerable<AcadAttributeReference> drawingname = StampAttributes.OfType<AcadAttributeReference>()
                 .Where(i => i.TagString == "НАИМЕНОВАНИЕ_ЧЕРТЕЖА");
-            IEnumerable<AutoCAD.AcadAttributeReference> drawingdeveloper = StampAttributes.OfType<AutoCAD.AcadAttributeReference>()
+            IEnumerable<AcadAttributeReference> drawingdeveloper = StampAttributes.OfType<AcadAttributeReference>()
                 .Where(i => i.TagString == "Developer");
-            IEnumerable<AutoCAD.AcadAttributeReference> drawingbuild = StampAttributes.OfType<AutoCAD.AcadAttributeReference>()
+            IEnumerable<AcadAttributeReference> drawingbuild = StampAttributes.OfType<AcadAttributeReference>()
                 .Where(i => i.TagString == "Building");
-            IEnumerable<AutoCAD.AcadAttributeReference> drawingproject = StampAttributes.OfType<AutoCAD.AcadAttributeReference>()
+            IEnumerable<AcadAttributeReference> drawingproject = StampAttributes.OfType<AcadAttributeReference>()
                 .Where(i => i.TagString == "PROJECT");
             drawingname.ElementAt(0).TextString = $"Схема внешних подключений щита {Pannel.PannelName}";
             drawingdeveloper.ElementAt(0).TextString = Author;
@@ -1224,7 +1207,7 @@ namespace AOVGEN
 
             //MessageBox.Show($"Distance = {(latpoint[0] - insertPoint[1]).ToString()}");
         }
-        private dynamic StartAutocad((string path, string progID) Acad)
+        private static dynamic StartAutocad((string path, string progID) Acad)
         {
             string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
             string acadfile = programFiles + Acad.path;// + " //product ACAD //language " + '\u0022' + "ru - RU" + '\u0022';
@@ -1245,13 +1228,12 @@ namespace AOVGEN
             acadProc.Start();
             if (!acadProc.WaitForInputIdle(300000))
                 throw new ApplicationException("Слишком долго стартует Autocad, выход");
-            dynamic acadApp;
             while (true)
             {
 
                 try
                 {
-                    acadApp = Marshal.GetActiveObject(Acad.progID);
+                    dynamic acadApp = Marshal.GetActiveObject(Acad.progID);
                     return acadApp;
                 }
                 catch (COMException ex)
@@ -1266,21 +1248,17 @@ namespace AOVGEN
 
 
 
-    }
+        }
         internal  TableExternalConnections(Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> inputdict, Dictionary<string, VentSystem> inputvensystemDict, bool[] inputcabsettings, Dictionary<string, Pannel> pannels  )
         {
-            cabsettings = inputcabsettings;
+            var cabsettings = inputcabsettings;
             level3 = inputdict;
             writecabeP = cabsettings[0];
             writecablePump = cabsettings[1];
             writecableValve = cabsettings[2];
             ventsystemDict = inputvensystemDict;
             checkedpannels = pannels;
-
-
         }
-        
-
     }
     public static class EnumExtensionMethods
     {

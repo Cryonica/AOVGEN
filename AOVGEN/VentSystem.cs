@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Data;
 using System.Reflection;
-
+using System.Windows.Forms;
 
 namespace AOVGEN
 {
 #pragma warning disable IDE1006
 	#region CommonVentsystem
 
-	[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+	[TypeConverter(typeof(EnumDescConverter))]
 	internal enum VentComponents
 	{
 		[Description("Приточный вентилятор")]
@@ -54,7 +52,7 @@ namespace AOVGEN
         SpareExtVent
 
 	}
-	[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+	[TypeConverter(typeof(EnumDescConverter))]
 	internal enum CableTypes
 	{
 		[Description("Аналоговый")]
@@ -131,7 +129,7 @@ namespace AOVGEN
 		}
 		public object Clone()
         {
-			return this.MemberwiseClone();
+			return MemberwiseClone();
         }
 		public List<dynamic> GetKIP()
         {
@@ -276,7 +274,7 @@ namespace AOVGEN
         protected bool _isSpare;
         protected internal string Location;
         protected internal string AttributeSpare;
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum AHUContolType
 		{
 			[Description("Прямой пуск")]
@@ -288,7 +286,7 @@ namespace AOVGEN
 			[Description("Трансформатор")]
 			Transworm
 		}
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum AHUProtect
 		{
 			[Description("Нет")]
@@ -300,7 +298,7 @@ namespace AOVGEN
 
 		}
 		
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum _PressureProtect
 		{
 			[Description("Нет")]
@@ -788,21 +786,21 @@ namespace AOVGEN
 			switch (comp)
 			{
 				case VentComponents.SupplyVent:
-					ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
+					ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 					if (_PressureContol != null)
 					{
 						_PressureContol.SetDescrtiption("Контроль работы приточного вентилятора");
-						_PressureContol.ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
+						_PressureContol.ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 						_PressureContol.ShemaASU.ShemaUp = "SupplyVent_PD";
 					}
 
 					break;
 				case VentComponents.ExtVent:
-					ShemaASU.componentPlace = ShemaASU.ComponentPlace.Exhaust;
+					ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Exhaust;
 					if (_PressureContol != null)
 					{
 						_PressureContol.SetDescrtiption("Контроль работы вытяжного вентилятора");
-						_PressureContol.ShemaASU.componentPlace = ShemaASU.ComponentPlace.Exhaust;
+						_PressureContol.ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Exhaust;
 						_PressureContol.ShemaASU.ShemaUp = "ExtVent_PD";
 					}
 
@@ -1055,32 +1053,32 @@ namespace AOVGEN
 			internal string Description { get; set; }
 			public (string VendorName, string ID, string VendorDescription, string DBTable, string Assignment, string DefaultDescription, string MainDBTable) GetVendorInfo()
 			{
-				return (this.VendorName, this.ID, this.VendorDescription, this.DBTable, this.Assignment, this.DefaultDescription, this.MainDBTable);
+				return (VendorName, ID, VendorDescription, DBTable, Assignment, DefaultDescription, MainDBTable);
 			}
 			public void SetVendorInfo(string vendorName, string ID, string vendorDescription, string dbTable, string assignment)
 			{
-				if (!string.IsNullOrEmpty(vendorName)) this.VendorName = vendorName;
+				if (!string.IsNullOrEmpty(vendorName)) VendorName = vendorName;
 				if (!string.IsNullOrEmpty(ID)) this.ID = ID;
-				if (!string.IsNullOrEmpty(vendorDescription)) this.VendorDescription= vendorDescription;
-				if (!string.IsNullOrEmpty(assignment)) this.Assignment = assignment;
-				this.DBTable = string.IsNullOrEmpty(dbTable) ? "FControl" : dbTable;
-				this.MainDBTable = "FControl";
+				if (!string.IsNullOrEmpty(vendorDescription)) VendorDescription= vendorDescription;
+				if (!string.IsNullOrEmpty(assignment)) Assignment = assignment;
+				DBTable = string.IsNullOrEmpty(dbTable) ? "FControl" : dbTable;
+				MainDBTable = "FControl";
 
 			}
 			public void ClearVendorInfo()
             {
-				this.VendorName = string.Empty;
-				this.ID = string.Empty;
-				this.VendorDescription = string.Empty;
-				this.Assignment = string.Empty;
-				this.DBTable = string.Empty;
+				VendorName = string.Empty;
+				ID = string.Empty;
+				VendorDescription = string.Empty;
+				Assignment = string.Empty;
+				DBTable = string.Empty;
 				
 
 
 			}
 			internal FControl()
             {
-				this.DBTable = "FControl";
+				DBTable = "FControl";
 				Description = "Регулятор оборотов вентилятора";
 
 			}
@@ -1091,8 +1089,8 @@ namespace AOVGEN
 		{
 			return new List<dynamic>
 			{
-				this._PressureContol,
-				this._FControl
+				_PressureContol,
+				_FControl
 			};
 
 		}
@@ -1336,7 +1334,7 @@ namespace AOVGEN
          {
 			return new List<dynamic>
             {
-                this._PressureContol,
+                _PressureContol,
 				MainSupplyVent._FControl,
 				ReservedSupplyVent._FControl
             };
@@ -1498,7 +1496,7 @@ namespace AOVGEN
 		{
 			return new List<dynamic>
 			{
-				this._PressureContol,
+				_PressureContol,
 				MainExtVent._FControl,
 				ReservedExtVent._FControl
 			};
@@ -1597,7 +1595,7 @@ namespace AOVGEN
 	{
 		private protected VentComponents ComponentVariable;
 		internal ShemaASU ShemaASU;
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		//public enum _PressureProtect
 		//{
 		//	[Description("Нет")]
@@ -1647,15 +1645,15 @@ namespace AOVGEN
 			switch (protect)
 			{
 				case Sensor.SensorType.Analogue:
-					_PressureContol = new PressureContol()
-					{
+					_PressureContol = new PressureContol
+                    {
 						SensorType = Sensor.SensorType.Analogue
 					};
 					_PressureContol.ShemaASU.SetIO(ShemaASU.IOType.AI, 1);
 					break;
 				case Sensor.SensorType.Discrete:
-					_PressureContol = new PressureContol()
-					{
+					_PressureContol = new PressureContol
+                    {
 						SensorType = Sensor.SensorType.Discrete
 					};
 					_PressureContol.ShemaASU.SetIO(ShemaASU.IOType.DI, 1);
@@ -1701,7 +1699,7 @@ namespace AOVGEN
 		{
 			return new List<dynamic>
 			{
-				this._PressureContol
+				_PressureContol
 			};
 
 		}
@@ -1823,7 +1821,7 @@ namespace AOVGEN
 			comp = VentComponents.SupplyDamper;
 			ShemaASU = ShemaASU.CreateBaseShema(comp);
 			ShemaASU.ShemaUp = "Supply_Damper";
-			ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
+			ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 			ShemaASU.ShemaPos = ShemaASUbase.DummyPos(comp);
 			ShemaASU.ScheUpSize = ShemaASUbase.DummySize(comp);
 			PosName = "M";
@@ -1907,10 +1905,11 @@ namespace AOVGEN
 			}
 			return blockname;
 		}
-		internal string SortPriority { get { return MakeSortPriority(); } }
-		private string MakeSortPriority()
+		internal string SortPriority => MakeSortPriority();
+
+        private string MakeSortPriority()
 		{
-			switch (this.Voltage)
+			switch (Voltage)
 			{
 				case _Voltage.AC220:
 					sortpriority = "12";
@@ -1932,7 +1931,9 @@ namespace AOVGEN
 		public static string ImagePath = VentSystem.AppFolder + "Images\\6_1.png";
 		public static string ImageNullPath = VentSystem.AppFolder + "Images\\6_0.png";
 		[DisplayName("Тип элемента")]
-		public VentComponents comp { get { return ComponentVariable; } internal set { ComponentVariable = value; } }
+		public VentComponents comp { get => ComponentVariable;
+            internal set => ComponentVariable = value;
+        }
 		private VentComponents ComponentVariable;
 		//private _Voltage VoltageVariable;
 		public ExtDamper()
@@ -1941,7 +1942,7 @@ namespace AOVGEN
 			comp = VentComponents.ExtDamper;
 			ShemaASU = ShemaASU.CreateBaseShema(comp);
 			ShemaASU.ShemaUp = "Ext_Damper";
-			ShemaASU.componentPlace = ShemaASU.ComponentPlace.Exhaust;
+			ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Exhaust;
 			
 			PosName = "M";
 			VoltageVariable = _Voltage.AC220;
@@ -1967,8 +1968,12 @@ namespace AOVGEN
 		public bool Spring { get; set; }
 
 		[DisplayName("Концевые выключатели")]
-		public bool HasContol { get { return hascontrol; } set { SetCable2Type(value); } }
-		public new _Voltage Voltage { get { return VoltageVariable; } set { VoltageVariable = value; } }
+		public bool HasContol { get => hascontrol;
+            set => SetCable2Type(value);
+        }
+		public new _Voltage Voltage { get => VoltageVariable;
+            set => VoltageVariable = value;
+        }
 		internal override string MakeDamperBlockName()
 		{
 			string blockname;
@@ -1984,10 +1989,11 @@ namespace AOVGEN
 
 			return blockname;
 		}
-		internal string SortPriority { get { return MakeSortPriority(); } }
-		private string MakeSortPriority()
+		internal string SortPriority => MakeSortPriority();
+
+        private string MakeSortPriority()
 		{
-            switch (this.Voltage)
+            switch (Voltage)
 			{
 				case _Voltage.AC220:
 					sortpriority = "13";
@@ -2009,7 +2015,7 @@ namespace AOVGEN
 	class WaterHeater : IEnumerable, ICompGUID, IGetSensors
 	{
 
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum WaterHeaterProtect
 		{
 			[Description("Нет")]
@@ -2096,7 +2102,7 @@ namespace AOVGEN
 							_SensorType = Sensor.SensorType.Discrete,
                             ShemaASU =
                             {
-                                componentPlace = ShemaASU.ComponentPlace.Supply,
+                                componentPlace = ShemaASUbase.ComponentPlace.Supply,
                                 ShemaUp = "Supply_WaterHeater_TempAir",
                                 ShemaPos = ShemaASUbase.DummyPos(VentComponents.WaterHeater)
                             }
@@ -2107,7 +2113,7 @@ namespace AOVGEN
 							_SensorType = Sensor.SensorType.Analogue,
                             ShemaASU =
                             {
-                                componentPlace = ShemaASU.ComponentPlace.Supply,
+                                componentPlace = ShemaASUbase.ComponentPlace.Supply,
                                 ShemaUp = "Supply_WaterHeater_TempBackWater",
                                 ShemaPos = ShemaASUbase.DummyPos(VentComponents.WaterHeater)
                             }
@@ -2240,13 +2246,13 @@ namespace AOVGEN
 		private string _getPS1GUID()
 		{
 			string ps1g = string.Empty;
-			if (PS1 != null) ps1g = this.PS1.GUID;
+			if (PS1 != null) ps1g = PS1.GUID;
 			return ps1g;
 		}
 		private string _getPS2GUID()
 		{
 			string ps2g = string.Empty;
-			if (PS2 != null) ps2g = this.PS2.GUID;
+			if (PS2 != null) ps2g = PS2.GUID;
 			return ps2g;
 		}
 		private string _getPumpGUID()
@@ -2384,18 +2390,18 @@ namespace AOVGEN
 			comp = VentComponents.WaterHeater;
 			ShemaASU = ShemaASU.CreateBaseShema(comp);
 			ShemaASU.ShemaUp = "Supply_WaterHeater_Pump_3WayValve";
-			ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
-			Pump pump = new WaterHeater.Pump();
-			this._Pump = pump;
-			this.HasTK = pump.HasTK;
+			ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
+			Pump pump = new Pump();
+			_Pump = pump;
+			HasTK = pump.HasTK;
 			pump.Voltage = ElectroDevice._Voltage.AC220;
-			Valve valve = new WaterHeater.Valve();
+			Valve valve = new Valve();
 			//valve.SortPriority = "17";
 			//valve.Description = "Э/д клапана водяного нагревателя";
-			this._Valve = valve;
+			_Valve = valve;
 			
 			valveType = valve._ValveType;
-			this.Waterprotect = WaterHeaterProtect.No;
+			Waterprotect = WaterHeaterProtect.No;
 			
 			ShemaASU.SetIO(ShemaASU.IOType.DO, 1);
 			ShemaASU.SetIO(ShemaASU.IOType.AO, 1);
@@ -2419,19 +2425,21 @@ namespace AOVGEN
 					ToBlockName = BlockName,
 					WireNumbers = 3
 				};
-				Cable1.SortPriority = this.SortPriority;
-				this.ShemaASU = ShemaASU.CreateBaseShema(VentComponents.WaterHeater);
-				this.ShemaASU.ShemaUp = "Supply_Pump";
-				this.ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
+				Cable1.SortPriority = SortPriority;
+				ShemaASU = ShemaASU.CreateBaseShema(VentComponents.WaterHeater);
+				ShemaASU.ShemaUp = "Supply_Pump";
+				ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 				ShemaASU.SetIO(ShemaASU.IOType.DO, 1);
 				Power = "300";
 
 			}
-			internal bool HasTK { get { return hascontrol; } set { PumpSetTK(value, this); } }
+			internal bool HasTK { get => hascontrol;
+                set => PumpSetTK(value, this);
+            }
 			
 			internal override string MakeDamperBlockName()
 			{
-				if (this.HasTK)
+				if (HasTK)
 
 				{
 					blockname = "ED_Pump_220_TK";
@@ -2452,8 +2460,9 @@ namespace AOVGEN
 				}
 				return blockname;
 			}
-			internal string SortPriority { get { return MakeSortPriority(); } }
-			private string MakeSortPriority()
+			internal string SortPriority => MakeSortPriority();
+
+            private string MakeSortPriority()
 			{
 				string sortpriority = "11";
 				Cable1.SortPriority = sortpriority;
@@ -2475,7 +2484,7 @@ namespace AOVGEN
 						Description = "Термоконтакты насоса нагревателя",
 						WireNumbers = 2
 					};
-					this.ShemaASU.SetIO(ShemaASU.IOType.DI, 1);
+					ShemaASU.SetIO(ShemaASU.IOType.DI, 1);
 
 
 
@@ -2486,13 +2495,13 @@ namespace AOVGEN
 				else
 				{
 					Cable2 = null;
-					this.ShemaASU.ReSetIO(ShemaASU.IOType.DI);
+					ShemaASU.ReSetIO(ShemaASU.IOType.DI);
 				}
 			}
 		}
 		internal class Valve : ElectroDevice, IPower, ICompGUID
 		{
-			[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+			[TypeConverter(typeof(EnumDescConverter))]
 			internal enum ValveType
 			{
 				[Description("0-10V")]
@@ -2503,7 +2512,9 @@ namespace AOVGEN
 				ThreePos
 			}
 			private ValveType valveType;
-			internal ValveType _ValveType { get { return valveType; } set { valveType = value; } }
+			internal ValveType _ValveType { get => valveType;
+                set => valveType = value;
+            }
 
 			public string Posname = "FV";
 			public string BlockName = "ED-24-010V";
@@ -2514,11 +2525,13 @@ namespace AOVGEN
 			internal Cable Cable5;
 			internal ShemaASU ShemaASU;
 
-			internal string SortPriority { get { return sortpriority; } set { MakeSortPriority(value); } }
+			internal string SortPriority { get => sortpriority;
+                set => MakeSortPriority(value);
+            }
 			private string MakeSortPriority(object val)
 			{
 				sortpriority = string.Empty;
-				switch (this.Voltage)
+				switch (Voltage)
 				{
 					case _Voltage.AC220:
 						sortpriority = "14";
@@ -2534,11 +2547,11 @@ namespace AOVGEN
 			internal Valve()
 			{
 
-				this.ShemaASU = ShemaASU.CreateBaseShema(VentComponents.WaterHeater) ;
-				this.ShemaASU.SetIO(ShemaASU.IOType.AO, 1);
-				this.ShemaASU.ShemaUp = "WaterHeater_Valve";
-				this.ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
-				this.ShemaASU.ShemaPos = ShemaASUbase.DummyPos(VentComponents.WaterHeater);
+				ShemaASU = ShemaASU.CreateBaseShema(VentComponents.WaterHeater) ;
+				ShemaASU.SetIO(ShemaASU.IOType.AO, 1);
+				ShemaASU.ShemaUp = "WaterHeater_Valve";
+				ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
+				ShemaASU.ShemaPos = ShemaASUbase.DummyPos(VentComponents.WaterHeater);
 
 				valveType = ValveType.Analogue_0_10;
 				Voltage = _Voltage.AC24;
@@ -2585,8 +2598,8 @@ namespace AOVGEN
 		{
 			return new List<dynamic>
 			{
-				this.PS1,
-				this.PS2
+				PS1,
+				PS2
 			};
 
 		}
@@ -2596,7 +2609,7 @@ namespace AOVGEN
 		#region Enums
 
 
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum _Stairs
 		{
 			[Description("1")]
@@ -2623,20 +2636,27 @@ namespace AOVGEN
 		#endregion
 		#region Properties
 		[DisplayName("Тип элемента")]
-		public VentComponents comp { get { return ComponentVariable; } private set { ComponentVariable = value; } }
+		public VentComponents comp { get => ComponentVariable;
+            private set => ComponentVariable = value;
+        }
 		[DisplayName("Напряжение")]
-		public new _Voltage Voltage { get { return VoltageVariable; } set { CheckVoltage(value); } }
+		public new _Voltage Voltage { get => VoltageVariable;
+            set => CheckVoltage(value);
+        }
 		[DisplayName("Мощность")]
 		public new string Power { get; set; }
 		[DisplayName("Количество ступеней")]
-		public _Stairs Stairs { get { return stairs; } set { CheckStairs(value); } }
+		public _Stairs Stairs { get => stairs;
+            set => CheckStairs(value);
+        }
 		//[DisplayName("Дистанционный пуск")]
 		//public bool RemoteStart { get { return remotestart; } set { MakeRemoteStart(value); } }
 		[DisplayName("Поз.обозн.")]
 		public string PosName { get; internal set; }
 		[DisplayName("Имя блока")]
-		public string BlockName { get { return MakeBlockName(); } }
-		public string GUID { get; set; }
+		public string BlockName => MakeBlockName();
+
+        public string GUID { get; set; }
 		internal string Description1 { get; set; }
 		internal string Description2 { get; set; }
 		internal double Displacement { get; set; }
@@ -2833,7 +2853,7 @@ namespace AOVGEN
 			ComponentVariable = VentComponents.ElectroHeater;
 			ShemaASU = ShemaASU.CreateBaseShema(ComponentVariable);
 			ShemaASU.ShemaUp = "Supply_ElectroHeater";
-			ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
+			ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 
 			Stairs = _Stairs.S1;
 			ShemaASU.SetIO(ShemaASU.IOType.DI, 1);
@@ -2858,8 +2878,8 @@ namespace AOVGEN
 			{
 				WriteBlock = false,
 				Attrubute = Cable.CableAttribute.D,
-				ToPosName = this.PosName,
-				ToBlockName = this.BlockName,
+				ToPosName = PosName,
+				ToBlockName = BlockName,
 				Description = "Управление нагревателем 1 ступень",
 				WireNumbers = 2
 
@@ -2868,22 +2888,23 @@ namespace AOVGEN
 			{
 				WriteBlock = false,
 				Attrubute = Cable.CableAttribute.D,
-				ToPosName = this.PosName,
-				ToBlockName = this.BlockName,
+				ToPosName = PosName,
+				ToBlockName = BlockName,
 				Description = "Авария нагревателя",
 				WireNumbers = 2
 
 			};
-			Cable2.MakeControlSortpriority(this.SortPriority + "2");
-			Cable6.MakeControlSortpriority(this.SortPriority + "6");
+			Cable2.MakeControlSortpriority(SortPriority + "2");
+			Cable6.MakeControlSortpriority(SortPriority + "6");
 
 		}
 		#endregion
-		internal string SortPriority { get { return MakeSortPriority(); } }
-		private string MakeSortPriority()
+		internal string SortPriority => MakeSortPriority();
+
+        private string MakeSortPriority()
 		{
             string priority;
-            switch (this.Voltage)
+            switch (Voltage)
 			{
 				case _Voltage.AC380:
 					priority = "03";
@@ -2893,12 +2914,12 @@ namespace AOVGEN
 					break;
 
 			}
-			if (this.Cable1 != null) Cable1.SortPriority = priority;
-			if (this.Cable2 != null) Cable2.MakeControlSortpriority(priority + "2");
-			if (this.Cable3 != null) Cable3.MakeControlSortpriority(priority + "3");
-			if (this.Cable4 != null) Cable4.MakeControlSortpriority(priority + "4");
-			if (this.Cable5 != null) Cable5.MakeControlSortpriority(priority + "5");
-			if (this.Cable6 != null) Cable6.MakeControlSortpriority(priority + "6");
+			if (Cable1 != null) Cable1.SortPriority = priority;
+			if (Cable2 != null) Cable2.MakeControlSortpriority(priority + "2");
+			if (Cable3 != null) Cable3.MakeControlSortpriority(priority + "3");
+			if (Cable4 != null) Cable4.MakeControlSortpriority(priority + "4");
+			if (Cable5 != null) Cable5.MakeControlSortpriority(priority + "5");
+			if (Cable6 != null) Cable6.MakeControlSortpriority(priority + "6");
 
 			return priority;
 
@@ -2932,7 +2953,7 @@ namespace AOVGEN
 	class Froster : ElectroDevice, IEnumerable, IPower, ICompGUID, IGetSensors
 	{
 		#region Enums
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum FrosterType 
 		{
 			[Description("Фреоновый")]
@@ -2940,7 +2961,7 @@ namespace AOVGEN
 			[Description("Водяной")]
 			Water
 		}
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum FrosterSensor
 		{
 			[Description("Нет")]
@@ -2966,8 +2987,8 @@ namespace AOVGEN
 		FrosterType frostertype;
 		FrosterSensor frostersensor;
 		KKB.FrosterStairs frosterStairs;
-		Froster.ProtectSensor.SensorType sensor1Type;
-		Froster.ProtectSensor.SensorType sensor2Type;
+		Sensor.SensorType sensor1Type;
+		Sensor.SensorType sensor2Type;
 		internal ProtectSensor Sens1;
 		internal ProtectSensor Sens2;
 		string sens1PosName;
@@ -2983,29 +3004,38 @@ namespace AOVGEN
 		#endregion
 		#region Properties
 		[DisplayName("Тип элемента")]
-		public VentComponents comp { get { return ComponentVariable; } private set { ComponentVariable = value; } }
+		public VentComponents comp { get => ComponentVariable;
+            private set => ComponentVariable = value;
+        }
 		[DisplayName("Тип охладителя")]
-		public FrosterType _FrosterType { get { return frostertype; } set { CheckFrosterType(value); } }
+		public FrosterType _FrosterType { get => frostertype;
+            set => CheckFrosterType(value);
+        }
 
 		[DisplayName("Количество ступеней")]
-		public KKB.FrosterStairs Stairs { get { return frosterStairs; } set { CheckfrosterStairs(value); } }
+		public KKB.FrosterStairs Stairs { get => frosterStairs;
+            set => CheckfrosterStairs(value);
+        }
 		
 		[DisplayName("Тип управления ККБ")]
-		public KKB.KKBControlType KKBControlType { get { return kKBControlType; } set { kKBControlType = MakeKKBControlType(value, frostertype); } }
+		public KKB.KKBControlType KKBControlType { get => kKBControlType;
+            set => kKBControlType = MakeKKBControlType(value, frostertype);
+        }
 		[DisplayName("Тип управления клапаном")]
-		public Valve.ValveType valveType { get { return _valveType; } set { _valveType = CheckValveType(value, ref _Valve); } }
+		public Valve.ValveType valveType { get => _valveType;
+            set => _valveType = CheckValveType(value, ref _Valve);
+        }
 		[DisplayName("Напряжение")]
-		public new _Voltage Voltage { get { return VoltageVariable; } set { CheckVoltage(ref _KKB, ref _Valve, value); } }
+		public new _Voltage Voltage { get => VoltageVariable;
+            set => CheckVoltage(ref _KKB, ref _Valve, value);
+        }
 		[DisplayName("Мощность")]
 		public new string Power { get; set; }
 		[DisplayName("Контроль тмпературы")]
 		internal FrosterSensor _FrosterSensor
 		{
-			get
-			{
-				return frostersensor;
-			}
-			set
+			get => frostersensor;
+            set
 			{
 				frostersensor = value;
 				sensor1Type = Sensor.SensorType.No;
@@ -3015,7 +3045,7 @@ namespace AOVGEN
 				switch (frostersensor)
 				{
 					case FrosterSensor.SupplySens:
-						Sens1 = new Froster.ProtectSensor
+						Sens1 = new ProtectSensor
 						{
 							frostersensor = FrosterSensor.SupplySens,
 							Description = "Контроль Т охладителя в приточном канале"
@@ -3029,7 +3059,7 @@ namespace AOVGEN
 
 						break;
 					case FrosterSensor.ExhaustSens: //вот это надо проверить и исключить?
-						Sens2 = new Froster.ProtectSensor
+						Sens2 = new ProtectSensor
 						{
 							frostersensor = FrosterSensor.ExhaustSens,
 							Description = "Контроль Т охладителя в вытяжном канале"
@@ -3039,12 +3069,12 @@ namespace AOVGEN
 						MakeSensBlockName(ref Sens2);
 						break;
 					case FrosterSensor.Supp_ExhSens: // вот это надо проверить и исключить?
-						Sens1 = new Froster.ProtectSensor
+						Sens1 = new ProtectSensor
 						{
 							frostersensor = FrosterSensor.SupplySens,
 							Description = "Контроль Т охладителя в приточном канале"
 						};
-						Sens2 = new Froster.ProtectSensor
+						Sens2 = new ProtectSensor
 						{
 							frostersensor = FrosterSensor.ExhaustSens,
 							Description = "Контроль Т охладителя в вытяжном канале"
@@ -3069,30 +3099,54 @@ namespace AOVGEN
 			}
 		}
 		[DisplayName("Тип датчика 1")]
-		internal Froster.ProtectSensor.SensorType Sensor1Type { get { return sensor1Type; } set { sensor1Type = CheckSensType(value, ref Sens1); } }
+		internal Sensor.SensorType Sensor1Type { get => sensor1Type;
+            set => sensor1Type = CheckSensType(value, ref Sens1);
+        }
 		[DisplayName("Тип датчика 2")]
-		internal Froster.ProtectSensor.SensorType Sensor2Type { get { return sensor2Type; } set { sensor2Type = CheckSensType(value, ref Sens2); } }
+		internal Sensor.SensorType Sensor2Type { get => sensor2Type;
+            set => sensor2Type = CheckSensType(value, ref Sens2);
+        }
 		[DisplayName("Поз.обозначение датчика 1")]
-		internal string Sens1PosName { get { return sens1PosName; } private set { sens1PosName = value; } }
+		internal string Sens1PosName { get => sens1PosName;
+            private set => sens1PosName = value;
+        }
 		[DisplayName("Поз.обозначение датчика 2")]
-		internal string Sens2PosName { get { return sens2PosName; } private set { sens2PosName = value; } }
+		internal string Sens2PosName { get => sens2PosName;
+            private set => sens2PosName = value;
+        }
 		[DisplayName("Имя блока датчика 1")]
-		internal string Sens1BlockName { get { return sens1BlockName; } private set { sens1BlockName = value; } }
+		internal string Sens1BlockName { get => sens1BlockName;
+            private set => sens1BlockName = value;
+        }
 		[DisplayName("Имя блока датчика 2")]
-		public string Sens2BlockName { get { return sens2BlockName; } private set { sens2BlockName = value; } }
+		public string Sens2BlockName { get => sens2BlockName;
+            private set => sens2BlockName = value;
+        }
 		[DisplayName("Поз.обозначение клапана")]
-		public string ValvePosName { get { return GetValveInfo()[0]; } }
-		[DisplayName("Имя блока клапана")]
-		public string ValveBlockName { get { return GetValveInfo()[1]; } }
-		[DisplayName("Поз.обозначение ККБ")]
-		public string KKBPosName { get { return GetKKBInfo()[0]; } }
-		[DisplayName("Имя блока ККБ")]
-		public string KKBBlockName { get { return GetKKBInfo()[1]; } }
-		public string GUID { get; set; }
-		internal string Sens1GUID { get { return _getPS1GUID(); } set { Sens1.GUID = value; } }
-		internal string Sens2GUID { get { return _getPS2GUID(); } set { Sens2.GUID = value; } }
-		internal string ValveGUID { get { return _getGUID(_Valve); } set { _Valve.GUID = value; } }
-		internal string KKBGUID { get { return _getGUID(_KKB); } set { _KKB.GUID = value; } }
+		public string ValvePosName => GetValveInfo()[0];
+
+        [DisplayName("Имя блока клапана")]
+		public string ValveBlockName => GetValveInfo()[1];
+
+        [DisplayName("Поз.обозначение ККБ")]
+		public string KKBPosName => GetKKBInfo()[0];
+
+        [DisplayName("Имя блока ККБ")]
+		public string KKBBlockName => GetKKBInfo()[1];
+
+        public string GUID { get; set; }
+		internal string Sens1GUID { get => _getPS1GUID();
+            set => Sens1.GUID = value;
+        }
+		internal string Sens2GUID { get => _getPS2GUID();
+            set => Sens2.GUID = value;
+        }
+		internal string ValveGUID { get => _getGUID(_Valve);
+            set => _Valve.GUID = value;
+        }
+		internal string KKBGUID { get => _getGUID(_KKB);
+            set => _KKB.GUID = value;
+        }
 
 		#endregion
 		#region Methods
@@ -3109,9 +3163,9 @@ namespace AOVGEN
 			}
 			return Imagepath;
 		}
-		protected Froster.ProtectSensor.SensorType CheckSensType(object val, ref Froster.ProtectSensor protectSensor)
+		protected Sensor.SensorType CheckSensType(object val, ref ProtectSensor protectSensor)
 		{
-			Froster.ProtectSensor.SensorType sensorType = Sensor.SensorType.No;
+			Sensor.SensorType sensorType = Sensor.SensorType.No;
 			if (frostersensor != FrosterSensor.No && protectSensor != null)
 			{
 				sensorType = (Sensor.SensorType)val;
@@ -3150,7 +3204,7 @@ namespace AOVGEN
 			return sensorType;
 
 		}
-		protected string MakeSensPosName(ref Froster.ProtectSensor protectSensor)
+		protected string MakeSensPosName(ref ProtectSensor protectSensor)
 		{
 
 			string posname = string.Empty;
@@ -3166,7 +3220,7 @@ namespace AOVGEN
 						posname = "TS";
 						break;
 				}
-				switch (this.frostersensor)
+				switch (frostersensor)
 				{
 					case FrosterSensor.SupplySens:
 						sens1PosName = posname;
@@ -3197,7 +3251,7 @@ namespace AOVGEN
 
 			return posname;
 		}
-		protected string MakeSensBlockName(ref Froster.ProtectSensor protectSensor)
+		protected string MakeSensBlockName(ref ProtectSensor protectSensor)
 		{
 
 			string blockname = string.Empty;
@@ -3213,7 +3267,7 @@ namespace AOVGEN
 						blockname = "SENS-TS-2WIRE";
 						break;
 				}
-				switch (this.frostersensor)
+				switch (frostersensor)
 				{
 					case FrosterSensor.SupplySens:
 						sens1BlockName = blockname;
@@ -3237,7 +3291,7 @@ namespace AOVGEN
 		}
 		protected string[] GetValveInfo()
 		{
-			string[] array = new string[] { string.Empty, string.Empty };
+			string[] array = { string.Empty, string.Empty };
 			if (_Valve != null)
 			{
 				array[0] = _Valve.Posname;
@@ -3247,7 +3301,7 @@ namespace AOVGEN
 		}
 		protected string[] GetKKBInfo()
 		{
-			string[] array = new string[] { string.Empty, string.Empty };
+			string[] array = { string.Empty, string.Empty };
 			if (_KKB != null)
 			{
 				array[0] = _KKB.PosName;
@@ -3259,7 +3313,7 @@ namespace AOVGEN
 
 			return array;
 		}
-		protected Valve.ValveType CheckValveType(object val, ref Froster.Valve valve)
+		protected Valve.ValveType CheckValveType(object val, ref Valve valve)
 		{
 
 			_valveType = (Valve.ValveType)val;
@@ -3337,11 +3391,11 @@ namespace AOVGEN
 			}
 			//return voltage;
 		}
-		protected Sensor.SensorType MakeSensorType(Froster.ProtectSensor protectSensor)
+		protected Sensor.SensorType MakeSensorType(ProtectSensor protectSensor)
 		{
 
             Sensor.SensorType sensorType = Sensor.SensorType.No;
-			switch (this._FrosterSensor)
+			switch (_FrosterSensor)
 			{
 				case FrosterSensor.No:
 					sensor1Type = Sensor.SensorType.No;
@@ -3477,7 +3531,7 @@ namespace AOVGEN
 			switch (frostertype)
 			{
 				case FrosterType.Freon:
-					_KKB = new Froster.KKB
+					_KKB = new KKB
 					{
 						_KKBControlType = KKB.KKBControlType.Analogue,
 						Voltage = VoltageVariable,
@@ -3490,13 +3544,13 @@ namespace AOVGEN
 					_valveType = Valve.ValveType.No;
 					VoltageVariable = _KKB.Voltage;
 					KKBControlType = KKB.KKBControlType.Analogue;
-					this.Stairs = KKB.FrosterStairs.One;
+					Stairs = KKB.FrosterStairs.One;
 					ShemaASU.ShemaUp = "Froster_Frion_Steps";
 					break;
 				case FrosterType.Water:
-					_Valve = new Froster.Valve();
+					_Valve = new Valve();
 					VoltageVariable = _Voltage.AC24;
-					this.sortpriority = _Valve.SortPriority;
+					sortpriority = _Valve.SortPriority;
 					ShemaASU.ShemaUp = "Supply_Froster_Water";
 					_KKB = null;
 					break;
@@ -3508,25 +3562,25 @@ namespace AOVGEN
 		private string _getPS1GUID()
 		{
 			string ps1g = string.Empty;
-			if (Sens1 != null) ps1g = this.Sens1.GUID;
+			if (Sens1 != null) ps1g = Sens1.GUID;
 			return ps1g;
 		}
 		private string _getPS2GUID()
 		{
 			string ps2g = string.Empty;
-			if (Sens2 != null) ps2g = this.Sens2.GUID;
+			if (Sens2 != null) ps2g = Sens2.GUID;
 			return ps2g;
 		}
 		private string _getGUID(object obj)
 		{
 			string guid = string.Empty;
-            if (obj is Froster.KKB)
+            if (obj is KKB)
             {
                 KKB kkb = _KKB;
                 guid = kkb.GUID;
             }
 
-            if (obj is Froster.Valve)
+            if (obj is Valve)
 			{
                 Valve valve = _Valve;
                 guid = valve.GUID;
@@ -3534,7 +3588,7 @@ namespace AOVGEN
 			return guid;
 
 		}
-		private Froster.KKB.FrosterStairs CheckfrosterStairs(object val)
+		private KKB.FrosterStairs CheckfrosterStairs(object val)
 		{
 			frosterStairs = (KKB.FrosterStairs)val;
 			_KKB.Stairs = frosterStairs;
@@ -3679,7 +3733,7 @@ namespace AOVGEN
 		#region Interenal Classes
 		internal class Valve : ElectroDevice, IPower, ICompGUID
 		{
-			[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+			[TypeConverter(typeof(EnumDescConverter))]
 			internal enum ValveType
 			{
 				[Description("Нет")]
@@ -3693,7 +3747,9 @@ namespace AOVGEN
 			}
 			private ValveType valveType;
 			internal ShemaASU ShemaASU;
-			public ValveType _ValveType { get { return valveType; } set { valveType = value; } }
+			public ValveType _ValveType { get => valveType;
+                set => valveType = value;
+            }
 
 			public string Posname = "FV";
 			public string BlockName = "ED-24";
@@ -3707,10 +3763,10 @@ namespace AOVGEN
 				{
 					WriteBlock = true,
 					Attrubute = Cable.CableAttribute.P,
-					ToPosName = this.Posname,
-					ToBlockName = this.BlockName,
-					SortPriority = this.SortPriority,
-					Description = this.Description
+					ToPosName = Posname,
+					ToBlockName = BlockName,
+					SortPriority = SortPriority,
+					Description = Description
 
 
 				};
@@ -3719,11 +3775,12 @@ namespace AOVGEN
 				ShemaASU.SetIO(ShemaASU.IOType.AO, 1);
 				Power = "10";
 			}
-			internal string SortPriority { get { return MakeSortPriority(); } }
-			private string MakeSortPriority()
+			internal string SortPriority => MakeSortPriority();
+
+            private string MakeSortPriority()
 			{
                 string priority;
-                switch (this.Voltage)
+                switch (Voltage)
 				{
 					case _Voltage.AC220: //this value will newer be assigned. Main Class (Froster) always set valve voltage to AC.24
 						priority = "14";
@@ -3792,7 +3849,7 @@ namespace AOVGEN
 		}
 		internal class KKB : ElectroDevice, IPower, ICompGUID
 		{
-			[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+			[TypeConverter(typeof(EnumDescConverter))]
 			public enum FrosterStairs
 			{
 				[Description("1")]
@@ -3805,7 +3862,7 @@ namespace AOVGEN
 				Four
 
 			}
-			[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+			[TypeConverter(typeof(EnumDescConverter))]
 			public enum KKBControlType
 			{
 				[Description("Нет")]
@@ -3867,28 +3924,28 @@ namespace AOVGEN
 
 				}
 
-				if (this.Cable1 != null) Cable1.SortPriority = priority;
-				if (this.Cable2 != null) Cable2.MakeControlSortpriority(priority + "2");
-				if (this.Cable3 != null) Cable3.MakeControlSortpriority(priority + "3");
-				if (this.Cable4 != null) Cable4.MakeControlSortpriority(priority + "4");
-				if (this.Cable5 != null) Cable5.MakeControlSortpriority(priority + "5");
-				if (this.Cable6 != null) Cable6.MakeControlSortpriority(priority + "6");
+				if (Cable1 != null) Cable1.SortPriority = priority;
+				if (Cable2 != null) Cable2.MakeControlSortpriority(priority + "2");
+				if (Cable3 != null) Cable3.MakeControlSortpriority(priority + "3");
+				if (Cable4 != null) Cable4.MakeControlSortpriority(priority + "4");
+				if (Cable5 != null) Cable5.MakeControlSortpriority(priority + "5");
+				if (Cable6 != null) Cable6.MakeControlSortpriority(priority + "6");
 				sortpriority = priority;
 				return priority;
 
 			}
 			internal KKB()
 			{
-				this.ShemaASU = ShemaASU.CreateBaseShema(VentComponents.Froster);
-				this.ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
+				ShemaASU = ShemaASU.CreateBaseShema(VentComponents.Froster);
+				ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 				_KKBControlType = KKBControlType.Discrete;
 				Voltage = _Voltage.AC380;
 				Cable1 = new Cable
 				{
 					WriteBlock = true,
 					Attrubute = Cable.CableAttribute.P,
-					ToPosName = this.PosName,
-					ToBlockName = this.BlockName,
+					ToPosName = PosName,
+					ToBlockName = BlockName,
 					Description = "ККБ охладителя",
 					SortPriority = SortPriority,
 					WireNumbers = 5
@@ -3898,8 +3955,8 @@ namespace AOVGEN
 				{
 					WriteBlock = false,
 					Attrubute = Cable.CableAttribute.D,
-					ToPosName = this.PosName,
-					ToBlockName = this.BlockName,
+					ToPosName = PosName,
+					ToBlockName = BlockName,
 					Description = "Управление ККБ 1 ступень",
 					WireNumbers = 2
 
@@ -3908,16 +3965,16 @@ namespace AOVGEN
 				{
 					WriteBlock = false,
 					Attrubute = Cable.CableAttribute.D,
-					ToPosName = this.PosName,
-					ToBlockName = this.BlockName,
+					ToPosName = PosName,
+					ToBlockName = BlockName,
 					Description = "Авария ККБ",
 					WireNumbers = 2
 
 				};
-				Cable2.MakeControlSortpriority(this.SortPriority + "2");
-				Cable6.MakeControlSortpriority(this.SortPriority + "6");
-				this.ShemaASU.SetIO(ShemaASU.IOType.DO, 1);
-				this.ShemaASU.SetIO(ShemaASU.IOType.DI, 1);
+				Cable2.MakeControlSortpriority(SortPriority + "2");
+				Cable6.MakeControlSortpriority(SortPriority + "6");
+				ShemaASU.SetIO(ShemaASU.IOType.DO, 1);
+				ShemaASU.SetIO(ShemaASU.IOType.DI, 1);
 
 			}
 
@@ -3932,7 +3989,7 @@ namespace AOVGEN
             {
 				ComponentVariable = VentComponents.Froster;
 				ShemaASU = ShemaASU.CreateBaseShema(ComponentVariable);
-				ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
+				ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 				Voltage = _Voltage.AC220;
 				Power = "0";
 			}
@@ -3940,7 +3997,7 @@ namespace AOVGEN
             {
 				ComponentVariable = VentComponents.Froster;
 				ShemaASU = ShemaASU.CreateBaseShema(ComponentVariable);
-				ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
+				ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 				Voltage = _Voltage.AC220;
 				Power = "0";
 				_FrosterType = FrosterType.Freon;
@@ -3999,8 +4056,8 @@ namespace AOVGEN
 		{
 			return new List<dynamic>
 			{
-				this.Sens1,
-				this.Sens2
+				Sens1,
+				Sens2
 			};
 
 		}
@@ -4016,7 +4073,7 @@ namespace AOVGEN
 		public static string Imagepath = VentSystem.AppFolder + "Images\\11_1.png";
 		#endregion
 		#region Enum
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum _HumType
 		{
 			[Description("Пароувлажнитель")]
@@ -4026,7 +4083,7 @@ namespace AOVGEN
 			[Description("Камера орошения")]
 			Irrigation_chamber
 		}
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum HumContolType
 		{
 			[Description("Аналоговое")]
@@ -4049,17 +4106,27 @@ namespace AOVGEN
 		internal Cable Cable2;
 		internal Cable Cable3;
 		internal ShemaASU ShemaASU;
-		internal HumiditySens HumiditySensor { get { return _HumiditySens; } set { _HumiditySens = value; } }
+		internal HumiditySens HumiditySensor { get => _HumiditySens;
+            set => _HumiditySens = value;
+        }
 		#endregion
 		#region Properties
 		[DisplayName("Тип элемента")]
-		public VentComponents comp { get { return ComponentVariable; } private set { ComponentVariable = value; } }
+		public VentComponents comp { get => ComponentVariable;
+            private set => ComponentVariable = value;
+        }
 		[DisplayName("Тип увлажнителя")]
-		public _HumType HumType { get { return humtype; } set { humtype = value; } }
+		public _HumType HumType { get => humtype;
+            set => humtype = value;
+        }
 		[DisplayName("Тип управления")]
-		public HumContolType HumControlType { get { return humContol; } set { CheckHumContol(value); } }
+		public HumContolType HumControlType { get => humContol;
+            set => CheckHumContol(value);
+        }
 		[DisplayName("Напряжение")]
-		public new _Voltage Voltage { get { return VoltageVariable; } set { CheckVoltage(value); } }
+		public new _Voltage Voltage { get => VoltageVariable;
+            set => CheckVoltage(value);
+        }
 		[DisplayName("Мощность")]
 		public new string Power { get; set; }
 
@@ -4199,9 +4266,9 @@ namespace AOVGEN
 					break;
 
 			}
-			if (this.Cable1 != null) Cable1.SortPriority = sortpriority;
-			if (this.Cable2 != null) Cable2.MakeControlSortpriority(sortpriority + "2");
-			if (this.Cable3 != null) Cable3.MakeControlSortpriority(sortpriority + "3");
+			if (Cable1 != null) Cable1.SortPriority = sortpriority;
+			if (Cable2 != null) Cable2.MakeControlSortpriority(sortpriority + "2");
+			if (Cable3 != null) Cable3.MakeControlSortpriority(sortpriority + "3");
 
 			return sortpriority;
 
@@ -4249,7 +4316,7 @@ namespace AOVGEN
         {
 			return new List<dynamic>
 			{
-				this._HumiditySens
+				_HumiditySens
 			};
 
 
@@ -4268,8 +4335,8 @@ namespace AOVGEN
 				switch (sensorType)
 				{
 					case SensorType.Analogue:
-						this.SetVendorInfo(null, null, null, "SensHE", null);
-						this.MainDBTable = "SensHUM";
+						SetVendorInfo(null, null, null, "SensHE", null);
+						MainDBTable = "SensHUM";
 						PosName = "ME";
 						Blockname = "SENS-ME-2WIRE";
 						sortpriority = "21";
@@ -4287,13 +4354,13 @@ namespace AOVGEN
 						}
 						ShemaASU?.ReSetIO(ShemaASU.IOType.DI);
 						ShemaASU?.SetIO(ShemaASU.IOType.AI, 1);
-						this.SensorInsideCrossSection = false;
+						SensorInsideCrossSection = false;
 
 
 						break;
 					case SensorType.Discrete:
-						this.SetVendorInfo(null, null, null, "SensHS", null);
-						this.MainDBTable = "SensHUM";
+						SetVendorInfo(null, null, null, "SensHS", null);
+						MainDBTable = "SensHUM";
 						PosName = "MS";
 						Blockname = "SENS-MS-2WIRE";
 						sortpriority = "28";
@@ -4310,7 +4377,7 @@ namespace AOVGEN
 						}
 						ShemaASU?.ReSetIO(ShemaASU.IOType.AI);
 						ShemaASU?.SetIO(ShemaASU.IOType.DI, 1);
-						this.SensorInsideCrossSection = false;
+						SensorInsideCrossSection = false;
 
 						break;
 					case SensorType.No:
@@ -4358,7 +4425,7 @@ namespace AOVGEN
 			public HumiditySens()
             {
 				//this.ShemaASU = ShemaASU.CreateBaseShema();
-                base.Description = "Капилярный гиростат";
+                Description = "Капилярный гиростат";
                
             }
 		}
@@ -4370,7 +4437,7 @@ namespace AOVGEN
 			ComponentVariable = VentComponents.Humidifier;
 			Description = "Увлажнитель в приточном канале";
 			ShemaASU = ShemaASU.CreateBaseShema(ComponentVariable);
-			ShemaASU.componentPlace = ShemaASU.ComponentPlace.Supply;
+			ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 			ShemaASU.ShemaUp = "Supply_Humidifier";
 			HumControlType = HumContolType.Analogue;
 			ShemaASU.SetIO(ShemaASU.IOType.DI, 1);
@@ -4380,7 +4447,7 @@ namespace AOVGEN
 				Description = Description,
 				ToBlockName = BlockName,
 				ToPosName = PosName,
-				SortPriority = this.SortPriority,
+				SortPriority = SortPriority,
 				WriteBlock = true,
 				WireNumbers = 3
 			};
@@ -4422,7 +4489,7 @@ namespace AOVGEN
 		public string Imagepath;
 		#endregion
 		#region Enums
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum RecuperatorType
 		{
 			[Description("Рециркуляция")]
@@ -4437,7 +4504,7 @@ namespace AOVGEN
 			Glycol
 
 		}
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum RecirculationType
 		{
 			[Description("Нет")]
@@ -4472,32 +4539,52 @@ namespace AOVGEN
 		internal Drive Drive2 { get => _Drive2; set => _Drive2 = value; }
 		internal Drive Drive3 { get => _Drive3; set => _Drive3 = value; }
 		internal SensorT protectSensor1 { get => _ProtectSensor1; set => _ProtectSensor1 = value; }
-		internal PressureContol protectSensor2 { get { return _ProtectSensor2; } set { _ProtectSensor2 = value; } }
+		internal PressureContol protectSensor2 { get => _ProtectSensor2;
+            set => _ProtectSensor2 = value;
+        }
 		[DisplayName("Тип элемента")]
-		public VentComponents comp { get { return ComponentVariable; } private set { ComponentVariable = value; } }
+		public VentComponents comp { get => ComponentVariable;
+            private set => ComponentVariable = value;
+        }
 		[DisplayName("Тип рекуператора")]
-		public RecuperatorType _RecuperatorType { get { return recuperatortype; } set { SetRecuperatorType(value, ref Imagepath, ref _ProtectSensor1, ref _ProtectSensor2, ref _Drive1, ref _Drive2, ref _Drive3, ref recirculationtype); } }
+		public RecuperatorType _RecuperatorType { get => recuperatortype;
+            set => SetRecuperatorType(value, ref Imagepath, ref _ProtectSensor1, ref _ProtectSensor2, ref _Drive1, ref _Drive2, ref _Drive3, ref recirculationtype);
+        }
 		[DisplayName("Количество приводов")]
-		public RecirculationType _RecirculationType { get { return recirculationtype; } internal set { recirculationtype = value; } }
+		public RecirculationType _RecirculationType { get => recirculationtype;
+            internal set => recirculationtype = value;
+        }
 		[DisplayName("Имя блока привода 1")]
-		public string Drive1BlockName { get { return GetDriveBlockName(_Drive1); } protected set { Dev1BlockName = value; } }
-		internal string Drive1PosName { get { return GetDrivePosName(_Drive1); } }
-		[DisplayName("Имя блока привода 2")]
-		public string Drive2BlockName { get { return GetDriveBlockName(_Drive2); } protected set { Dev2BlockName = value; } }
-		internal string Drive2PosName { get { return GetDrivePosName(_Drive2); } }
-		[DisplayName("Имя блока привода 3")]
-		public string Drive3BlockName { get { return GetDriveBlockName(_Drive3); } protected set { Dev3BlockName = value; } }
-		internal string Drive3PosName { get { return GetDrivePosName(_Drive3); } }
-		[DisplayName("Обозначение датчика защиты 1")]
-		public string Sens1PosName { get { return GetSensorPos(_ProtectSensor1); } }
-		[DisplayName("Имя блока датчика защиты 1")]
-		public string PS1BlockName { get { return GetSensorName(_ProtectSensor1); } }
-		[DisplayName("Обозначение датчика защиты 2")]
-		public string Sens2PosName { get { return GetSensorPos(_ProtectSensor2); } }
+		public string Drive1BlockName { get => GetDriveBlockName(_Drive1);
+            protected set => Dev1BlockName = value;
+        }
+		internal string Drive1PosName => GetDrivePosName(_Drive1);
 
-		[DisplayName("Имя блока датчика защиты 2")]
-		public string PS2BlockName { get { return GetSensorName(_ProtectSensor2); } }
-		public string GUID { get; set; }
+        [DisplayName("Имя блока привода 2")]
+		public string Drive2BlockName { get => GetDriveBlockName(_Drive2);
+            protected set => Dev2BlockName = value;
+        }
+		internal string Drive2PosName => GetDrivePosName(_Drive2);
+
+        [DisplayName("Имя блока привода 3")]
+		public string Drive3BlockName { get => GetDriveBlockName(_Drive3);
+            protected set => Dev3BlockName = value;
+        }
+		internal string Drive3PosName => GetDrivePosName(_Drive3);
+
+        [DisplayName("Обозначение датчика защиты 1")]
+		public string Sens1PosName => GetSensorPos(_ProtectSensor1);
+
+        [DisplayName("Имя блока датчика защиты 1")]
+		public string PS1BlockName => GetSensorName(_ProtectSensor1);
+
+        [DisplayName("Обозначение датчика защиты 2")]
+		public string Sens2PosName => GetSensorPos(_ProtectSensor2);
+
+        [DisplayName("Имя блока датчика защиты 2")]
+		public string PS2BlockName => GetSensorName(_ProtectSensor2);
+
+        public string GUID { get; set; }
 		#endregion
 		#region Methods
 		internal string makeimagepath(RecuperatorType recuperatorType)
@@ -4602,7 +4689,7 @@ namespace AOVGEN
 					break;
 				case RecuperatorType.LaminatedBypass:
 					recirculation = RecirculationType.One;
-					drive1 = new Recuperator.Drive
+					drive1 = new Drive
 					{
 						Description = "Э/д привода заслонки байпаса рекуператора",
 						SortPriority = "18"
@@ -4789,7 +4876,7 @@ namespace AOVGEN
 					break;
 				case RecuperatorType.Glycol:
 					recirculation = RecirculationType.Two;
-					drive1 = new Recuperator.Drive
+					drive1 = new Drive
 					{
 						Description = "Э/д привода рекуператоора",
 						SortPriority = "18"
@@ -4819,7 +4906,7 @@ namespace AOVGEN
 					};
 					drive1.Cable2.MakeControlSortpriority(drive1.SortPriority);
 
-					drive2 = new Recuperator.Drive
+					drive2 = new Drive
 					{
 						Description = "Э/д насоса рекуператора",
 						SortPriority = "19"
@@ -4916,8 +5003,8 @@ namespace AOVGEN
 		{
 			return new List<dynamic>
 			{
-				this._ProtectSensor1,
-				this._ProtectSensor2
+				_ProtectSensor1,
+				_ProtectSensor2
 			};
 		}
 		#endregion
@@ -4979,15 +5066,17 @@ namespace AOVGEN
 					ToBlockName = BlockName,
 					WireNumbers = 3
 				};
-				Cable1.SortPriority = this.SortPriority;
+				Cable1.SortPriority = SortPriority;
 				Power = "300";
 				
 			}
-			internal bool HasTK { get { return hascontrol; } set { PumpSetTK(value, this); } }
+			internal bool HasTK { get => hascontrol;
+                set => PumpSetTK(value, this);
+            }
 			
 			internal override string MakeDamperBlockName()
 			{
-				if (this.HasTK)
+				if (HasTK)
 
 				{
 					blockname = "ED_Pump_220_TK";
@@ -5008,8 +5097,9 @@ namespace AOVGEN
 				}
 				return blockname;
 			}
-			internal string SortPriority { get { return MakeSortPriority(); } }
-			private string MakeSortPriority()
+			internal string SortPriority => MakeSortPriority();
+
+            private string MakeSortPriority()
 			{
 				string sortpriority = "11";
 				Cable1.SortPriority = sortpriority;
@@ -5063,7 +5153,7 @@ namespace AOVGEN
 	abstract class Sensor  : ICompGUID, IVendoInfo
 	{
 		
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum SensorType
 		{
 			[Description("Нет")]
@@ -5090,15 +5180,18 @@ namespace AOVGEN
 		public string PosName { get; internal set; }
 		//private SensorType _sensorType;
 		//public SensorType _SensorType  { get { return _sensorType; } set { _sensorType = value; }}
-		public virtual SensorType _SensorType { get { return sensorType; } set { CheckSensorType(value); } }
+		public virtual SensorType _SensorType { get => sensorType;
+            set => CheckSensorType(value);
+        }
 		public string GUID { get; set; }
 		internal string Description { get; set; }
 		internal string Location { get; set; }
 		
 		
 
-		internal virtual string SortPriority { get { return sortpriority; } }
-		//internal CableTypes Cable1Type { get; set; }
+		internal virtual string SortPriority => sortpriority;
+
+        //internal CableTypes Cable1Type { get; set; }
 		internal Cable Cable1;
 		internal abstract void CheckSensorType(object val);
 		internal ShemaASU ShemaASU;
@@ -5109,26 +5202,26 @@ namespace AOVGEN
 			vendorinfo.ID = ID;
 			vendorinfo.VendorDescription = VendorDescription;
 			vendorinfo.DBTable = VendorDBTable;
-			vendorinfo.DefaultDescription = this.Description;//;Description;
+			vendorinfo.DefaultDescription = Description;//;Description;
 			vendorinfo.Assignment = Assignment;
-			vendorinfo.MainDBTable = this.MainDBTable;
+			vendorinfo.MainDBTable = MainDBTable;
 			return vendorinfo;
         }
 		public void SetVendorInfo(string vendorName, string ID, string vendorDescription, string dbTable, string assignment)
         {
-			if (!string.IsNullOrEmpty(vendorName)) this.VendorName = vendorName;
+			if (!string.IsNullOrEmpty(vendorName)) VendorName = vendorName;
 			if (!string.IsNullOrEmpty(ID)) this.ID = ID;
-			if (!string.IsNullOrEmpty(vendorDescription)) this.VendorDescription = vendorDescription;
-			if (!string.IsNullOrEmpty(dbTable)) this.VendorDBTable = dbTable;
-			if (!string.IsNullOrEmpty(assignment)) this.Assignment = assignment;
+			if (!string.IsNullOrEmpty(vendorDescription)) VendorDescription = vendorDescription;
+			if (!string.IsNullOrEmpty(dbTable)) VendorDBTable = dbTable;
+			if (!string.IsNullOrEmpty(assignment)) Assignment = assignment;
 		}
 		public void ClearVendorInfo()
 		{
-			this.VendorName = string.Empty;
-			this.ID = string.Empty;
-			this.VendorDescription = string.Empty;
-			this.Assignment = string.Empty;
-			this.VendorDBTable = string.Empty;
+			VendorName = string.Empty;
+			ID = string.Empty;
+			VendorDescription = string.Empty;
+			Assignment = string.Empty;
+			VendorDBTable = string.Empty;
 			
 		}
 
@@ -5147,8 +5240,8 @@ namespace AOVGEN
 					Blockname = "SENS-TE-2WIRE";
 					sortpriority = "26";
 					
-					this.SetVendorInfo(null, null, null, "SensTE", null);
-					this.MainDBTable = "SensT";
+					SetVendorInfo(null, null, null, "SensTE", null);
+					MainDBTable = "SensT";
 					
 					if (Cable1 != null) Cable1.Attrubute = Cable.CableAttribute.A;
 					else {
@@ -5175,8 +5268,8 @@ namespace AOVGEN
 
 					break;
 				case SensorType.Discrete:
-					this.SetVendorInfo(null, null, null, "SensTS", null);
-					this.MainDBTable = "SensT";
+					SetVendorInfo(null, null, null, "SensTS", null);
+					MainDBTable = "SensT";
 					PosName = "TS";
 					Blockname = "SENS-TS-2WIRE";
 					sortpriority = "33";
@@ -5207,7 +5300,7 @@ namespace AOVGEN
 					PosName = string.Empty;
 					Blockname = string.Empty;
 					Cable1 = null;
-					this.ShemaASU = null;
+					ShemaASU = null;
 
 					break;
 
@@ -5226,7 +5319,7 @@ namespace AOVGEN
 			Description = description;
 			ShemaASU = ShemaASU.CreateBaseShema();
 			ShemaASU.ShemaUp = "Temp_NoPos";
-            ShemaASU.Description1 = this.Description;
+            ShemaASU.Description1 = Description;
 
 
         }
@@ -5246,9 +5339,12 @@ namespace AOVGEN
 	{
 		private VentComponents ComponentVariable;
 		
-		internal new string SortPriority { get { return sortpriority; } }
-		[DisplayName("Тип элемента")]
-		public VentComponents comp { get { return ComponentVariable; } internal set { ComponentVariable = value; } }
+		internal new string SortPriority => sortpriority;
+
+        [DisplayName("Тип элемента")]
+		public VentComponents comp { get => ComponentVariable;
+            internal set => ComponentVariable = value;
+        }
 		internal override void CheckSensorType(object val)
 		{
 			sensorType = (SensorType)val;
@@ -5258,8 +5354,8 @@ namespace AOVGEN
 					PosName = "TE";
 					Blockname = "SENS-TE-2WIRE";
 					sortpriority = "22";
-					this.SetVendorInfo(null, null, null, "SensTE", null);
-					this.MainDBTable = "SensT";
+					SetVendorInfo(null, null, null, "SensTE", null);
+					MainDBTable = "SensT";
 					if (Cable1 != null) Cable1.Attrubute = Cable.CableAttribute.A;
 					else
 					{
@@ -5291,8 +5387,8 @@ namespace AOVGEN
 					PosName = "TS";
 					Blockname = "SENS-TS-2WIRE";
 					sortpriority = "29";
-					this.SetVendorInfo(null, null, null, "SensTS", null);
-					this.MainDBTable = "SensT";
+					SetVendorInfo(null, null, null, "SensTS", null);
+					MainDBTable = "SensT";
 					if (Cable1 != null) Cable1.Attrubute = Cable.CableAttribute.D;
 					else
 					{
@@ -5318,7 +5414,7 @@ namespace AOVGEN
 					}
 					break;
 				case SensorType.No:
-					this.SetVendorInfo(null, null, null, null, null);
+					SetVendorInfo(null, null, null, null, null);
 					PosName = string.Empty;
 					Blockname = string.Empty;
 					Cable1 = null;
@@ -5344,7 +5440,7 @@ namespace AOVGEN
 			ShemaASU.ShemaUp = "Temp_Supply";
 			ShemaASU.ShemaPos = ShemaASUbase.DummyPos(ComponentVariable);
 			ShemaASU.ScheUpSize = ShemaASUbase.DummySize(ComponentVariable);
-            ShemaASU.Description1 = this.Description;
+            ShemaASU.Description1 = Description;
 
 
         }
@@ -5354,10 +5450,12 @@ namespace AOVGEN
 	{
 		private VentComponents ComponentVariable;
 		
-		internal new string SortPriority { get { return sortpriority; } }
+		internal new string SortPriority => sortpriority;
 
-		[DisplayName("Тип элемента")]
-		public VentComponents comp { get { return ComponentVariable; } internal set { ComponentVariable = value; } }
+        [DisplayName("Тип элемента")]
+		public VentComponents comp { get => ComponentVariable;
+            internal set => ComponentVariable = value;
+        }
 		internal override void CheckSensorType(object val)
 		{
 			sensorType = (SensorType)val;
@@ -5367,8 +5465,8 @@ namespace AOVGEN
 					PosName = "TE";
 					Blockname = "SENS-TE-2WIRE";
 					sortpriority = "23";
-					this.SetVendorInfo(null, null, null, "SensTE", null);
-					this.MainDBTable = "SensT";
+					SetVendorInfo(null, null, null, "SensTE", null);
+					MainDBTable = "SensT";
 					if (Cable1 != null) Cable1.Attrubute = Cable.CableAttribute.A;
 					else
 					{
@@ -5379,7 +5477,7 @@ namespace AOVGEN
 							ToPosName = PosName,
 							ToBlockName = Blockname,
 							WriteBlock = true,
-							Description = this.Description,
+							Description = Description,
 							WireNumbers = 2
 						};
 					}
@@ -5400,8 +5498,8 @@ namespace AOVGEN
 					PosName = "TS";
 					Blockname = "SENS-TS-2WIRE";
 					sortpriority = "30";
-					this.SetVendorInfo(null, null, null, "SensTS", null);
-					this.MainDBTable = "SensT";
+					SetVendorInfo(null, null, null, "SensTS", null);
+					MainDBTable = "SensT";
 					if (Cable1 != null) Cable1.Attrubute = Cable.CableAttribute.D;
 					else
 					{
@@ -5412,7 +5510,7 @@ namespace AOVGEN
 							ToPosName = PosName,
 							ToBlockName = Blockname,
 							WriteBlock = true,
-							Description = this.Description,
+							Description = Description,
 							WireNumbers = 2
 
 						};
@@ -5431,7 +5529,7 @@ namespace AOVGEN
 					}
 					break;
 				case SensorType.No:
-					this.SetVendorInfo(null, null, null, null, null);
+					SetVendorInfo(null, null, null, null, null);
 					PosName = string.Empty;
 					Blockname = string.Empty;
 					Cable1 = null;
@@ -5457,25 +5555,24 @@ namespace AOVGEN
 			ShemaASU.ShemaUp = "Temp_Supply";
 			ShemaASU.ShemaPos = ShemaASUbase.DummyPos(ComponentVariable);
 			ShemaASU.ScheUpSize = ShemaASUbase.DummySize(ComponentVariable);
-            ShemaASU.Description1 = this.Description;
+            ShemaASU.Description1 = Description;
         }
 	}//в воздуховоде
 	class ExhaustTemp : SensorT
 	{
 		private VentComponents ComponentVariable;
 		
-		internal override string SortPriority { get { return sortpriority; } }
+		internal override string SortPriority => sortpriority;
 
-		[DisplayName("Тип элемента")]
-		public VentComponents comp { get { return ComponentVariable; } internal set { ComponentVariable = value; } }
+        [DisplayName("Тип элемента")]
+		public VentComponents comp { get => ComponentVariable;
+            internal set => ComponentVariable = value;
+        }
 		[DisplayName("Тип датчика")]
 		public new SensorType _SensorType
 		{
-			get
-			{
-				return sensorType;
-			}
-			set
+			get => sensorType;
+            set
 			{
 				sensorType = value;
 				switch (sensorType)
@@ -5484,8 +5581,8 @@ namespace AOVGEN
 						PosName = "TE";
 						Blockname = "SENS-TE-2WIRE";
 						sortpriority = "24";
-						this.SetVendorInfo(null, null, null, "SensTE", null);
-						this.MainDBTable = "SensT";
+						SetVendorInfo(null, null, null, "SensTE", null);
+						MainDBTable = "SensT";
 						if (Cable1 == null)
 						{
 							Cable1 = new Cable
@@ -5495,7 +5592,7 @@ namespace AOVGEN
 								ToPosName = PosName,
 								ToBlockName = Blockname,
 								WriteBlock = true,
-								Description = this.Description,
+								Description = Description,
 								WireNumbers = 2
 							};
 						}
@@ -5514,8 +5611,8 @@ namespace AOVGEN
 						PosName = "TS";
 						Blockname = "SENS-TS-2WIRE";
 						sortpriority = "31";
-						this.SetVendorInfo(null, null, null, "SensTS", null);
-						this.MainDBTable = "SensT";
+						SetVendorInfo(null, null, null, "SensTS", null);
+						MainDBTable = "SensT";
 						if (Cable1 == null)
 						{
 							Cable1 = new Cable
@@ -5525,7 +5622,7 @@ namespace AOVGEN
 								ToPosName = PosName,
 								ToBlockName = Blockname,
 								WriteBlock = true,
-								Description = this.Description,
+								Description = Description,
 								WireNumbers = 2
 							};
 						}
@@ -5540,7 +5637,7 @@ namespace AOVGEN
 						ShemaASU.SetIO(ShemaASU.IOType.DI, 1);
 						break;
 					case SensorType.No:
-						this.SetVendorInfo(null, null, null, null, null);
+						SetVendorInfo(null, null, null, null, null);
 						PosName = string.Empty;
 						Blockname = string.Empty;
 						Cable1 = null;
@@ -5568,7 +5665,7 @@ namespace AOVGEN
 							ToPosName = PosName,
 							ToBlockName = Blockname,
 							WriteBlock = true,
-							Description = this.Description,
+							Description = Description,
 							WireNumbers = 2
 						};
 					}
@@ -5589,7 +5686,7 @@ namespace AOVGEN
 							ToPosName = PosName,
 							ToBlockName = Blockname,
 							WriteBlock = true,
-							Description = this.Description,
+							Description = Description,
 							WireNumbers = 2
 						};
 					}
@@ -5620,7 +5717,7 @@ namespace AOVGEN
 			_SensorType = SensorType.Analogue;
 			ShemaASU.ShemaUp = "Temp_Exihaust";
 			ShemaASU.ShemaPos = ShemaASUbase.DummyPos(ComponentVariable);
-            ShemaASU.Description1 = this.Description;
+            ShemaASU.Description1 = Description;
 
         }
 	} //в воздуховоде
@@ -5628,16 +5725,16 @@ namespace AOVGEN
 	{
 		private VentComponents ComponentVariable;
 		
-		internal new string SortPriority { get { return sortpriority; } }
-		[DisplayName("Тип элемента")]
-		public VentComponents comp { get { return ComponentVariable; } internal set { ComponentVariable = value; } }
+		internal new string SortPriority => sortpriority;
+
+        [DisplayName("Тип элемента")]
+		public VentComponents comp { get => ComponentVariable;
+            internal set => ComponentVariable = value;
+        }
 		public new SensorType _SensorType
 		{
-			get
-			{
-				return sensorType;
-			}
-			set
+			get => sensorType;
+            set
 			{
 				sensorType = value;
 				switch (sensorType)
@@ -5646,8 +5743,8 @@ namespace AOVGEN
 						PosName = "TE";
 						Blockname = "SENS-TE-2WIRE";
 						sortpriority = "25";
-						this.SetVendorInfo(null, null, null, "SensTE", null);
-						this.MainDBTable = "SensT";
+						SetVendorInfo(null, null, null, "SensTE", null);
+						MainDBTable = "SensT";
 						if (Cable1 == null)
 						{
 							Cable1 = new Cable
@@ -5657,7 +5754,7 @@ namespace AOVGEN
 								ToPosName = PosName,
 								ToBlockName = Blockname,
 								WriteBlock = true,
-								Description = this.Description,
+								Description = Description,
 								WireNumbers = 2
 							};
 						}
@@ -5686,8 +5783,8 @@ namespace AOVGEN
 						PosName = "TS";
 						Blockname = "SENS-TS-2WIRE";
 						sortpriority = "32";
-						this.SetVendorInfo(null, null, null, "SensTS", null);
-						this.MainDBTable = "SensT";
+						SetVendorInfo(null, null, null, "SensTS", null);
+						MainDBTable = "SensT";
 						if (Cable1 == null)
 						{
 							Cable1 = new Cable
@@ -5697,7 +5794,7 @@ namespace AOVGEN
 								ToPosName = PosName,
 								ToBlockName = Blockname,
 								WriteBlock = true,
-								Description = this.Description,
+								Description = Description,
 								WireNumbers = 2
 							};
 						}
@@ -5722,7 +5819,7 @@ namespace AOVGEN
 						}
 						break;
 					case SensorType.No:
-						this.SetVendorInfo(null, null, null, null, null);
+						SetVendorInfo(null, null, null, null, null);
 						PosName = string.Empty;
 						Blockname = string.Empty;
 						Cable1 = null;
@@ -5794,7 +5891,7 @@ namespace AOVGEN
 			ShemaASU.ShemaUp = "Temp_Indoor";
 			ShemaASU.ShemaPos = ShemaASUbase.DummyPos(ComponentVariable);
 			ShemaASU.ScheUpSize = ShemaASUbase.DummySize(ComponentVariable);
-            ShemaASU.Description1 = this.Description;
+            ShemaASU.Description1 = Description;
         }
 	} // в комнате
 	class PressureContol : Sensor
@@ -5802,7 +5899,7 @@ namespace AOVGEN
 		
 		internal new string SortPriority => MakeSortPriority(sensorType);
 
-        public new SensorType SensorType
+        public SensorType SensorType
 		{
 			get => sensorType;
             set
@@ -5811,10 +5908,10 @@ namespace AOVGEN
 				switch (sensorType)
 				{
 					case SensorType.Analogue:
-						this.SetVendorInfo(null, null, null, "SensPE", null);
-						this.MainDBTable = "SensPDS";
-						this.PosName = "PE";
-						this.Blockname = "SENS-PE-2WIRE";
+						SetVendorInfo(null, null, null, "SensPE", null);
+						MainDBTable = "SensPDS";
+						PosName = "PE";
+						Blockname = "SENS-PE-2WIRE";
 						if (Cable1 == null) 
 							Cable1 = new Cable
 							{
@@ -5826,10 +5923,10 @@ namespace AOVGEN
 							};
 						break;
 					case SensorType.Discrete:
-						this.SetVendorInfo(null, null, null, "SensPS", null);
-						this.MainDBTable = "SensPDS";
-						this.PosName = "PDS";
-						this.Blockname = "SENS-PDS-2WIRE";
+						SetVendorInfo(null, null, null, "SensPS", null);
+						MainDBTable = "SensPDS";
+						PosName = "PDS";
+						Blockname = "SENS-PDS-2WIRE";
 						if (Cable1 == null) Cable1 = new Cable
 						{
 							SortPriority = SortPriority,
@@ -5855,7 +5952,7 @@ namespace AOVGEN
 			switch (sensorType)
 			{
 				case SensorType.Analogue:
-					this.sortpriority = "27";
+					sortpriority = "27";
 					if (Cable1 == null)
 					{
 						Cable1 = new Cable
@@ -5878,7 +5975,7 @@ namespace AOVGEN
 					}
 					break;
 				case SensorType.Discrete:
-					this.sortpriority = "34";
+					sortpriority = "34";
 					if (Cable1 == null)
 					{
 						Cable1 = new Cable
@@ -5919,8 +6016,8 @@ namespace AOVGEN
 					PosName = "PE";
 					Blockname = "SENS-PE-2WIRE";
 					sortpriority = "27";
-					this.SetVendorInfo(null, null, null, "SensPE", null);
-					this.MainDBTable = "SensPDS";
+					SetVendorInfo(null, null, null, "SensPE", null);
+					MainDBTable = "SensPDS";
 					if (Cable1 != null) Cable1.Attrubute = Cable.CableAttribute.A;
 					else
 					{
@@ -5939,8 +6036,8 @@ namespace AOVGEN
 					PosName = "PDS";
 					Blockname = "SENS-PDS-2WIRE";
 					sortpriority = "34";
-					this.SetVendorInfo(null, null, null, "SensPS", null);
-					this.MainDBTable = "SensPDS";
+					SetVendorInfo(null, null, null, "SensPS", null);
+					MainDBTable = "SensPDS";
 					if (Cable1 != null) Cable1.Attrubute = Cable.CableAttribute.D;
 					else
 					{
@@ -5985,7 +6082,7 @@ namespace AOVGEN
 		public  PressureContol()
 		{
 			
-			this.ShemaASU = ShemaASU.CreateBaseShema();
+			ShemaASU = ShemaASU.CreateBaseShema();
 			
 			_SensorType = SensorType.Discrete;
 			
@@ -5995,7 +6092,7 @@ namespace AOVGEN
 	}
 	class ElectroDevice 
 	{
-		[System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+		[TypeConverter(typeof(EnumDescConverter))]
 		public enum _Voltage
 		{
 			[Description("~380")]
@@ -6008,10 +6105,14 @@ namespace AOVGEN
 			DC24
 		}
 		[DisplayName("Напряжение")]
-		public _Voltage Voltage { get { return VoltageVariable; } set { VoltageVariable = value; } }
+		public _Voltage Voltage { get => VoltageVariable;
+            set => VoltageVariable = value;
+        }
 
 		[DisplayName("Мощность")]
-		public  string Power { get { return GetPower(); } set { SetPower(value); } }
+		public  string Power { get => GetPower();
+            set => SetPower(value);
+        }
 		internal string Description { get; set; }
         protected _Voltage VoltageVariable;
 
@@ -6020,7 +6121,7 @@ namespace AOVGEN
 		private string _power;
 		internal string GetPower()
         {
-			return this._power;
+			return _power;
         }
 		internal void SetPower(object val)
         {
@@ -6442,7 +6543,7 @@ namespace AOVGEN
 					Description = "Датчик температуры в канале",
 					_SensorType = Sensor.SensorType.Analogue
 				};
-				this.sensorTType = _SensorT._SensorType;
+				sensorTType = _SensorT._SensorType;
 			}
 			if (sensH)
 			{
@@ -6451,7 +6552,7 @@ namespace AOVGEN
 					Description = "Датчик влажности в канале",
 					_SensorType = Sensor.SensorType.Analogue
 				};
-				this.sensorHType = _SensorH._SensorType;
+				sensorHType = _SensorH._SensorType;
 				_SensorH.SensorInsideCrossSection =true;
 
 			}
@@ -6467,7 +6568,7 @@ namespace AOVGEN
 					Description = "Датчик температуры в канале",
 					_SensorType = Sensor.SensorType.Analogue
 				};
-				this.sensorTType = _SensorT._SensorType;
+				sensorTType = _SensorT._SensorType;
 			}
 			if (sensH)
 			{
@@ -6476,7 +6577,7 @@ namespace AOVGEN
 					Description = "Датчик влажности в канале",
 					_SensorType = Sensor.SensorType.Analogue
 				};
-				this.sensorHType = _SensorH._SensorType;
+				sensorHType = _SensorH._SensorType;
 				_SensorH.SensorInsideCrossSection = true;
 
 			}
@@ -6636,7 +6737,7 @@ namespace AOVGEN
 			attributes.Add(new ReadOnlyAttribute(value));
 			typeof(MemberDescriptor).GetProperty("AttributeArray",
 				BindingFlags.Instance | BindingFlags.NonPublic)
-				.SetValue((MemberDescriptor)p, attributes.ToArray());
+				.SetValue(p, attributes.ToArray());
 		}
 	}
 	interface ISchemaASU

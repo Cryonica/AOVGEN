@@ -13,10 +13,7 @@ using AOVGEN.Properties;
 using Bunifu.UI.WinForms;
 using Telerik.WinControls.UI;
 using WinFormAnimation;
-using Path = WinFormAnimation.Path;
-using Point = System.Drawing.Point;
 using PositionChangedEventArgs = Telerik.WinControls.UI.Data.PositionChangedEventArgs;
-using Size = System.Drawing.Size;
 using Timer = System.Windows.Forms.Timer;
 
 namespace AOVGEN

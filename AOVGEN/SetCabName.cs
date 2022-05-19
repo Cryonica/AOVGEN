@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Windows.Forms;
-
+using Telerik.WinControls.UI;
 
 namespace AOVGEN
 {
-    public partial class SetCabName : Telerik.WinControls.UI.RadForm
+    public partial class SetCabName : RadForm
     {
         public string Cablename { get; set; }
         public int Cablestartnum { get; set; }
@@ -27,7 +27,7 @@ namespace AOVGEN
                     Cablestartnum = tempnum;
                     Cablename = radTextBox1.Text;
                     DialogResult = DialogResult.OK;
-                    this.Close();
+                    Close();
                 }
                 else
                 {

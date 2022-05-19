@@ -1,30 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Windows.Forms;
-using System.Xml;
-using Telerik.WinControls.UI;
-using WinFormAnimation;
 using System.Data.OleDb;
 using System.Data.SQLite;
-using System.Threading;
-using GKS_ASU_Loader;
-using System.Reflection;
-using System.IO;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Windows.Forms;
+using System.Xml;
+using AOVGEN.Properties;
+using GKS_ASU_Loader;
+using Telerik.WinControls.UI;
+using WinFormAnimation;
+using Path = System.IO.Path;
+using Timer = System.Timers.Timer;
 
 namespace AOVGEN
 {
     public partial class DataBaseForm : Form
     {
         public IRevitExternalService Service { get; set; }
-        bool mainformload = false;
-        bool connectOK = false;
+        bool mainformload;
+        bool connectOK;
         public DataBaseForm(IRevitExternalService externalService)
         {
             InitializeComponent();
-            this.Icon = Properties.Resources.DataBaseIcon;
+            Icon = Resources.DataBaseIcon;
             LoadXML();
             AnimationEmergence();
             Service = externalService;
@@ -41,8 +43,8 @@ namespace AOVGEN
             path = Environment.ExpandEnvironmentVariables(path);
             path += @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\";
             doc.Load(path + @"Config.xml");
-            this.Xmldoc = doc;
-            this.Configpath = path + "Config.xml";
+            Xmldoc = doc;
+            Configpath = path + "Config.xml";
 
             XmlElement documentElement = doc.DocumentElement;
             XmlNodeList aNodes = documentElement?.SelectNodes("/Config/DataBase");
@@ -114,7 +116,7 @@ namespace AOVGEN
                                           .ToList();
             radDropDownList1.Text = (radDropDownList1.DataSource as IEnumerable<RadListDataItem>)
                 .ToList()
-                .Where(e => (bool)e.Tag == true)
+                .Where(e => (bool)e.Tag)
                 .Select(e => e)
                 .FirstOrDefault()
                 ?.Text;
@@ -123,7 +125,7 @@ namespace AOVGEN
         {
             try
             {
-                XmlDocument doc = this.Xmldoc;
+                XmlDocument doc = Xmldoc;
                 XmlElement documentElement = doc.DocumentElement;
                 XmlNodeList aNodes = documentElement?.SelectNodes("/Config/DataBase");
                 XmlNodeList users = documentElement?.SelectNodes("/Config/Users");
@@ -163,7 +165,7 @@ namespace AOVGEN
 
                 if (first?.Attributes != null)
                     first.Attributes[0].Value = "true";
-                doc.Save(this.Configpath);
+                doc.Save(Configpath);
             }
             catch 
             {
@@ -183,7 +185,7 @@ namespace AOVGEN
         {
             //check selected item
             if (radListView1.SelectedItem == null) return;
-            string FileExtension= System.IO.Path.GetExtension(radListView1.SelectedItem.Tag.ToString());
+            string FileExtension= Path.GetExtension(radListView1.SelectedItem.Tag.ToString());
             string BDPath = radListView1.SelectedItem.Text;
             string DBFileName = radListView1.SelectedItem.Tag.ToString();
                 
@@ -258,7 +260,7 @@ namespace AOVGEN
             });
             _thread.SetApartmentState(ApartmentState.STA);
             _thread.Start();
-            System.Timers.Timer aTimer = new System.Timers.Timer();
+            Timer aTimer = new Timer();
             System.Windows.Forms.Timer t = new System.Windows.Forms.Timer
             {
                 Interval = 10 // specify interval time as you want
@@ -345,7 +347,7 @@ namespace AOVGEN
             {
                 if (provider.StartsWith("Microsoft.ACE.OLEDB"))
                 {
-                    prov = provider.ToString();
+                    prov = provider;
                     break;
                 }
             }
@@ -370,7 +372,7 @@ namespace AOVGEN
         public string Configpath { get; set; }
         private void CheckAndStartmainForm()
         {
-            if (this.Opacity ==0)
+            if (Opacity ==0)
            
             {
                 
@@ -425,7 +427,7 @@ namespace AOVGEN
             var processInfo = new ProcessStartInfo();
             stdOut = "";
             processInfo.FileName = fileName;
-            processInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+            processInfo.WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
             Debug.Print("Set working directory to: {0}", processInfo.WorkingDirectory);
 
             processInfo.WindowStyle = isVisible ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;

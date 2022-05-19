@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using Telerik.WinControls;
 using System.Data.SQLite;
-using Telerik.WinControls.UI;
+using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
+using Telerik.WinControls.Data;
+using Telerik.WinControls.UI;
 
 namespace AOVGEN
 {
-    public partial class AddSensorForm : Telerik.WinControls.UI.RadForm
+    public partial class AddSensorForm : RadForm
     {
         readonly SQLiteConnection connection;
-        bool isdeleted = false;
-        bool isupdated = false;
+        bool isdeleted;
+        bool isupdated;
        
         internal DataTable VendorsDataTable;
         
@@ -77,12 +75,12 @@ namespace AOVGEN
             radGridView1.Columns["Артикул"].TextAlignment = ContentAlignment.MiddleCenter;
             //radGridView1.Columns["Артикул"].ReadOnly = true;
                       
-            radGridView1.AutoSizeColumnsMode = Telerik.WinControls.UI.GridViewAutoSizeColumnsMode.Fill;
+            radGridView1.AutoSizeColumnsMode = GridViewAutoSizeColumnsMode.Fill;
             radGridView1.Columns["Имя вендора(*)"].Width = 15;
             radGridView1.Columns["Артикул"].Width = 15;
             radGridView1.Columns["Название блока"].Width = 15;
             radGridView1.Columns["Тип датчика(*)"].Width = 15;
-            this.radGridView1.RowsChanged += new GridViewCollectionChangedEventHandler(this.radGridView1_RowsChanged);
+            radGridView1.RowsChanged += radGridView1_RowsChanged;
         }
 
         private void radButton1_Click(object sender, EventArgs e)
@@ -155,9 +153,9 @@ namespace AOVGEN
 
         private void radButton2_Click(object sender, EventArgs e)
         {
-            this.radGridView1.RowsChanging -= new GridViewCollectionChangingEventHandler(this.radGridView1_RowsChanging);
-            this.radGridView1.RowsChanged -= new GridViewCollectionChangedEventHandler(this.radGridView1_RowsChanged);
-            this.radGridView1.Rows.Clear();
+            radGridView1.RowsChanging -= radGridView1_RowsChanging;
+            radGridView1.RowsChanged -= radGridView1_RowsChanged;
+            radGridView1.Rows.Clear();
 
             List<string> DBTable = new List<string>
             {
@@ -178,7 +176,7 @@ namespace AOVGEN
             {
                 Connection = connection
             };
-            int cnt = this.radGridView1.RowCount;
+            int cnt = radGridView1.RowCount;
             foreach ((string vendor, string dbtable) in Listforquery)
             {
                 cnt++;
@@ -191,7 +189,7 @@ namespace AOVGEN
                     
                     while (reader1.Read())
                     {
-                        GridViewDataRowInfo rowInfo = new GridViewDataRowInfo(this.radGridView1.MasterView);
+                        GridViewDataRowInfo rowInfo = new GridViewDataRowInfo(radGridView1.MasterView);
                         rowInfo.Cells[0].Value = cnt;
                         
                         rowInfo.Cells[1].Value = reader1[0].ToString();
@@ -208,13 +206,13 @@ namespace AOVGEN
                 }
 
             }
-            this.radGridView1.RowsChanging += new GridViewCollectionChangingEventHandler(this.radGridView1_RowsChanging);
-            this.radGridView1.RowsChanged += new GridViewCollectionChangedEventHandler(this.radGridView1_RowsChanged);
+            radGridView1.RowsChanging += radGridView1_RowsChanging;
+            radGridView1.RowsChanged += radGridView1_RowsChanged;
         }
 
         private void radGridView1_RowsChanging(object sender, GridViewCollectionChangingEventArgs e)
         {
-            if (e.Action == Telerik.WinControls.Data.NotifyCollectionChangedAction.Remove)
+            if (e.Action == NotifyCollectionChangedAction.Remove)
             {
                 GridViewDataRowInfo row = (GridViewDataRowInfo)e.OldItems[0] ;
                 if (row != null)
@@ -250,12 +248,12 @@ namespace AOVGEN
 
             }
             
-            if (e.Action == Telerik.WinControls.Data.NotifyCollectionChangedAction.ItemChanged)
+            if (e.Action == NotifyCollectionChangedAction.ItemChanged)
             {
                 _ = (GridViewDataRowInfo)e.OldItems[0];
                 isupdated = true;
             }
-            if (e.Action == Telerik.WinControls.Data.NotifyCollectionChangedAction.ItemChanging)
+            if (e.Action == NotifyCollectionChangedAction.ItemChanging)
             {
                 isupdated = true;
             }
@@ -266,7 +264,7 @@ namespace AOVGEN
         private void radGridView1_CellEndEdit(object sender, GridViewCellEventArgs e)
         {
 
-            if ( this.radGridView1.CurrentCell.RowIndex > 0) //not new row
+            if ( radGridView1.CurrentCell.RowIndex > 0) //not new row
             {
                 if (!string.IsNullOrEmpty(e.Row.Cells[6].Value.ToString())) //present datatable name
                 {

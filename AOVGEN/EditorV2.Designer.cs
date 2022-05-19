@@ -1,11 +1,18 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using Bunifu.UI.WinForms;
+using Telerik.WinControls;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class EditorV2
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -634,32 +641,32 @@
 
         #endregion
 #pragma warning restore
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton10;
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton9;
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton8;
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton7;
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton6;
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton5;
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton1;
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton2;
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton4;
-        private Telerik.WinControls.UI.RadPropertyGrid radPropertyGrid1;
-        private System.Windows.Forms.Panel panel1;
-        private Telerik.WinControls.UI.RadButton radButton12;
-        private Telerik.WinControls.UI.RadPanel radPanel1;
-        private Bunifu.UI.WinForms.BunifuImageButton bunifuImageButton3;
-        private System.Windows.Forms.Panel panel2;
-        private Telerik.WinControls.UI.RadAutoCompleteBox radAutoCompleteBox1;
-        private System.Windows.Forms.Label label1;
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.RootRadElement object_c7bff681_b919_44ed_b8a3_1b4580078ad5;
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Label label2;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList1;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList2;
-        private Telerik.WinControls.UI.RadButton radButton2;
-        private System.Windows.Forms.Panel panel4;
-        private System.Windows.Forms.Panel panel5;
+        private BunifuImageButton bunifuImageButton10;
+        private BunifuImageButton bunifuImageButton9;
+        private BunifuImageButton bunifuImageButton8;
+        private BunifuImageButton bunifuImageButton7;
+        private BunifuImageButton bunifuImageButton6;
+        private BunifuImageButton bunifuImageButton5;
+        private BunifuImageButton bunifuImageButton1;
+        private BunifuImageButton bunifuImageButton2;
+        private BunifuImageButton bunifuImageButton4;
+        private RadPropertyGrid radPropertyGrid1;
+        private Panel panel1;
+        private RadButton radButton12;
+        private RadPanel radPanel1;
+        private BunifuImageButton bunifuImageButton3;
+        private Panel panel2;
+        private RadAutoCompleteBox radAutoCompleteBox1;
+        private Label label1;
+        private RadButton radButton1;
+        private RootRadElement object_c7bff681_b919_44ed_b8a3_1b4580078ad5;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private Panel panel3;
+        private Label label2;
+        private RadDropDownList radDropDownList1;
+        private RadDropDownList radDropDownList2;
+        private RadButton radButton2;
+        private Panel panel4;
+        private Panel panel5;
     }
 }

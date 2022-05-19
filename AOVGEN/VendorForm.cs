@@ -2,23 +2,21 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using Telerik.WinControls.UI;
-using System.Reflection;
+using PositionChangedEventArgs = Telerik.WinControls.UI.Data.PositionChangedEventArgs;
 
 namespace AOVGEN
 {
-    public partial class VendorForm : Telerik.WinControls.UI.RadForm
+    public partial class VendorForm : RadForm
     {
         readonly string DBFilePath;
 		internal SQLiteConnection connection;
-		Dictionary<string, string> sensors;
-		internal string vendorname;
+        public Dictionary<string, string> Sensors { get; private set; }
+        internal string vendorname;
 		internal string vendorID;
-		internal Dictionary<string, string> GetSensors() { return sensors; }
-		internal (string VendorID, string VendorName) GetVendorInfo() { return (this.vendorID, this.vendorname); }
+        internal (string VendorID, string VendorName) GetVendorInfo() { return (vendorID, vendorname); }
 		public VendorForm(string dbpath, string vendor)
         {
             
@@ -30,7 +28,7 @@ namespace AOVGEN
         }
 		private SQLiteConnection OpenDB()
 		{
-			string BDPath = this.DBFilePath;
+			string BDPath = DBFilePath;
 			string connectionstr = "Data Source=" + BDPath;
 			return new SQLiteConnection(connectionstr);
 
@@ -65,7 +63,7 @@ namespace AOVGEN
 			}
 			else
             {
-				radDropDownList1.Text = "Выброр вендора";
+				radDropDownList1.Text = @"Выброр вендора";
 			}
 			
 		}
@@ -77,7 +75,7 @@ namespace AOVGEN
 			DialogResult = DialogResult.Cancel;
 		}
 
-        private void RadDropDownList1_SelectedIndexChanged(object sender, Telerik.WinControls.UI.Data.PositionChangedEventArgs e)
+        private void RadDropDownList1_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
         {
 			string selectedVendor = radDropDownList1.SelectedItem.Text;
 			List <RadListDataItemCollection> listclear = new List<RadListDataItemCollection>
@@ -190,7 +188,7 @@ namespace AOVGEN
 
         private void RadButton1_Click(object sender, EventArgs e)
         {
-			sensors = new Dictionary<string, string>
+			Sensors = new Dictionary<string, string>
             {
                 { "Sens1", radDropDownList2.Text},
                 { "Sens2", radDropDownList3.Text},
@@ -224,38 +222,34 @@ namespace AOVGEN
 		}
 		List<(string, string)> GetReaderColumnValues(SQLiteDataReader reader)
         {
-			if (reader.HasRows)
-            {
-				DataTable dataTable = new DataTable();
-				dataTable.Load(reader);
-				return dataTable.AsEnumerable()
-						.Select(x => 
-						{
-							(string item1, string item2) sens;
-							sens.item1 = x.ItemArray[0].ToString();
-							sens.item2 = x.ItemArray[1].ToString();
-							return sens;
-						})
-						.ToList();
+            if (!reader.HasRows) return null;
+            DataTable dataTable = new DataTable();
+            dataTable.Load(reader);
+            return dataTable.AsEnumerable()
+                .Select(x => 
+                {
+                    (string item1, string item2) sens;
+                    sens.item1 = x.ItemArray[0].ToString();
+                    sens.item2 = x.ItemArray[1].ToString();
+                    return sens;
+                })
+                .ToList();
 
-			}
-			return null;
-				
-		}
-		void AddItemsFromList(RadDropDownList radDropDownList, List<(string, string)> list)
+        }
+
+        private static void AddItemsFromList(RadDropDownList radDropDownList, List<(string, string)> list)
         {
 			if (list != null)
             {
-				foreach (var s in list)
-				{
-                    RadListDataItem dataItem = new RadListDataItem
-                    {
-                        Text = s.Item1,
-                        Tag = s.Item2
-                    };
+                foreach (var dataItem in list.Select(s => new RadListDataItem
+                {
+                    Text = s.Item1,
+                    Tag = s.Item2
+                }))
+                {
                     radDropDownList.Items.Add(dataItem);
-				}
-			}
+                }
+            }
 			else
             {
 				radDropDownList.Items.Clear();
@@ -274,7 +268,7 @@ namespace AOVGEN
 			if (radProgressBar1.Value2 == 100)
             {
 				radProgressBar1.Value1 = 0;
-				//radProgressBar1.Text = radProgressBar1.Value1.ToString() + "%";
+				
 				return;
 
 			}
@@ -283,63 +277,58 @@ namespace AOVGEN
 			{
 				
 				radProgressBar1.Value1++;
-				radProgressBar1.Text = radProgressBar1.Value1.ToString() + "%";
+				radProgressBar1.Text = radProgressBar1.Value1 + @"%";
 
 			}
 			else
 			{
 				radProgressBar1.Value1 = radProgressBar1.Minimum;
 			}
-			if (radProgressBar1.Value1 == radProgressBar1.Maximum)
+
+            if (radProgressBar1.Value1 != radProgressBar1.Maximum) return;
+            if (radDropDownList1.SelectedItem != null)
             {
-
-				if (radDropDownList1.SelectedItem != null)
-				{
-					bool result = SavePreset();
-					if (result)
-					{
-						radProgressBar1.Value2 = 100;
-					}
-					else
-					{
-						if (timer != null)
-						{
-							timer.Start();
-						}
-						else
-						{
-							timer = new Timer
-							{
-								Interval = 10
-							};
-							timer.Tick += new EventHandler(TimerProcessor);
-							timer.Start();
-						}
-					}
-				}
-				else
+                bool result = SavePreset();
+                if (result)
                 {
-					MessageBox.Show("Следует выбрать вендора");
-					if (timer != null)
-					{
-						timer.Start();
-					}
-					else
-					{
-						timer = new Timer
-						{
-							Interval = 10
-						};
-						timer.Tick += new EventHandler(TimerProcessor);
-						timer.Start();
-					}
-				}
+                    radProgressBar1.Value2 = 100;
+                }
+                else
+                {
+                    if (timer != null)
+                    {
+                        timer.Start();
+                    }
+                    else
+                    {
+                        timer = new Timer
+                        {
+                            Interval = 10
+                        };
+                        timer.Tick += TimerProcessor;
+                        timer.Start();
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show(@"Следует выбрать вендора");
+                if (timer != null)
+                {
+                    timer.Start();
+                }
+                else
+                {
+                    timer = new Timer
+                    {
+                        Interval = 10
+                    };
+                    timer.Tick += TimerProcessor;
+                    timer.Start();
+                }
+            }
 
-				
-
-			}
-
-		}
+        }
 		internal Timer timer;
 
 		private void RadRepeatButton1_MouseUp(object sender, MouseEventArgs e)
@@ -356,76 +345,51 @@ namespace AOVGEN
                 }
 
 				timer.Interval = 10;
-				timer.Tick += new EventHandler(TimerProcessor);
+				timer.Tick += TimerProcessor;
 				timer.Start();
             }
-			if (radProgressBar1.Value2 == 100)
-            {
-				radProgressBar1.Value2 = 0;
-				radProgressBar1.Value1 = 0;
-				radProgressBar1.Text = radProgressBar1.Value1.ToString() + "%";
 
-			}
+            if (radProgressBar1.Value2 != 100) return;
+            radProgressBar1.Value2 = 0;
+            radProgressBar1.Value1 = 0;
+            radProgressBar1.Text = radProgressBar1.Value1 + @"%";
         }
 		private void TimerProcessor(object obj, EventArgs args)
         {
 			if (radProgressBar1.Value1<=0)
             {
-				Timer timer = (Timer)obj;
-				timer.Stop();
+				Timer ProcessorTimer = (Timer)obj;
+				ProcessorTimer.Stop();
             }
-			if (radProgressBar1.Value1 > 0)
-			{
-				
-				if (radDropDownList1.SelectedItem == null)
+
+            if (radProgressBar1.Value1 <= 0) return;
+            if (radDropDownList1.SelectedItem == null)
+            {
+                if (radProgressBar1.Value1 >= 30)
                 {
-					if (radProgressBar1.Value1 >= 30)
-                    {
-						radProgressBar1.Value1 -= 5;
-					}
-					else
-                    {
-						radProgressBar1.Value1--;
-					}
+                    radProgressBar1.Value1 -= 5;
+                }
+                else
+                {
+                    radProgressBar1.Value1--;
+                }
 					
 
-				}
-				else
-                {
-					radProgressBar1.Value1--;
-				}
-				
-				//radProgressBar1.Value1--;
-				radProgressBar1.Text = radProgressBar1.Value1.ToString() + "%";
-			}
+            }
+            else
+            {
+                radProgressBar1.Value1--;
+            }
+            radProgressBar1.Text = radProgressBar1.Value1 + @"%";
 
-		}
-		bool SavePreset()
+        }
+
+        private bool SavePreset()
         {
 			bool result = false;
 			try
             {
-				//string[] sens = 
-				//{
-				//	radDropDownList2.Text,
-				//	radDropDownList3.Text,
-				//	radDropDownList4.Text,
-				//	radDropDownList5.Text,
-				//	radDropDownList6.Text,
-				//	radDropDownList7.Text,
-				//	radDropDownList8.Text,
-				//	radDropDownList9.Text,
-				//	radDropDownList10.Text,
-				//	radDropDownList11.Text,
-				//	radDropDownList12.Text,
-				//	radDropDownList1.SelectedItem.Text
-				//};
-
-				var t12 = (from RadListDataItem tr in radDropDownList2.Items
-						   where tr.Text == radDropDownList2.Text
-						   select tr)
-						  .FirstOrDefault()?
-						  .Tag;
+				
 				List<(RadListDataItemCollection, RadDropDownList)> rads = new List<(RadListDataItemCollection, RadDropDownList)>
 				{
 					(radDropDownList2.Items,radDropDownList2),
@@ -443,22 +407,15 @@ namespace AOVGEN
 					(radDropDownList14.Items,radDropDownList14),
 					(radDropDownList15.Items,radDropDownList15)
 				};
-				List<object> senstab = new List<object>();
-				foreach (var t in rads)
-                {
-					senstab.Add((from RadListDataItem tr in t.Item1
-								 where tr.Text == t.Item2.Text
-								 select tr)
-						  .FirstOrDefault()?
-						  .Tag);
-                };
-				var newsens= senstab
-						.Select(e =>
-						{
-							return e != null ? (string)e : string.Empty;
-						})
+				List<object> senstab = rads.Select(t => 
+                    (from RadListDataItem tr in t.Item1 
+                        where tr.Text == t.Item2.Text 
+                        select tr)
+                    .FirstOrDefault()?.Tag)
+                    .ToList();
+                var newsens= senstab
+						.Select(e => e != null ? (string)e : string.Empty)
 						.ToArray();
-
 
 				string updatepresetquery = $"UPDATE VendorPresets SET Sens1 = '{newsens[0]}', Sens2 = '{newsens[1]}', Sens3 = '{newsens[2]}', " +
 					$"Sens4 = '{newsens[3]}', Sens5 = '{newsens[4]}', Sens6 = '{newsens[5]}', Sens7 = '{newsens[6]}', Sens8 = '{newsens[7]}', " +
@@ -481,15 +438,10 @@ namespace AOVGEN
 
         private void RadButton3_Click(object sender, EventArgs e)
         {
-			if (radDropDownList1.SelectedItem != null)
-            {
-				AddSensorForm addSensorForm = new AddSensorForm(connection);
-				DialogResult dialogResult =  addSensorForm.ShowDialog();
-				if (dialogResult == DialogResult.OK) addSensorForm.Close();
-				if (dialogResult == DialogResult.Cancel) addSensorForm.Close();
-				
-			}
-			
+            if (radDropDownList1.SelectedItem == null) return;
+            AddSensorForm addSensorForm = new AddSensorForm(connection);
+            DialogResult dialogResult =  addSensorForm.ShowDialog();
+            if (dialogResult == DialogResult.OK || dialogResult == DialogResult.Cancel) addSensorForm.Close();
         }
 
         private void RadDropDownList6_MouseClick(object sender, MouseEventArgs e)

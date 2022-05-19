@@ -1,4 +1,10 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using Bunifu.Framework.UI;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
 namespace AOVGEN
 {
     partial class Editor
@@ -6,7 +12,7 @@ namespace AOVGEN
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -776,51 +782,51 @@ namespace AOVGEN
 
         #endregion
 
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Panel panel4;
-        private System.Windows.Forms.PictureBox pictureBox5;
-        private System.Windows.Forms.PictureBox pictureBox4;
-        private System.Windows.Forms.PictureBox pictureBox2;
-        private System.Windows.Forms.Panel panel1;
-        private Telerik.WinControls.UI.RadPropertyGrid radPropertyGrid1;
-        private System.Windows.Forms.Panel panel3;
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private Telerik.WinControls.UI.RadButton radButton2;
-        private Telerik.WinControls.UI.RadButton radButton11;
-        private Telerik.WinControls.UI.RadButton radButton10;
-        private Telerik.WinControls.UI.RadButton radButton9;
-        private Telerik.WinControls.UI.RadButton radButton8;
-        private Telerik.WinControls.UI.RadButton radButton7;
-        private Telerik.WinControls.UI.RadButton radButton6;
-        private Telerik.WinControls.UI.RadButton radButton5;
-        private Telerik.WinControls.UI.RadButton radButton4;
-        private Telerik.WinControls.UI.RadButton radButton3;
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.UI.RadButton radButton12;
-        private System.Windows.Forms.PictureBox pictureBox9;
-        private System.Windows.Forms.PictureBox pictureBox8;
-        private System.Windows.Forms.PictureBox pictureBox6;
-        private System.Windows.Forms.PictureBox pictureBox3;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.PictureBox pictureBox12;
-        private System.Windows.Forms.PictureBox pictureBox11;
-        private System.Windows.Forms.PictureBox pictureBox10;
-        private Telerik.WinControls.UI.RadAutoCompleteBox radAutoCompleteBox1;
-        private Bunifu.Framework.UI.BunifuImageButton bunifuImageButton1;
-        private System.Windows.Forms.Timer timer1;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox2;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.PictureBox pictureBox14;
-        private System.Windows.Forms.PictureBox pictureBox13;
-        private Telerik.WinControls.UI.RadButton radButton14;
-        private Telerik.WinControls.UI.RadButton radButton13;
-        private System.Windows.Forms.PictureBox pictureBox16;
-        private System.Windows.Forms.PictureBox pictureBox15;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox4;
-        private Telerik.WinControls.UI.RadButton radButton16;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox3;
-        private Telerik.WinControls.UI.RadButton radButton15;
-        private System.Windows.Forms.PictureBox pictureBox7;
+        private Panel panel2;
+        private Panel panel4;
+        private PictureBox pictureBox5;
+        private PictureBox pictureBox4;
+        private PictureBox pictureBox2;
+        private Panel panel1;
+        private RadPropertyGrid radPropertyGrid1;
+        private Panel panel3;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private RadButton radButton2;
+        private RadButton radButton11;
+        private RadButton radButton10;
+        private RadButton radButton9;
+        private RadButton radButton8;
+        private RadButton radButton7;
+        private RadButton radButton6;
+        private RadButton radButton5;
+        private RadButton radButton4;
+        private RadButton radButton3;
+        private RadButton radButton1;
+        private RadButton radButton12;
+        private PictureBox pictureBox9;
+        private PictureBox pictureBox8;
+        private PictureBox pictureBox6;
+        private PictureBox pictureBox3;
+        private PictureBox pictureBox1;
+        private PictureBox pictureBox12;
+        private PictureBox pictureBox11;
+        private PictureBox pictureBox10;
+        private RadAutoCompleteBox radAutoCompleteBox1;
+        private BunifuImageButton bunifuImageButton1;
+        private Timer timer1;
+        private RadGroupBox radGroupBox2;
+        private RadGroupBox radGroupBox1;
+        private Label label1;
+        private PictureBox pictureBox14;
+        private PictureBox pictureBox13;
+        private RadButton radButton14;
+        private RadButton radButton13;
+        private PictureBox pictureBox16;
+        private PictureBox pictureBox15;
+        private RadGroupBox radGroupBox4;
+        private RadButton radButton16;
+        private RadGroupBox radGroupBox3;
+        private RadButton radButton15;
+        private PictureBox pictureBox7;
     }
 }

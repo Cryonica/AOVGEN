@@ -1,11 +1,16 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class PlacePannelsForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -502,33 +507,33 @@
 
         #endregion
 
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.UI.RadButton radButton2;
-        private Telerik.WinControls.UI.RadGridView radGridView1;
-        private Telerik.WinControls.UI.RadButton radButton3;
-        private Telerik.WinControls.UI.RadTextBox radTextBox1;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList2;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList1;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private Telerik.WinControls.UI.RadToggleSwitch radToggleSwitch1;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox1;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox2;
-        private Telerik.WinControls.UI.RadTextBox radTextBox2;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox3;
-        private System.Windows.Forms.Label label6;
-        private Telerik.WinControls.UI.RadTextBox radTextBox3;
-        private Telerik.WinControls.UI.RadSplitContainer radSplitContainer1;
-        private Telerik.WinControls.UI.SplitPanel splitPanel1;
-        private Telerik.WinControls.UI.SplitPanel splitPanel2;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Label label5;
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private Telerik.WinControls.Themes.HighContrastBlackTheme highContrastBlackTheme1;
+        private RadButton radButton1;
+        private RadButton radButton2;
+        private RadGridView radGridView1;
+        private RadButton radButton3;
+        private RadTextBox radTextBox1;
+        private Label label4;
+        private Label label3;
+        private Label label2;
+        private Label label1;
+        private RadDropDownList radDropDownList2;
+        private RadDropDownList radDropDownList1;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private RadToggleSwitch radToggleSwitch1;
+        private RadGroupBox radGroupBox1;
+        private RadGroupBox radGroupBox2;
+        private RadTextBox radTextBox2;
+        private RadGroupBox radGroupBox3;
+        private Label label6;
+        private RadTextBox radTextBox3;
+        private RadSplitContainer radSplitContainer1;
+        private SplitPanel splitPanel1;
+        private SplitPanel splitPanel2;
+        private Panel panel3;
+        private Label label7;
+        private Panel panel2;
+        private Label label5;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private HighContrastBlackTheme highContrastBlackTheme1;
     }
 }

@@ -1,11 +1,17 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using Bunifu.Framework.UI;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class CreatePannel
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -309,22 +315,22 @@
 
         #endregion
 
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private System.Windows.Forms.Panel panel1;
-        private Bunifu.Framework.UI.BunifuImageButton bunifuImageButton1;
-        private System.Windows.Forms.Timer timer1;
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.UI.RadTextBox radTextBox1;
-        private Telerik.WinControls.UI.RadLabel radLabel1;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList3;
-        private Telerik.WinControls.UI.RadLabel radLabel4;
-        private Telerik.WinControls.UI.RadLabel radLabel5;
-        private Telerik.WinControls.UI.RadToggleSwitch radToggleSwitch1;
-        private Telerik.WinControls.UI.RadToggleSwitch radToggleSwitch2;
-        private Telerik.WinControls.UI.RadLabel radLabel6;
-        private System.Windows.Forms.Panel panel2;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList2;
-        private Telerik.WinControls.UI.RadLabel radLabel7;
-        private System.Windows.Forms.Panel panel3;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private Panel panel1;
+        private BunifuImageButton bunifuImageButton1;
+        private Timer timer1;
+        private RadButton radButton1;
+        private RadTextBox radTextBox1;
+        private RadLabel radLabel1;
+        private RadDropDownList radDropDownList3;
+        private RadLabel radLabel4;
+        private RadLabel radLabel5;
+        private RadToggleSwitch radToggleSwitch1;
+        private RadToggleSwitch radToggleSwitch2;
+        private RadLabel radLabel6;
+        private Panel panel2;
+        private RadDropDownList radDropDownList2;
+        private RadLabel radLabel7;
+        private Panel panel3;
     }
 }

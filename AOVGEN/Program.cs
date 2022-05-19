@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Windows.Forms;
-using GKS_ASU_Loader;
-using System.ServiceModel;
 using System.Diagnostics;
 using System.IO;
-using  System.Linq;
-
+using System.Linq;
+using System.ServiceModel;
+using System.Windows.Forms;
+using GKS_ASU_Loader;
 
 namespace AOVGEN
 {
@@ -16,7 +15,7 @@ namespace AOVGEN
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
 
 
@@ -60,7 +59,7 @@ namespace AOVGEN
 
             try
             {
-                System.ServiceModel.ChannelFactory<IRevitExternalService> channelFactory =
+                ChannelFactory<IRevitExternalService> channelFactory =
                 new ChannelFactory<IRevitExternalService>("IRevitExternalService");
                 service = channelFactory.CreateChannel();
 

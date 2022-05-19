@@ -1,11 +1,16 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class CableLenghtForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -322,27 +327,27 @@
 
         #endregion
 
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.UI.RadCheckBox radCheckBox2;
-        private Telerik.WinControls.UI.RadCheckBox radCheckBox3;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private Telerik.WinControls.UI.RadTextBox radTextBox1;
-        private System.Windows.Forms.Panel panel1;
-        private Telerik.WinControls.UI.RadTextBox radTextBox2;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private Telerik.WinControls.UI.RadCheckBox radCheckBox1;
-        private System.Windows.Forms.Label label5;
-        private Telerik.WinControls.UI.RadCheckBox radCheckBox4;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Label label6;
-        private Telerik.WinControls.UI.RadTextBox radTextBox3;
-        private System.Windows.Forms.Panel panel4;
-        private Telerik.WinControls.UI.RadCheckBox radCheckBox5;
-        private System.Windows.Forms.Label label7;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private RadButton radButton1;
+        private RadCheckBox radCheckBox2;
+        private RadCheckBox radCheckBox3;
+        private Label label1;
+        private Label label2;
+        private Label label3;
+        private RadTextBox radTextBox1;
+        private Panel panel1;
+        private RadTextBox radTextBox2;
+        private Label label4;
+        private OpenFileDialog openFileDialog1;
+        private RadCheckBox radCheckBox1;
+        private Label label5;
+        private RadCheckBox radCheckBox4;
+        private Panel panel2;
+        private Panel panel3;
+        private Label label6;
+        private RadTextBox radTextBox3;
+        private Panel panel4;
+        private RadCheckBox radCheckBox5;
+        private Label label7;
     }
 }

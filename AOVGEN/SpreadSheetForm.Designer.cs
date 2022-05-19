@@ -1,11 +1,14 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class SpreadSheetForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -101,8 +104,8 @@
         }
 
         #endregion
-        private Telerik.WinControls.UI.RadSpreadsheetRibbonBar radSpreadsheetRibbonBar1;
-        private Telerik.WinControls.UI.RadRibbonFormBehavior radRibbonFormBehavior1;
-        private Telerik.WinControls.UI.RadSpreadsheet radSpreadsheet1;
+        private RadSpreadsheetRibbonBar radSpreadsheetRibbonBar1;
+        private RadRibbonFormBehavior radRibbonFormBehavior1;
+        private RadSpreadsheet radSpreadsheet1;
     }
 }

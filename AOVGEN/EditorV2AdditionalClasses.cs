@@ -1,8 +1,6 @@
 ﻿
-using Bunifu.UI.WinForms;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
 using System.Drawing;
@@ -15,11 +13,13 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AOVGEN.Properties;
+using Bunifu.UI.WinForms;
 using Telerik.WinControls.UI;
 
 namespace AOVGEN
 {
-    public partial class EditorV2 : Telerik.WinControls.UI.RadForm
+    public partial class EditorV2 : RadForm
     {
         #region Global variables
 
@@ -40,12 +40,12 @@ namespace AOVGEN
         private Point startPoint;
         private static readonly Dictionary<string, string> imageDictionary = new Dictionary<string, string>
         {
-            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supp_exh_T), "room__arrow_supp_exh_T"},
-            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supp_exh_T_big), "room__arrow_supp_exh_T_big"},
-            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supply_T), "room__arrow_supply_T"},
-            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supp_exh_TH), "room__arrow_supp_exh_TH"},
-            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supp_exh_TH_big), "room__arrow_supp_exh_TH_big"},
-            {MD5HashGenerator.GenerateKey(Properties.Resources.room__arrow_supply_TH), "room__arrow_supply_TH"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_T), "room__arrow_supp_exh_T"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_T_big), "room__arrow_supp_exh_T_big"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_supply_T), "room__arrow_supply_T"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_TH), "room__arrow_supp_exh_TH"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_TH_big), "room__arrow_supp_exh_TH_big"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_supply_TH), "room__arrow_supply_TH"},
 
 
         };
@@ -67,7 +67,7 @@ namespace AOVGEN
                     Size = new Size(1, 300),
                     BackColor = Color.Black
                 };
-                this.Controls.Add(pictureBox);
+                Controls.Add(pictureBox);
                 switch (t)
                 {
                     case 9:
@@ -79,7 +79,7 @@ namespace AOVGEN
                             Text = "A4x3"
                         };
                         A4x3.SendToBack();
-                        this.Controls.Add(A4x3);
+                        Controls.Add(A4x3);
                         break;
                     }
                     case 13:
@@ -90,7 +90,7 @@ namespace AOVGEN
                             AutoSize = true,
                             Text = "A4x4"
                         };
-                        this.Controls.Add(A4x4);
+                        Controls.Add(A4x4);
                         break;
                     }
                     case 15:
@@ -101,7 +101,7 @@ namespace AOVGEN
                             AutoSize = true,
                             Text = "A3x3"
                         };
-                        this.Controls.Add(A3x3);
+                        Controls.Add(A3x3);
                         break;
                     }
                 }
@@ -114,7 +114,7 @@ namespace AOVGEN
                     Size = new Size(900, 1),
                     BackColor = Color.Red
                 };
-                this.Controls.Add(pictureBox);
+                Controls.Add(pictureBox);
                 if (t == 1)
                 {
                     var A4 = new Label
@@ -123,7 +123,7 @@ namespace AOVGEN
                         AutoSize = true,
                         Text = "A4"
                     };
-                    this.Controls.Add(A4);
+                    Controls.Add(A4);
                 }
                 if (t == 5)
                 {
@@ -133,14 +133,14 @@ namespace AOVGEN
                         AutoSize = true,
                         Text = "A3"
                     };
-                    this.Controls.Add(A3);
+                    Controls.Add(A3);
                 }
             }
         }
         private int[] GetCellPos(object s)
         {
             //correct position in mattrix
-            Point pursor = this.PointToClient(Cursor.Position);
+            Point pursor = PointToClient(Cursor.Position);
             if (s is Bunifu.Framework.UI.BunifuImageButton button)
             {
                 PosInfo posInfo = (PosInfo)button.Tag;
@@ -212,7 +212,7 @@ namespace AOVGEN
                         }
                         present = false;
                         GlobalPosInfo.Pos = mymas;
-                        posInfo.Pos = new int[] { CellX, CellY };
+                        posInfo.Pos = new[] { CellX, CellY };
                         posInfo.Pos[0] = CellX;
                         posInfo.Pos[1] = CellY;
                         button.BackColor = Color.FromArgb(250, 4, 243, 100);
@@ -300,7 +300,7 @@ namespace AOVGEN
             button.Tag = posInfo;
             button.Click += button_Click;
             Controls.Add(button);
-            this.Controls.SetChildIndex(button, 0);
+            Controls.SetChildIndex(button, 0);
             currObject = button;
            
         }
@@ -334,7 +334,7 @@ namespace AOVGEN
             button.Tag = posInfo;
             button.Click += button_Click;
             Controls.Add(button);
-            this.Controls.SetChildIndex(button, 0);
+            Controls.SetChildIndex(button, 0);
             currObject = button;
             //return button;
 
@@ -375,7 +375,7 @@ namespace AOVGEN
             button.Tag = posInfo;
             button.Click += button_Click;
             Controls.Add(button);
-            this.Controls.SetChildIndex(button, 0);
+            Controls.SetChildIndex(button, 0);
             currObject = button;
             lastComponent = comp;
 
@@ -412,7 +412,7 @@ namespace AOVGEN
             button.Tag = posInfo;
             button.Click += button_Click;
             Controls.Add(button);
-            this.Controls.SetChildIndex(button, 0);
+            Controls.SetChildIndex(button, 0);
             currObject = button;
             lastComponent = comp;
 
@@ -456,7 +456,7 @@ namespace AOVGEN
                     comp = new ExtFiltr();
                     break;
                 case nameof(Filtr):
-                    comp = new Filtr()
+                    comp = new Filtr
                     {
                         PressureProtect = Sensor.SensorType.Discrete
                     };
@@ -483,8 +483,8 @@ namespace AOVGEN
                     break;
                 case nameof(CrossSection):
                     {
-                        bool isT = equalObjects(AOVGEN.Properties.Resources.cross1T, image);
-                        bool isTH = equalObjects(AOVGEN.Properties.Resources.cross1TH, image);
+                        bool isT = equalObjects(Resources.cross1T, image);
+                        bool isTH = equalObjects(Resources.cross1TH, image);
                         if (isTH) comp = new CrossSection(true, true);
                         if (isT) comp = new CrossSection(true, false);
                         comp = comp ?? new CrossSection(false, false);
@@ -493,13 +493,13 @@ namespace AOVGEN
                 case nameof(Room):
                     {
                         bool isT = 
-                            equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_T, image)||
-                            equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_T_big, image)||
-                            equalObjects(AOVGEN.Properties.Resources.room__arrow_supply_T, image);
+                            equalObjects(Resources.room__arrow_supp_exh_T, image)||
+                            equalObjects(Resources.room__arrow_supp_exh_T_big, image)||
+                            equalObjects(Resources.room__arrow_supply_T, image);
                         bool isTH =
-                            equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_TH, image) ||
-                            equalObjects(AOVGEN.Properties.Resources.room__arrow_supp_exh_TH_big, image) ||
-                            equalObjects(AOVGEN.Properties.Resources.room__arrow_supply_TH, image);
+                            equalObjects(Resources.room__arrow_supp_exh_TH, image) ||
+                            equalObjects(Resources.room__arrow_supp_exh_TH_big, image) ||
+                            equalObjects(Resources.room__arrow_supply_TH, image);
                         string RoomImageName = GetRoomImageName();
                         if (isT) comp = new Room(true, false, RoomImageName);
                         if (isTH) comp = new Room(true, true, RoomImageName);
@@ -510,9 +510,9 @@ namespace AOVGEN
 
                 case nameof(SupplyDamper):
 
-                    if (MD5HashGenerator.GenerateKey(image) == MD5HashGenerator.GenerateKey(AOVGEN.Properties.Resources.shutter_right_T))
+                    if (MD5HashGenerator.GenerateKey(image) == MD5HashGenerator.GenerateKey(Resources.shutter_right_T))
                     {
-                        SupplyDamper supplyDamper = new SupplyDamper()
+                        SupplyDamper supplyDamper = new SupplyDamper
                         {
                             SetSensor = true
                         };
@@ -534,7 +534,7 @@ namespace AOVGEN
         
         private SQLiteConnection OpenDB()
         {
-            string BDPath = this.DBFilePath;
+            string BDPath = DBFilePath;
             string connectionstr = @"Data Source=" + BDPath + ";";
             try
             {
@@ -553,7 +553,7 @@ namespace AOVGEN
             connection.Open();
             if (connection.State == ConnectionState.Open)
             {
-                SQLiteCommand command = new SQLiteCommand()
+                SQLiteCommand command = new SQLiteCommand
                 {
                     Connection = connection
                 };
@@ -605,7 +605,7 @@ namespace AOVGEN
                     connection.Open();
                     if (connection.State == ConnectionState.Open)
                     {
-                        SQLiteCommand command = new SQLiteCommand()
+                        SQLiteCommand command = new SQLiteCommand
                         {
                             Connection = connection
                         };
@@ -630,7 +630,7 @@ namespace AOVGEN
                     connection.Open();
                     if (connection.State == ConnectionState.Open)
                     {
-                        SQLiteCommand command = new SQLiteCommand()
+                        SQLiteCommand command = new SQLiteCommand
                         {
                             Connection = connection
                         };
@@ -795,7 +795,7 @@ namespace AOVGEN
 
         }
         
-        private RadTreeNode FindNodeByName(object text, Telerik.WinControls.UI.RadTreeNodeCollection nodes)
+        private RadTreeNode FindNodeByName(object text, RadTreeNodeCollection nodes)
         {
 
             foreach (RadTreeNode node in nodes)
@@ -805,13 +805,11 @@ namespace AOVGEN
                 {
                     return node;
                 }
-                else
+
+                RadTreeNode n = FindNodeByName(text, node.Nodes);
+                if (n != null)
                 {
-                    RadTreeNode n = FindNodeByName(text, node.Nodes);
-                    if (n != null)
-                    {
-                        return n;
-                    }
+                    return n;
                 }
 
 
@@ -973,19 +971,17 @@ namespace AOVGEN
                 {
                     throw new ArgumentNullException("Null as parameter is not allowed");
                 }
-                else
+
+                //We determine if the passed object is really serializable.
+                try
                 {
-                    //We determine if the passed object is really serializable.
-                    try
-                    {
-                        //Now we begin to do the real work.
-                        string hashString = ComputeHash(ObjectToByteArray(sourceObject));
-                        return hashString;
-                    }
-                    catch (AmbiguousMatchException ame)
-                    {
-                        throw new ApplicationException("Could not definitly decide if object is serializable. Message:" + ame.Message);
-                    }
+                    //Now we begin to do the real work.
+                    string hashString = ComputeHash(ObjectToByteArray(sourceObject));
+                    return hashString;
+                }
+                catch (AmbiguousMatchException ame)
+                {
+                    throw new ApplicationException("Could not definitly decide if object is serializable. Message:" + ame.Message);
                 }
             }
 
@@ -1055,7 +1051,7 @@ namespace AOVGEN
         
         class DoubleBufferedBunifuImageButton : Bunifu.Framework.UI.BunifuImageButton
         {
-            public DoubleBufferedBunifuImageButton() : base()
+            public DoubleBufferedBunifuImageButton()
             {
                 DoubleBuffered = true;
                 
@@ -1081,8 +1077,8 @@ namespace AOVGEN
 
             internal PosInfo()
             {
-                _Pos = new int[] { 50, 50 };
-                Size = new int[] { 0, 0 };
+                _Pos = new[] { 50, 50 };
+                Size = new[] { 0, 0 };
             }
             public int PozX => _Pos[0];
             public int PozY => _Pos[1];

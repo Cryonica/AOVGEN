@@ -2,16 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
-using System.Windows.Forms;
-using Telerik.WinControls.UI;
 using System.Data.SQLite;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
+using AOVGEN.Properties;
+using Telerik.WinControls;
+using Telerik.WinControls.Enumerations;
+using Telerik.WinControls.UI;
 
 namespace AOVGEN
 {
-    public partial class SelectPannelForm : Telerik.WinControls.UI.RadForm
+    public partial class SelectPannelForm : RadForm
     {
         private readonly List<RadTreeNode> radTreeNodes = new List<RadTreeNode>();
         internal Dictionary<string, Pannel> CheckedItems;
@@ -25,9 +27,9 @@ namespace AOVGEN
             connection = inputconnection;
             radTreeNodes = inputnodes;
             InitializeComponent();
-            this.InitializeData();
+            InitializeData();
             
-            this.radCheckedListBox1.VisualItemFormatting += radCheckedListBox1_VisualItemFormatting;
+            radCheckedListBox1.VisualItemFormatting += radCheckedListBox1_VisualItemFormatting;
             
             
 
@@ -35,8 +37,8 @@ namespace AOVGEN
 
         private void radButton3_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
             
         }
 
@@ -46,7 +48,7 @@ namespace AOVGEN
         }
         private void InitializeData()
         {
-            List<Pannel> Pannels = this.CreatePannels();
+            List<Pannel> Pannels = CreatePannels();
             if (connection.State == ConnectionState.Closed)
             {
                 connection = OpenDB();
@@ -55,7 +57,7 @@ namespace AOVGEN
             SQLiteCommand command = new SQLiteCommand { Connection = connection };
             foreach (Pannel pannel in Pannels)
             {
-                this.radCheckedListBox1.Items.Add(this.CreateItem(pannel, command));
+                radCheckedListBox1.Items.Add(CreateItem(pannel, command));
             }
             command.Dispose();
             
@@ -98,7 +100,7 @@ namespace AOVGEN
             ArrayList arrayList = new ArrayList();
             ListViewDataItem item = new ListViewDataItem
             {
-                Image = new Bitmap(AOVGEN.Properties.Resources.documents_32__1_),
+                Image = new Bitmap(Resources.documents_32__1_),
                 Text = pannel.PannelName
             };
             arrayList.Add(numRows);
@@ -124,7 +126,7 @@ namespace AOVGEN
 
             item.Data.Text = "<html>" +
                    "<span style=\"font-size:10.5pt;font-family:Segoe UI Semibold;\">  " + pannel.PannelName + "</span>" +
-                   "<br><span style=\"font-size:8pt;\"><i>   " + cablecount.ToString() +   " кабелей </i></span>";
+                   "<br><span style=\"font-size:8pt;\"><i>   " + cablecount +   " кабелей </i></span>";
                    //"<br><span style=\"font-size:14pt;\"> </span>";
 
             item.ImageLayout = ImageLayout.Center;
@@ -137,17 +139,17 @@ namespace AOVGEN
                 if (cell.Text != string.Empty)
                 {
                     cell.Text = new string(' ', 5) + string.Format("{0}", cell.Text);
-                    e.CellElement.BorderGradientStyle = Telerik.WinControls.GradientStyles.Solid;
+                    e.CellElement.BorderGradientStyle = GradientStyles.Solid;
                 }
                 else
                 {
-                    e.CellElement.ResetValue(LightVisualElement.BorderGradientStyleProperty, Telerik.WinControls.ValueResetFlags.Local);
+                    e.CellElement.ResetValue(LightVisualElement.BorderGradientStyleProperty, ValueResetFlags.Local);
                 }
             }
         }
         private SQLiteConnection OpenDB()
         {
-            string BDPath = this.DBFilePath;
+            string BDPath = DBFilePath;
             string connectionstr = @"Data Source=" + BDPath + ";";
             try
             {
@@ -163,7 +165,7 @@ namespace AOVGEN
         {
             ArrayList array = e.Item.Tag as ArrayList;
             Pannel pannel = (Pannel)array[1];
-            if (e.Item.CheckState == Telerik.WinControls.Enumerations.ToggleState.On)
+            if (e.Item.CheckState == ToggleState.On)
             {
                 
                 if(!CheckedItems.ContainsKey(pannel.PannelName))
@@ -172,7 +174,7 @@ namespace AOVGEN
                 }
                 
             }
-            if (e.Item.CheckState == Telerik.WinControls.Enumerations.ToggleState.Off)
+            if (e.Item.CheckState == ToggleState.Off)
             {
                 if (CheckedItems.ContainsKey(pannel.PannelName))
                 {
@@ -187,7 +189,7 @@ namespace AOVGEN
         {
             foreach (var item in radCheckedListBox1.Items)
             {
-                item.CheckState = Telerik.WinControls.Enumerations.ToggleState.On;
+                item.CheckState = ToggleState.On;
                 
             }
         }
@@ -196,7 +198,7 @@ namespace AOVGEN
         {
             foreach (var item in radCheckedListBox1.Items)
             {
-                item.CheckState = Telerik.WinControls.Enumerations.ToggleState.Off;
+                item.CheckState = ToggleState.Off;
 
             }
         }

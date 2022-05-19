@@ -1,11 +1,16 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using Telerik.WinControls;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class VendorForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -712,47 +717,47 @@
         }
 
         #endregion
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.UI.RadPanel radPanel1;
-        private Telerik.WinControls.RootRadElement object_b0ef2846_5821_420a_b725_690670fed277;
-        private Telerik.WinControls.RootRadElement object_8556f384_495a_4a94_92b4_da99c39262bf;
-        private Telerik.WinControls.UI.RadButton radButton2;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList1;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox3;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList12;
-        private Telerik.WinControls.UI.RadLabel radLabel14;
-        private System.Windows.Forms.Panel panel2;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox2;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList11;
-        private Telerik.WinControls.UI.RadLabel radLabel10;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList10;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList9;
-        private Telerik.WinControls.UI.RadLabel radLabel8;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList8;
-        private Telerik.WinControls.UI.RadLabel radLabel7;
-        private Telerik.WinControls.UI.RadLabel radLabel6;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox1;
-        private Telerik.WinControls.UI.RadLabel radLabel9;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList6;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList5;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList4;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList3;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList7;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList2;
-        private Telerik.WinControls.UI.RadLabel radLabel4;
-        private Telerik.WinControls.UI.RadLabel radLabel5;
-        private Telerik.WinControls.UI.RadLabel radLabel3;
-        private Telerik.WinControls.UI.RadLabel radLabel2;
-        private Telerik.WinControls.UI.RadLabel radLabel1;
-        private Telerik.WinControls.UI.RadRepeatButton radRepeatButton1;
-        private Telerik.WinControls.UI.RadProgressBar radProgressBar1;
-        private Telerik.WinControls.UI.RadButton radButton3;
-        private Telerik.WinControls.UI.RadGroupBox radGroupBox4;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList14;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList15;
-        private Telerik.WinControls.UI.RadLabel radLabel15;
-        private Telerik.WinControls.UI.RadLabel radLabel16;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList13;
-        private Telerik.WinControls.UI.RadLabel radLabel11;
+        private RadButton radButton1;
+        private RadPanel radPanel1;
+        private RootRadElement object_b0ef2846_5821_420a_b725_690670fed277;
+        private RootRadElement object_8556f384_495a_4a94_92b4_da99c39262bf;
+        private RadButton radButton2;
+        private RadDropDownList radDropDownList1;
+        private RadGroupBox radGroupBox3;
+        private RadDropDownList radDropDownList12;
+        private RadLabel radLabel14;
+        private Panel panel2;
+        private RadGroupBox radGroupBox2;
+        private RadDropDownList radDropDownList11;
+        private RadLabel radLabel10;
+        private RadDropDownList radDropDownList10;
+        private RadDropDownList radDropDownList9;
+        private RadLabel radLabel8;
+        private RadDropDownList radDropDownList8;
+        private RadLabel radLabel7;
+        private RadLabel radLabel6;
+        private RadGroupBox radGroupBox1;
+        private RadLabel radLabel9;
+        private RadDropDownList radDropDownList6;
+        private RadDropDownList radDropDownList5;
+        private RadDropDownList radDropDownList4;
+        private RadDropDownList radDropDownList3;
+        private RadDropDownList radDropDownList7;
+        private RadDropDownList radDropDownList2;
+        private RadLabel radLabel4;
+        private RadLabel radLabel5;
+        private RadLabel radLabel3;
+        private RadLabel radLabel2;
+        private RadLabel radLabel1;
+        private RadRepeatButton radRepeatButton1;
+        private RadProgressBar radProgressBar1;
+        private RadButton radButton3;
+        private RadGroupBox radGroupBox4;
+        private RadDropDownList radDropDownList14;
+        private RadDropDownList radDropDownList15;
+        private RadLabel radLabel15;
+        private RadLabel radLabel16;
+        private RadDropDownList radDropDownList13;
+        private RadLabel radLabel11;
     }
 }

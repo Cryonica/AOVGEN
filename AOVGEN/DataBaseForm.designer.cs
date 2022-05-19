@@ -1,4 +1,9 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
 namespace AOVGEN
 {
     partial class DataBaseForm
@@ -6,7 +11,7 @@ namespace AOVGEN
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -170,16 +175,16 @@ namespace AOVGEN
 
         #endregion
 
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private Telerik.WinControls.UI.RadListView radListView1;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private Telerik.WinControls.UI.RadButton radButton2;
-        private System.Windows.Forms.Timer timer1;
-        private Telerik.WinControls.UI.RadButton radButton3;
-        private System.Windows.Forms.Timer timer2;
-        private System.Windows.Forms.Label label1;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList1;
+        private RadButton radButton1;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private RadListView radListView1;
+        private Panel panel1;
+        private PictureBox pictureBox1;
+        private RadButton radButton2;
+        private Timer timer1;
+        private RadButton radButton3;
+        private Timer timer2;
+        private Label label1;
+        private RadDropDownList radDropDownList1;
     }
 }

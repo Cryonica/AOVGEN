@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Windows.Forms;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
+using System.Windows.Forms;
 
 namespace AOVGEN
 {
-	using PosInfo = EditorV2.PosInfo;
-
     internal class WriteVentSystemToDB
 	{
 		public static bool Execute(string connectionstr, VentSystem ventSystem, Project Project, Building Building)
@@ -44,18 +41,18 @@ namespace AOVGEN
 			{
 				#region Find Supply and Exhaust
 				//***change filtr to filtr supply and exhaust filtr
-				PosInfo SupplyYLine = (from y in ventSystem.ComponentsV2
+				EditorV2.PosInfo SupplyYLine = (from y in ventSystem.ComponentsV2
 						.Where(d => d.Tag.GetType().Name == nameof(SupplyVent) || d.Tag.GetType().Name == nameof(SpareSuplyVent))
 												select y)
 						.FirstOrDefault();
-				PosInfo ExhaustYLine = (from y in ventSystem.ComponentsV2
+				EditorV2.PosInfo ExhaustYLine = (from y in ventSystem.ComponentsV2
 						.Where(d => d.Tag.GetType().Name == nameof(ExtVent) || d.Tag.GetType().Name == nameof(SpareExtVent))
 												 select y)
 						.FirstOrDefault();
-				List<PosInfo> Rooms = ventSystem.ComponentsV2
+				List<EditorV2.PosInfo> Rooms = ventSystem.ComponentsV2
 						.Where(d => d.Tag.GetType().Name == nameof(Room))
 						.ToList();
-				List<PosInfo> CrossSectionNulled = ventSystem.ComponentsV2
+				List<EditorV2.PosInfo> CrossSectionNulled = ventSystem.ComponentsV2
 					.Where(d => d.Tag.GetType().Name == nameof(CrossSection))
 					.Where(d => d.PozY != SupplyYLine?.PozY)
 					.Where(d => d.PozY != ExhaustYLine?.PozY)
@@ -68,7 +65,7 @@ namespace AOVGEN
 						.Where(d => d.Tag.GetType().Name == nameof(Filtr)) //вот тут мы ищем фильтры. у меня есть 2 класса фильтров:
 						.Where(d => d.PozY == SupplyYLine.PozY)
 						.ToList();
-					List<PosInfo> CrossectionSupply = ventSystem.ComponentsV2
+					List<EditorV2.PosInfo> CrossectionSupply = ventSystem.ComponentsV2
 					   .Where(d => d.Tag.GetType().Name == nameof(CrossSection)) //тут мы ищем воздуховоды на приточной линии. это нужно для того что у меня есть датчики Т SupplyTemp, ExihaustTemp, просто SensorT,
 					   .Where(d => d.PozY == SupplyYLine.PozY)
 					   .ToList();
@@ -121,7 +118,7 @@ namespace AOVGEN
 						.Where(d => d.Tag.GetType().Name == nameof(Filtr))
 						.Where(d => d.PozY == ExhaustYLine.PozY)
 						.ToList();
-					List<PosInfo> CrossectionExhaust = ventSystem.ComponentsV2
+					List<EditorV2.PosInfo> CrossectionExhaust = ventSystem.ComponentsV2
 						.Where(d => d.Tag.GetType().Name == nameof(CrossSection))
 						.Where(d => d.PozY == ExhaustYLine.PozY)
 						.ToList();
@@ -231,7 +228,7 @@ namespace AOVGEN
 						});
 				}
 
-				List<PosInfo> filtrListNoPos = ventSystem.ComponentsV2
+				List<EditorV2.PosInfo> filtrListNoPos = ventSystem.ComponentsV2
 						.Where(d => d.Tag is Filtr)
 						.Where(d => d.PozY != SupplyYLine?.PozY)
 						.Where(d => d.PozY != ExhaustYLine?.PozY)
@@ -273,7 +270,7 @@ namespace AOVGEN
 				}
 				#endregion
 				#region Algorythm core
-				foreach (PosInfo item in ventSystem.ComponentsV2) // перебираем все элементы в вентсистеме
+				foreach (EditorV2.PosInfo item in ventSystem.ComponentsV2) // перебираем все элементы в вентсистеме
 				{
 					string sensguid2;
 					switch (item.Tag.GetType().Name) //выбор кода для этого элемента
@@ -326,7 +323,7 @@ namespace AOVGEN
 														 $"('{ventguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}'," +
 														 $"'{voltage}','{controltype}','{power}','{protectype}','{sensguid1}','{ cab1guid}'," +
 														 $"'{blockname}', '{posname}', '{supplyVent.Description}', '{FCGuid}', 'Supply', " +
-														 $"'{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+														 $"'{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertQueryVent;
 								command.ExecuteNonQuery();
 								if (Cab1 != null)
@@ -403,7 +400,7 @@ namespace AOVGEN
 									FCGuid = Guid.NewGuid().ToString();
 									fControl.GUID = FCGuid;
 								}
-								string InsertQueryVent1 = $"INSERT INTO Ventilator ([GUID], [SystemGUID], SystemName, [Project], Voltage, ControlType, Power, ProtectType, [SensPDS], [Cable1], BlockName, PosName, Description, FControl, Location, Position, PosInfoGUID) VALUES ('{ventguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}','{voltage1}','{controltype1}','{power1}','{protectype1}','{sensguid1}','{cab1guid}','{blockname1}', '{posname}', '{extVent.Description}', '{FCGuid}', 'Exhaust', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+								string InsertQueryVent1 = $"INSERT INTO Ventilator ([GUID], [SystemGUID], SystemName, [Project], Voltage, ControlType, Power, ProtectType, [SensPDS], [Cable1], BlockName, PosName, Description, FControl, Location, Position, PosInfoGUID) VALUES ('{ventguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}','{voltage1}','{controltype1}','{power1}','{protectype1}','{sensguid1}','{cab1guid}','{blockname1}', '{posname}', '{extVent.Description}', '{FCGuid}', 'Exhaust', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertQueryVent1;
 								command.ExecuteNonQuery();
 								if (Cab1 != null)
@@ -567,7 +564,7 @@ namespace AOVGEN
 									Cab1.cableGUID = sensguid1;
 								}
 								string posinfoguid = WritePosInfoToDB(ref command, item, supplyfilterguid, ventSystem.GUID);
-								string InsertQueryfiltr = $"INSERT INTO Filter ([GUID], [SystemGUID], SystemName, [Project], ControlType, [SensPDS], BlockName, Description, Location, Image, Position, PosInfoGUID) VALUES ('{supplyfilterguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}','{controltype}','{sensguid1}','{blockname}', '{supplyFiltr.Description}', 'Supply', '{item.ImageName}', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+								string InsertQueryfiltr = $"INSERT INTO Filter ([GUID], [SystemGUID], SystemName, [Project], ControlType, [SensPDS], BlockName, Description, Location, Image, Position, PosInfoGUID) VALUES ('{supplyfilterguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}','{controltype}','{sensguid1}','{blockname}', '{supplyFiltr.Description}', 'Supply', '{item.ImageName}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertQueryfiltr;
 								command.ExecuteNonQuery();
 								UpdateVensystem("Filter");
@@ -605,7 +602,7 @@ namespace AOVGEN
 									sensguid1 = WriteSensToDB(ref command, senscat, sensblockname, sensposname, senstype, extfilterguid, sortpriority, description, writeblock, cabattribute, Cab1, pressureContol.Location);
 								}
 								string posinfoguid = WritePosInfoToDB(ref command, item, extfilterguid, ventSystem.GUID);
-								string InsertQueryfiltr = $"INSERT INTO Filter ([GUID], [SystemGUID], SystemName, [Project], ControlType, [SensPDS], BlockName, Description, Location, Image, Position, PosInfoGUID) VALUES ('{extfilterguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}','{controltype}','{sensguid1}','{blockname}', '{extFiltr.Description}', 'Exhaust', '{item.ImageName}', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+								string InsertQueryfiltr = $"INSERT INTO Filter ([GUID], [SystemGUID], SystemName, [Project], ControlType, [SensPDS], BlockName, Description, Location, Image, Position, PosInfoGUID) VALUES ('{extfilterguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}','{controltype}','{sensguid1}','{blockname}', '{extFiltr.Description}', 'Exhaust', '{item.ImageName}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertQueryfiltr;
 								command.ExecuteNonQuery();
 								UpdateVensystem("Filter");
@@ -644,7 +641,7 @@ namespace AOVGEN
 									Cab1.cableGUID = sensguid1;
 								}
 								string posinfoguid = WritePosInfoToDB(ref command, item, filterguid, ventSystem.GUID);
-								string InsertQueryfiltr = $"INSERT INTO Filter ([GUID], [SystemGUID], SystemName, [Project], ControlType, [SensPDS], BlockName, Description, Location, Image, Position, PosInfoGUID) VALUES ('{filterguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}','{controltype}','{sensguid1}','{blockname}', '{Filtr.Description}', '{string.Empty}', '{item.ImageName}', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+								string InsertQueryfiltr = $"INSERT INTO Filter ([GUID], [SystemGUID], SystemName, [Project], ControlType, [SensPDS], BlockName, Description, Location, Image, Position, PosInfoGUID) VALUES ('{filterguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}','{controltype}','{sensguid1}','{blockname}', '{Filtr.Description}', '{string.Empty}', '{item.ImageName}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertQueryfiltr;
 								command.ExecuteNonQuery();
 								UpdateVensystem("Filter");
@@ -709,7 +706,7 @@ namespace AOVGEN
 									UpdateVensystem("SensTOutdoor");
 								}
 								string InsertSupplyDamper = "INSERT INTO Damper ([GUID], [SystemGUID], SystemName, [Project], HasControl, Spring, Voltage, [Cable1], [Cable2],  BlockName, Description, Location, Image, Position, SensT, PosInfoGUID) " +
-								$"VALUES ('{supplyDamperguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}', '{hascntrol}', '{spring}','{voltage}','{cable1guid}', '{cable2guid}', '{blockname}', '{supplyDamper.Description1}', 'Supply', '{item.ImageName}', '{PosInfo.PosToString(item.Pos)}', '{sensguid1}', '{posinfoguid}')";
+								$"VALUES ('{supplyDamperguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}', '{hascntrol}', '{spring}','{voltage}','{cable1guid}', '{cable2guid}', '{blockname}', '{supplyDamper.Description1}', 'Supply', '{item.ImageName}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{sensguid1}', '{posinfoguid}')";
 								command.CommandText = InsertSupplyDamper;
 								command.ExecuteNonQuery();
 								UpdateVensystem("SupplyDamper");
@@ -748,7 +745,7 @@ namespace AOVGEN
 									//WriteCableToDB(ref command, cable2guid5, posname5, extDamperguid, extDamper.SortPriority, "Damper", extDamper.Description2);
 								}
 								string InsertExtDamper = "INSERT INTO Damper ([GUID], [SystemGUID], SystemName, [Project], HasControl, Spring, Voltage, [Cable1], [Cable2],  BlockName, Description, Location, Image, Position, PosInfoGUID ) " +
-									$"VALUES ('{extDamperguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}', '{hascntrol}', '{spring}','{voltage}','{cable1guid}', '{cable2guid}', '{blockname}', '{extDamper.Description1}', 'Exhaust', '{item.ImageName}', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+									$"VALUES ('{extDamperguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}', '{hascntrol}', '{spring}','{voltage}','{cable1guid}', '{cable2guid}', '{blockname}', '{extDamper.Description1}', 'Exhaust', '{item.ImageName}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertExtDamper;
 								command.ExecuteNonQuery();
 								UpdateVensystem("ExtDamper");
@@ -857,7 +854,7 @@ namespace AOVGEN
 								}
 								string posinfoguid = WritePosInfoToDB(ref command, item, waterHeaterguid, ventSystem.GUID);
 								string InsertWaterHeaterItemsQuery7 = "INSERT INTO WaterHeater ([GUID], [Project], [SystemGUID], SystemName, [SensT1], [SensT2], [Pump], [Valve], ControlType, Position, PosInfoGUID) " +
-									$"VALUES ('{waterHeaterguid}','{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}','{sensguid1}', '{sensguid2}','{pumpguid}', '{valveguid}', '{protecttype}', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+									$"VALUES ('{waterHeaterguid}','{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}','{sensguid1}', '{sensguid2}','{pumpguid}', '{valveguid}', '{protecttype}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertWaterHeaterItemsQuery7;
 								command.ExecuteNonQuery();
 								UpdateVensystem("WaterHeater");
@@ -917,7 +914,7 @@ namespace AOVGEN
 								}
 								string posinfoguid = WritePosInfoToDB(ref command, item, ElectroHeaterguid, ventSystem.GUID);
 								string InsertElectroHeaterItemsQuery = "INSERT INTO ElectroHeater ([GUID], [Project], [SystemGUID], SystemName, Stairs, Voltage, Power, BlockName, PosName, [Cable1], Description, Position, PosInfoGUID) " +
-									$"VALUES ('{ElectroHeaterguid}','{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}','{stairs}', '{voltage}','{power}', '{blockname}', '{posname}', '{cableguid1}', '{electroHeater.Description1}', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+									$"VALUES ('{ElectroHeaterguid}','{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}','{stairs}', '{voltage}','{power}', '{blockname}', '{posname}', '{cableguid1}', '{electroHeater.Description1}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertElectroHeaterItemsQuery;
 								command.ExecuteNonQuery();
 								UpdateVensystem("ElectroHeat");
@@ -966,7 +963,7 @@ namespace AOVGEN
 								}
 								string posinfoguid = WritePosInfoToDB(ref command, item, Frosterguid, ventSystem.GUID);
 								string InsertFrosterItemsQuery = "INSERT INTO Froster ([GUID], [Project], [SystemGUID], SystemName, [SensT1], [SensT2], [KKB], [Valve], ControlType, Power, Voltage, FrosterSensor, Position, PosInfoGUID) " +
-									$"VALUES ('{Frosterguid}','{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}','{sensguid1}', '{sensguid2}','{KKBGuid}', '{frostervalveguid}', '{frosterType}', '{Power}', '{_Voltage}', '{frosterSensor}', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+									$"VALUES ('{Frosterguid}','{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}','{sensguid1}', '{sensguid2}','{KKBGuid}', '{frostervalveguid}', '{frosterType}', '{Power}', '{_Voltage}', '{frosterSensor}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertFrosterItemsQuery;
 
 								command.ExecuteNonQuery();
@@ -1016,7 +1013,7 @@ namespace AOVGEN
 								}
 								string posinfoguid = WritePosInfoToDB(ref command, item, Humidifierguid, ventSystem.GUID);
 								string InsertHumidifierItemsQuery = "INSERT INTO Humidifier ([GUID], [Project], [SystemGUID], SystemName, [SensHum], Power, Voltage, HumSensPresent, Type, BlockName, Cable1, PosName, Description, Cable2, Position, PosInfoGUID) " +
-									$"VALUES ('{Humidifierguid}','{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}','{sensguid1}', '{power10}','{voltage10}', '{humsenspresent}', '{humtype}', '{humblockname}', '{cable1guid}', '{humposname}', '{humidifier.Description}', '{cable2guid}', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+									$"VALUES ('{Humidifierguid}','{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}','{sensguid1}', '{power10}','{voltage10}', '{humsenspresent}', '{humtype}', '{humblockname}', '{cable1guid}', '{humposname}', '{humidifier.Description}', '{cable2guid}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertHumidifierItemsQuery;
 								command.ExecuteNonQuery();
 								if (Cab1 != null)
@@ -1124,7 +1121,7 @@ namespace AOVGEN
 								}
 								string posinfoguid = WritePosInfoToDB(ref command, item, Recuperatorguid, ventSystem.GUID);
 								string InsertRecuperatorQuery = "INSERT INTO Recuperator ([GUID], [Project], [SystemGUID], SystemName, [PS1], [PS2], [Drive1], [Drive2], [Drive3], Type, Position, PosInfoGUID) " +
-									$"VALUES ('{Recuperatorguid}', '{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}', '{PS1GUID}', '{PS2GUID}', '{Drive1GUID}', '{Drive2GUID}', '{Drive3GUID}', '{RecType}', '{PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+									$"VALUES ('{Recuperatorguid}', '{Project.GetGUID()}', '{ventSystem.GUID}', '{ventSystem.SystemName}', '{PS1GUID}', '{PS2GUID}', '{Drive1GUID}', '{Drive2GUID}', '{Drive3GUID}', '{RecType}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertRecuperatorQuery;
 								command.ExecuteNonQuery();
 								UpdateVensystem("Recuperator");
@@ -1173,7 +1170,7 @@ namespace AOVGEN
 									sensguid2 = WriteSensor(humiditySens, "SensHSupply", "Humidity", Senstype, humiditySens.Location);
 								}
 								string InsertCrossConnection = "INSERT INTO CrossConnection ([GUID], [Project], [SystemGUID], Position, Image, SensT, SensH, SensP, PosInfoGUID) " +
-															   $"VALUES ('{CrossectionGUID}', '{Project.GetGUID()}', '{ventSystem.GUID}', '{PosInfo.PosToString(item.Pos)}', '{item.ImageName}', '{sensguid1}', '{sensguid2}', '{string.Empty}', '{posinfoguid}')";
+															   $"VALUES ('{CrossectionGUID}', '{Project.GetGUID()}', '{ventSystem.GUID}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{item.ImageName}', '{sensguid1}', '{sensguid2}', '{string.Empty}', '{posinfoguid}')";
 								command.CommandText = InsertCrossConnection;
 								command.ExecuteNonQuery();
 								UpdateVensystem("CrossConnection");
@@ -1208,7 +1205,7 @@ namespace AOVGEN
 										sensguid2 = WriteSensor(humiditySens, "SensHIndoor", "Humidity", Senstype2, humiditySens.Location);
 									}
 									string InsertRoom = "INSERT INTO Room ([GUID], [Project], [SystemGUID], Position, Image, SensT, SensH, PosInfoGUID) " +
-																				 $"VALUES ('{RoomGUID}', '{Project.GetGUID()}', '{ventSystem.GUID}', '{PosInfo.PosToString(item.Pos)}', '{item.ImageName}', '{sensguid1}', '{sensguid2}', '{posinfoguid}')";
+																				 $"VALUES ('{RoomGUID}', '{Project.GetGUID()}', '{ventSystem.GUID}', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{item.ImageName}', '{sensguid1}', '{sensguid2}', '{posinfoguid}')";
 									command.CommandText = InsertRoom;
 									command.ExecuteNonQuery();
 									UpdateVensystem("Room");
@@ -1513,12 +1510,12 @@ namespace AOVGEN
 					command.ExecuteNonQuery();
 
 				}
-				string WritePosInfoToDB(ref SQLiteCommand oleDbCommand, PosInfo posInfo, string elementGUID, string SystemGUID)
+				string WritePosInfoToDB(ref SQLiteCommand oleDbCommand, EditorV2.PosInfo posInfo, string elementGUID, string SystemGUID)
 				{
 					var posinfoGUID = Guid.NewGuid().ToString();
 					oleDbCommand.CommandText = "INSERT INTO PosInfo ([GUID], Pos, Size, Image, [HostGUID], [SystemGUID]) VALUES " +
 						$"('{posinfoGUID}', " +
-						$"'{PosInfo.PosToString(posInfo.Pos)}', " +
+						$"'{EditorV2.PosInfo.PosToString(posInfo.Pos)}', " +
 						$"'{posInfo.SizeX};{posInfo.SizeY}', " +
 						$"'{posInfo.ImageName}', " +
 						$"'{elementGUID}', " +
@@ -1542,7 +1539,7 @@ namespace AOVGEN
 					command.ExecuteNonQuery();
 				}
 
-                void WriteSpare<T>(dynamic spareVent, PosInfo item)
+                void WriteSpare<T>(dynamic spareVent, EditorV2.PosInfo item)
                 {
                     dynamic MainVent = null;
                     dynamic ReservedVent = null;
@@ -1567,12 +1564,12 @@ namespace AOVGEN
                                                         $"VALUES ('{spareVent.GUID}', '{ventSystem.GUID}', '{ventSystem.SystemName}', '{ProjectGuid}', '{spareVent.Voltage}', " +
                                                         $"'{spareVent.ControlType}', '{spareVent.Power}', '{spareVent.Protect}', '{spareVent._PressureContol.GUID}', " +
                                                         $"'{MainVent?.GUID}', '{ReservedVent?.GUID}', '{spareVent.Location}', " +
-                                                        $"'{PosInfo.PosToString(item.Pos)}', '{item.GUID}')";
+                                                        $"'{EditorV2.PosInfo.PosToString(item.Pos)}', '{item.GUID}')";
                     command.CommandText = InsertQuerySpareSupplyVent;
                     command.ExecuteNonQuery();
 
                 }
-				void WriteVent(Vent vent, PosInfo item, string Spareventguid)
+				void WriteVent(Vent vent, EditorV2.PosInfo item, string Spareventguid)
 				{
 					Vent.FControl fControl = vent._FControl;
 					string voltage = vent.Voltage.ToString();
@@ -1599,7 +1596,7 @@ namespace AOVGEN
 											 $"('{vent.GUID}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}'," +
 											 $"'{voltage}','{controltype}','{power}','{protectype}','{sensguid1}','{ cab1guid}'," +
 											 $"'{blockname}', '{posname}', '{vent.Description}', '{FCGuid}', '{vent.Location}', " +
-											 $"'{PosInfo.PosToString(item.Pos)}', '{item.GUID}', '{vent.AttributeSpare}', '{Spareventguid}')";
+											 $"'{EditorV2.PosInfo.PosToString(item.Pos)}', '{item.GUID}', '{vent.AttributeSpare}', '{Spareventguid}')";
 					command.CommandText = InsertQueryVent;
 					command.ExecuteNonQuery();
 					if (Cab1 != null)

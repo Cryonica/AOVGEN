@@ -1,11 +1,15 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class SelectPannelForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -109,10 +113,10 @@
 
         #endregion
 
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private Telerik.WinControls.UI.RadCheckedListBox radCheckedListBox1;
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.UI.RadButton radButton2;
-        private Telerik.WinControls.UI.RadButton radButton3;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private RadCheckedListBox radCheckedListBox1;
+        private RadButton radButton1;
+        private RadButton radButton2;
+        private RadButton radButton3;
     }
 }

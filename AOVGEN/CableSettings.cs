@@ -1,18 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using Telerik.WinControls;
 using Telerik.WinControls.UI;
-using System.IO;
-using System.Net;
-using System.Data.SQLite;
-using System.Collections.Generic;
-using System.Linq;
+using Telerik.WinControls.UI.Data;
+using PositionChangedEventArgs = Telerik.WinControls.UI.Data.PositionChangedEventArgs;
 
 namespace AOVGEN
 {
-    public partial class CableSettings : Telerik.WinControls.UI.RadForm
+    public partial class CableSettings : RadForm
     {
         
         public string DBFilePath { get; set; }
@@ -26,7 +28,7 @@ namespace AOVGEN
 
         private void label2_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void radButton1_Click(object sender, EventArgs e)
@@ -70,7 +72,7 @@ namespace AOVGEN
                    
 
                 {
-                    bool flagCheckExist = CheckExist("BuildSetting", "Place", this.Building.BuildGUID);
+                    bool flagCheckExist = CheckExist("BuildSetting", "Place", Building.BuildGUID);
                     string query;
                     if (flagCheckExist)
                     {
@@ -79,14 +81,14 @@ namespace AOVGEN
                                 $"CableAPipe = '{pipeA}', CableDPipe = '{pipeD}', CableCPipe = '{pipeC}', CablePPipe = '{pipeP}', " +
                                 $"CableATray = '{trayA}', CableDTray = '{trayD}', CableCTray = '{trayC}', CablePTray = '{trayP}', BuildPreset = '{buildpreset}', Devider = '{devider}', CableName = '{cablename}', WriteCableP = '{WriteCableP}', " +
                                 $"WritePumpCable = '{writepumpcable}', WriteValveCable = '{writevalvecable}' " +
-                                $"WHERE Place = '{this.Building.BuildGUID}'";
+                                $"WHERE Place = '{Building.BuildGUID}'";
                     }
                     else
                     {
-                        query = $"INSERT INTO BuildSetting ([Project], [Place], CableA, CableD, CableC, CableP, " +
+                        query = "INSERT INTO BuildSetting ([Project], [Place], CableA, CableD, CableC, CableP, " +
                                 "CableAPipe, CableDPipe, CableCPipe, CablePPipe, " +
                                 "CableATray, CableDTray, CableCTray, CablePTray, BuildPreset, Devider, Cablename, WriteCableP, WritePumpCable, WriteValveCable) " +
-                                $"VALUES('{this.Project.GetGUID()}','{this.Building.BuildGUID}','{cableA}','{cableD}','{cableC}', '{cableP}', " +
+                                $"VALUES('{Project.GetGUID()}','{Building.BuildGUID}','{cableA}','{cableD}','{cableC}', '{cableP}', " +
                                 $"'{pipeA}', '{pipeD}', '{pipeC}', '{pipeP}', " +
                                 $"'{trayA}', '{trayD}', '{trayC}', '{trayP}', '{buildpreset}', '{devider}', '{cablename}' , '{WriteCableP}', " +
                                 $"'{writepumpcable}', '{writevalvecable}');";
@@ -120,7 +122,7 @@ namespace AOVGEN
 
 
 
-                    this.Close();
+                    Close();
                 }
                 else
                 {
@@ -143,7 +145,7 @@ namespace AOVGEN
 
         private void bunifuImageButton1_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void CableSettings_Load(object sender, EventArgs e)
@@ -172,7 +174,7 @@ namespace AOVGEN
                     }
                     reader.Close();
                     
-                    string settingsguery = $"SELECT * FROM BuildSetting WHERE Place = '{this.Building.BuildGUID}'";
+                    string settingsguery = $"SELECT * FROM BuildSetting WHERE Place = '{Building.BuildGUID}'";
                     command.CommandText = settingsguery;
                     using (SQLiteDataReader reader2 = command.ExecuteReader())
                     {
@@ -244,7 +246,7 @@ namespace AOVGEN
         }
         private SQLiteConnection OpenDB()
         {
-            string BDPath = this.DBFilePath;
+            string BDPath = DBFilePath;
             string connectionstr = @"Data Source=" + BDPath + ";";
             
             
@@ -349,16 +351,16 @@ namespace AOVGEN
             }
         }
 
-        private void radDropDownList9_SelectedIndexChanged(object sender, Telerik.WinControls.UI.Data.PositionChangedEventArgs e)
+        private void radDropDownList9_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
         {
             
             string SelectedPreset = radDropDownList9.SelectedItem.Text;
             string query = $"SELECT CablePresets.CableD FROM CablePresets WHERE CablePresets.BuildingType = '{SelectedPreset}' " +
-                $"UNION ALL " +
+                "UNION ALL " +
                 $"SELECT CablePresets.CableA FROM CablePresets WHERE CablePresets.BuildingType = '{SelectedPreset}' " +
-                $"UNION ALL " +
+                "UNION ALL " +
                 $"SELECT CablePresets.CableC FROM CablePresets WHERE CablePresets.BuildingType = '{SelectedPreset}' " +
-                $"UNION ALL " +
+                "UNION ALL " +
                 $"SELECT CablePresets.CableP FROM CablePresets WHERE CablePresets.BuildingType = '{SelectedPreset}' ";
             SQLiteConnection connection = OpenDB();
             connection.Open();
@@ -379,21 +381,21 @@ namespace AOVGEN
             connection.Close();
         }
 
-        private void radDropDownList1_SelectedIndexChanged(object sender, Telerik.WinControls.UI.Data.PositionChangedEventArgs e)
+        private void radDropDownList1_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
         {
 
         }
-       private void radDropDownList3_SelectedIndexChanged(object sender, Telerik.WinControls.UI.Data.PositionChangedEventArgs e)
-        {
-            
-        }
-
-        private void radDropDownList5_SelectedIndexChanged(object sender, Telerik.WinControls.UI.Data.PositionChangedEventArgs e)
+       private void radDropDownList3_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
         {
             
         }
 
-        private void radDropDownList7_SelectedIndexChanged(object sender, Telerik.WinControls.UI.Data.PositionChangedEventArgs e)
+        private void radDropDownList5_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
+        {
+            
+        }
+
+        private void radDropDownList7_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
         {
             
         }
@@ -565,7 +567,7 @@ namespace AOVGEN
             
         }
 
-        private void radDropDownList10_SelectedIndexChanging(object sender, Telerik.WinControls.UI.Data.PositionChangingCancelEventArgs e)
+        private void radDropDownList10_SelectedIndexChanging(object sender, PositionChangingCancelEventArgs e)
         {
             label3.Text = radTextBoxControl1.Text + radDropDownList10.Items[e.Position].Text;
             

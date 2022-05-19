@@ -1,20 +1,13 @@
-﻿using ClosedXML.Excel;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using Telerik.WinControls;
 using Telerik.WinControls.UI;
-using Telerik.Windows.Documents.Spreadsheet.FormatProviders.OpenXml.Xlsx;
 using Telerik.Windows.Documents.Spreadsheet.Model;
 
 namespace AOVGEN
 {
-    public partial class SpreadSheetForm : Telerik.WinControls.UI.RadForm
+    public partial class SpreadSheetForm : RadForm
     {
         internal RadTreeView radTreeView4 { get; set; }
         public SpreadSheetForm()
@@ -28,20 +21,16 @@ namespace AOVGEN
         {
 
             Dictionary<string, List<dynamic>> VentDict = new Dictionary<string, List<dynamic>>();
-            List<dynamic> listkip = null;
             if (radTreeView4 != null)
             {
-
-                List<Pannel> PannelList = new List<Pannel>();
                 foreach (RadTreeNode radTreeNode in radTreeView4.Nodes)
                 {
-                    Pannel pannel = (Pannel)radTreeNode.Tag;
                     if (radTreeNode.Nodes.Count > 0)
                     {
                         foreach (RadTreeNode ventnode in radTreeNode.Nodes)
                         {
                             VentSystem ventSystem = (VentSystem)ventnode.Tag;
-                            listkip = ventSystem.GetKIP();
+                            var listkip = ventSystem.GetKIP();
                             listkip.Insert(0, $"Комплект автоматики для системы {ventSystem.SystemName}");
                             listkip = listkip.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList(); //remove list null entry
                             VentDict.Add(ventSystem.GUID, listkip);
@@ -75,49 +64,33 @@ namespace AOVGEN
             {
                 foreach (KeyValuePair <string, List<dynamic> > keyValuePair in VentDict)
                 {
-                    string GUID = keyValuePair.Key;
                     List<dynamic> kipcomt = keyValuePair.Value;
-                    if (kipcomt.Count > 0)
+                    if (kipcomt.Count <= 0) continue;
+                    int cnt = 1;
+                    foreach (var kiprow in from string s in kipcomt select dt.Rows.Add())
                     {
-                        int cnt = 1;
-                        foreach (string s in kipcomt)
-                        {
-                            DataRow kiprow = dt.Rows.Add();
-                            kiprow[dt.Columns[0]] = cnt + ".";
-                            //kiprow[dt.Columns[1]] = s;
-                            kiprow[dt.Columns[1]] = "Тут должно быть значение см SpreadSheetForm строка 88";
-                            cnt++;
-                        }
+                        kiprow[dt.Columns[0]] = cnt + ".";
+                        kiprow[dt.Columns[1]] = "Тут должно быть значение см SpreadSheetForm строка 88";
+                        cnt++;
                     }
                 }
                 
                
             }
             
-
-
-
-            //for (int i = 0; i < 1000; i++)
-            //{
-            //    DataRow row = dt.Rows.Add();
-            //    foreach (DataColumn col in dt.Columns)
-            //    {
-            //        row[col.ColumnName] = "Data" + i + "." + col.ColumnName;
-            //    }
-            //}
-            bool shouldImportColumnHeaders = true;
+            const bool shouldImportColumnHeaders = true;
             PopulateSpreadsheet(dt, shouldImportColumnHeaders);
         }
         private void PopulateSpreadsheet(DataTable data, bool shouldImportColumnHeaders)
         {
-            Worksheet worksheet = this.radSpreadsheet1.ActiveSheet as Worksheet;
+            Worksheet worksheet = radSpreadsheet1.ActiveSheet as Worksheet;
             int startRowIndex = 0;
             if (shouldImportColumnHeaders)
             {
                 startRowIndex++;
                 for (int i = 0; i < data.Columns.Count; i++)
                 {
-                    worksheet.Cells[0, i].SetValue(data.Columns[i].ColumnName);
+                    worksheet?.Cells[0, i].SetValue(data.Columns[i].ColumnName);
                 }
             }
 
@@ -125,10 +98,10 @@ namespace AOVGEN
             {
                 for (int j = 0; j < data.Columns.Count; j++)
                 {
-                    worksheet.Cells[startRowIndex + i, j].SetValue(data.Rows[i][j] + string.Empty);
+                    worksheet?.Cells[startRowIndex + i, j].SetValue(data.Rows[i][j] + string.Empty);
                 }
             }
-            worksheet.Columns[worksheet.UsedCellRange].AutoFitWidth();
+            worksheet?.Columns[worksheet.UsedCellRange].AutoFitWidth();
         }
 
     }

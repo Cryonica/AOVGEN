@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using Telerik.WinControls.UI;
 using WinFormAnimation;
-using System.Data.SQLite;
-using System.Collections.Generic;
-
 
 namespace AOVGEN
 {
@@ -551,7 +550,7 @@ namespace AOVGEN
                 if (cnt == 0) throw new VentSystemEmptyException("Не создано ни одного элемента");
                 string oldvensystemguid = VentSystem.GUID;
                 VentSystem.GUID = Guid.NewGuid().ToString(); //create ventsystem GUID
-                if (!OpenForEdit) VentSystem.SystemName = this.radAutoCompleteBox1.Text; //get ventsystem name
+                if (!OpenForEdit) VentSystem.SystemName = radAutoCompleteBox1.Text; //get ventsystem name
                 
                 // Open DataBase
                 SQLiteConnection connection = OpenDB(); //open DataBase
@@ -559,7 +558,7 @@ namespace AOVGEN
                 
                 if (connection.State == ConnectionState.Open)
                 {
-                    SQLiteCommand command = new SQLiteCommand()
+                    SQLiteCommand command = new SQLiteCommand
                     {
                         Connection = connection
                     };
@@ -572,7 +571,7 @@ namespace AOVGEN
                     command.CommandText = InsertQueryVensystem;
                     command.ExecuteNonQuery();
                     // Write Ventsystem components to DataBase
-                    WriteVentSystemToDB.Execute(command.Connection.ConnectionString, VentSystem, this.Project, Building) ;
+                    WriteVentSystemToDB.Execute(command.Connection.ConnectionString, VentSystem, Project, Building) ;
                     //using (WriteVentSystemToDB writeVentSystemToDB = new WriteVentSystemToDB(command, VentSystem, this.Project, Building)) { }
                     
                     command.Dispose();
@@ -637,7 +636,7 @@ namespace AOVGEN
                     Ventree.Update();
                     
                     Ventree.SelectedNode = null;
-                    this.Close();
+                    Close();
                     
                 }
 
@@ -732,11 +731,11 @@ namespace AOVGEN
         }
         private void Timer1_Tick(object sender, EventArgs e)
         {
-            if (this.Opacity == 0) Close();
+            if (Opacity == 0) Close();
         }
         private SQLiteConnection OpenDB()
         {
-            string BDPath = this.DBFilePath;
+            string BDPath = DBFilePath;
             string connectionstr = @"Data Source=" + BDPath + ";";
             try
             {
@@ -756,7 +755,7 @@ namespace AOVGEN
             connection.Open();
             if (connection.State == ConnectionState.Open)
             {
-                SQLiteCommand command = new SQLiteCommand()
+                SQLiteCommand command = new SQLiteCommand
                 {
                     Connection = connection
                 };
@@ -802,7 +801,7 @@ namespace AOVGEN
                     connection.Open();
                     if (connection.State == ConnectionState.Open)
                     {
-                        SQLiteCommand command = new SQLiteCommand()
+                        SQLiteCommand command = new SQLiteCommand
                         {
                             Connection = connection
                         };
@@ -827,7 +826,7 @@ namespace AOVGEN
                     connection.Open();
                     if (connection.State == ConnectionState.Open)
                     {
-                        SQLiteCommand command = new SQLiteCommand()
+                        SQLiteCommand command = new SQLiteCommand
                         {
                             Connection = connection
                         };
@@ -920,7 +919,7 @@ namespace AOVGEN
                         bool writeblock = bool.Parse(readerchild1[4].ToString());
                         string hosttable = readerchild1[5].ToString();
                         string posguid = readerchild1[1].ToString();
-                        string newposname = (AllConnectedSumm).ToString() + devider + readerchild1[0].ToString() + cnt.ToString();
+                        string newposname = (AllConnectedSumm) + devider + readerchild1[0] + cnt;
                         posnames.Oldposname = readerchild1[0].ToString();
                         posnames.Newposname = newposname;
                         if (writeblock)
@@ -970,7 +969,7 @@ namespace AOVGEN
 
             
         }
-        private RadTreeNode FindNodeByName(object text, Telerik.WinControls.UI.RadTreeNodeCollection nodes)
+        private RadTreeNode FindNodeByName(object text, RadTreeNodeCollection nodes)
         {
 
             foreach (RadTreeNode node in nodes)

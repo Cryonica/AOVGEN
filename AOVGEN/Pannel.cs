@@ -1,7 +1,5 @@
-﻿using System.ComponentModel;
-using System;
-
-
+﻿using System;
+using System.ComponentModel;
 
 namespace AOVGEN
 {
@@ -18,11 +16,13 @@ namespace AOVGEN
         internal int Version { get; set; }
 
         [DisplayName("Имя щита")]
-        public string PannelName { get { return name; } set { SetName(value); } }
+        public string PannelName { get => name;
+            set => SetName(value);
+        }
         [DisplayName("Мощность")]
         public string Power { get; internal set; }
 
-        [System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+        [TypeConverter(typeof(EnumDescConverter))]
         public enum _Category 
         {
             [Description("1")]
@@ -33,7 +33,7 @@ namespace AOVGEN
             three
 
         }
-        [System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+        [TypeConverter(typeof(EnumDescConverter))]
         public enum _FireProtect
         {
             [Description("Да")]
@@ -42,7 +42,7 @@ namespace AOVGEN
             No
 
         }
-        [System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+        [TypeConverter(typeof(EnumDescConverter))]
         public enum _Dispatching
         {
             [Description("Да")]
@@ -51,7 +51,7 @@ namespace AOVGEN
             No
 
         }
-        [System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+        [TypeConverter(typeof(EnumDescConverter))]
         public enum _Protocol
         {
             [Description("Нет")]
@@ -65,7 +65,7 @@ namespace AOVGEN
             [Description("LON")]
             LON
         }
-        [System.ComponentModel.TypeConverter(typeof(EnumDescConverter))]
+        [TypeConverter(typeof(EnumDescConverter))]
         public enum _Voltage
         {
             [Description("220")]
@@ -75,17 +75,28 @@ namespace AOVGEN
 
         }
         [DisplayName("Категория")]
-        public _Category Category { get { return Categoryvariable; } set { SetCategory(value); } }
+        public _Category Category { get => Categoryvariable;
+            set => SetCategory(value);
+        }
         [DisplayName("Пож.защита")]
-        public _FireProtect FireProtect { get { return FireProtectVariable; } set { SetFireProtect(value); } }
+        public _FireProtect FireProtect { get => FireProtectVariable;
+            set => SetFireProtect(value);
+        }
         [DisplayName("Диспетч-я")]
-        public _Dispatching Dispatching { get { return DispatchingVariable; } set { SetDispatching(value); } }
+        public _Dispatching Dispatching { get => DispatchingVariable;
+            set => SetDispatching(value);
+        }
         [DisplayName("Протокол")]
-        public _Protocol Protocol { get { return ProtocolVariable; } set { SetProtocol(value); } }
+        public _Protocol Protocol { get => ProtocolVariable;
+            set => SetProtocol(value);
+        }
         private string PannelGUID;
         [DisplayName("Напряжение")]
-        public _Voltage Voltage { get { return VoltageVariable; } set { SetVoltage(value); } }
-        internal _Protocol OldProtocol { get { return OldProtocolVariable; } }
+        public _Voltage Voltage { get => VoltageVariable;
+            set => SetVoltage(value);
+        }
+        internal _Protocol OldProtocol => OldProtocolVariable;
+
         public string GetGUID()
         {
             string guid = PannelGUID;

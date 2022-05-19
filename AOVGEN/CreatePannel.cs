@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Data;
-using System.Drawing;
-using System.Windows.Forms;
-using WinFormAnimation;
 using System.Data.SQLite;
+using System.Drawing;
 using System.Reflection;
+using System.Windows.Forms;
 using Telerik.WinControls.UI;
+using WinFormAnimation;
 
 namespace AOVGEN
 {
-    public partial class CreatePannel : Telerik.WinControls.UI.RadForm
+    public partial class CreatePannel : RadForm
     {
         private readonly MainForm mainForm;
         private readonly RadTreeNode buildnode;
@@ -44,7 +44,7 @@ namespace AOVGEN
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (this.Opacity == 0)
+            if (Opacity == 0)
             {
                 timer1.Stop();
                 WriteToDB();
@@ -65,7 +65,7 @@ namespace AOVGEN
                 if (category == "Категория") category = string.Empty;
                 if (pannelname == string.Empty) throw new Exception();
                 if (category == string.Empty) throw new Exception();
-                this.pGUID = Guid.NewGuid().ToString();
+                pGUID = Guid.NewGuid().ToString();
                 timer1.Start();
                 //AnimationPannelFormAccept();
                 AnimationClose();
@@ -81,23 +81,23 @@ namespace AOVGEN
         }
         private void AnimationPannelForm()
         {
-            new Animator2D(new Path2D(this.Location.X, 800, this.Location.Y, this.Location.Y, 200)
-                .ContinueTo(776, this.Location.Y, 250))
+            new Animator2D(new Path2D(Location.X, 800, Location.Y, Location.Y, 200)
+                .ContinueTo(776, Location.Y, 250))
                 .Play(this, Animator2D.KnownProperties.Location);
         }
         private void AnimationPannelFormAccept()
         {
-            new Animator2D(new Path2D(this.Location.X, this.Location.X + 50, this.Location.Y, this.Location.Y, 150)
-                            .ContinueTo(0, this.Location.Y, 80))
+            new Animator2D(new Path2D(Location.X, Location.X + 50, Location.Y, Location.Y, 150)
+                            .ContinueTo(0, Location.Y, 80))
                             .Play(this, Animator2D.KnownProperties.Location);
         }
         public string BUILDGUID { get; set; }
         public string DBFilePath { get; set; }
         public DataTable dataTable { get; set; }
-        public Telerik.WinControls.UI.RadTreeView RadTreeView { get; set; }
+        public RadTreeView RadTreeView { get; set; }
 
-        public Telerik.WinControls.UI.RadGridView RadGridView { get; set; }
-        public Telerik.WinControls.UI.RadPropertyGrid RadPropertyGrid { get; set; }
+        public RadGridView RadGridView { get; set; }
+        public RadPropertyGrid RadPropertyGrid { get; set; }
         private string pGUID { get; set; }
 
         private void radTextBox1_Click(object sender, EventArgs e)
@@ -177,7 +177,7 @@ namespace AOVGEN
                 try
                 {
                     
-                    string selectprjguid = $"SELECT Buildings.Project FROM Buildings WHERE GUID = '{this.BUILDGUID}'";
+                    string selectprjguid = $"SELECT Buildings.Project FROM Buildings WHERE GUID = '{BUILDGUID}'";
                     SQLiteCommand command = new SQLiteCommand(selectprjguid, connection);
                     var dataReader = command.ExecuteReader();
                     while (dataReader.Read())
@@ -232,7 +232,7 @@ namespace AOVGEN
                                 break;
                         }
 
-                        string Place = this.BUILDGUID;
+                        string Place = BUILDGUID;
                         var Modyfied = DateTime.Now.ToString("dd-MM-yyyy");
                         string Version = "1";
 
@@ -243,7 +243,7 @@ namespace AOVGEN
                         connection.Close();
                         //timer1.Stop();
 
-                        DataTable dataSource = this.dataTable as DataTable;
+                        DataTable dataSource = dataTable;
                         DataRow drToAdd = dataSource.NewRow();
                         drToAdd["ID"] = dataSource.Rows.Count + 1;
                         //drToAdd["ParentID"] = DBNull.Value;
@@ -266,14 +266,14 @@ namespace AOVGEN
                         //var gridview = this.RadGridView;
                         Pannel pannel= CreatePannelClass(NewPannelGUID);
                         
-                        foreach (var row in this.RadGridView.Rows)
+                        foreach (var row in RadGridView.Rows)
                         {
                             
                             if (row.Cells[1].Value.ToString() == NewPannelGUID)
                             {
                                 
                                 row.Tag = pannel;
-                                this.RadPropertyGrid.SelectedObject =pannel;
+                                RadPropertyGrid.SelectedObject =pannel;
                                 break;
                             }
                         }
@@ -295,7 +295,7 @@ namespace AOVGEN
         }
         private SQLiteConnection OpenDB()
         {
-            string BDPath = this.DBFilePath;
+            string BDPath = DBFilePath;
             string connectionstr = @"Data Source=" + BDPath + ";";
             try
             {
@@ -377,7 +377,7 @@ namespace AOVGEN
         private void UpdateDataGrid()
         {
 
-            foreach (var Row in this.RadGridView.Rows)
+            foreach (var Row in RadGridView.Rows)
             {
                 try
                 {

@@ -1,11 +1,15 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using Telerik.WinControls.Themes;
+
+namespace AOVGEN
 {
     partial class CableImage
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -68,7 +72,7 @@
 
         #endregion
 
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private PictureBox pictureBox1;
     }
 }

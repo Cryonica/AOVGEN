@@ -1,11 +1,14 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class AddSensorForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -122,9 +125,9 @@
 
         #endregion
 
-        private Telerik.WinControls.UI.RadGridView radGridView1;
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.UI.RadButton radButton2;
-        private Telerik.WinControls.UI.RadButton radButton3;
+        private RadGridView radGridView1;
+        private RadButton radButton1;
+        private RadButton radButton2;
+        private RadButton radButton3;
     }
 }

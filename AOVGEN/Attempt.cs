@@ -1,9 +1,10 @@
 ﻿using System;
+using Telerik.WinControls.UI;
 using WinFormAnimation;
 
 namespace AOVGEN
 {
-    public partial class Attempt : Telerik.WinControls.UI.RadForm
+    public partial class Attempt : RadForm
     {
         public int Num { get; set; }
         public Attempt()
@@ -31,7 +32,7 @@ namespace AOVGEN
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (this.Opacity == 0) Close();
+            if (Opacity == 0) Close();
         }
     }
 }

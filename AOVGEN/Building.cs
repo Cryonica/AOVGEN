@@ -11,8 +11,11 @@ namespace AOVGEN
         public string BuildNum { get; set; }
         [DisplayName("Адрес")]
         public string Address { get; set; }
-        internal string BuildGUID { get { return guid; } set { SetGUID(value); } }
-        string SetGUID(object val)
+        internal string BuildGUID { get => guid;
+            set => SetGUID(value);
+        }
+
+        internal string SetGUID(object val)
         {
             guid = val.ToString();
             return guid;

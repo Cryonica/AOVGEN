@@ -10,6 +10,7 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 
 namespace AOVGEN
@@ -78,13 +79,13 @@ namespace AOVGEN
             }
             return description;
         }
-        public EnumDescConverter(System.Type type)
+        public EnumDescConverter(Type type)
             : base(type)
         {
             _val = type;
         }
 
-        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string))
             {
@@ -92,29 +93,25 @@ namespace AOVGEN
                 {
                     return GetEnumDescription(_val, s);
                 }
-                else
+
+                if (value is Enum e)
                 {
-                    if (value is Enum e)
-                    {
-                        return GetEnumDescription(e);
-                    }
+                    return GetEnumDescription(e);
                 }
             }
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
-        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is String s)
             {
                 return GetEnumValue(_val, s);
             }
-            else
+
+            if (value is Enum e)
             {
-                if (value is Enum e)
-                {
-                    return GetEnumDescription(e);
-                }
+                return GetEnumDescription(e);
             }
             return base.ConvertFrom(context, culture, value);
         }
@@ -124,7 +121,7 @@ namespace AOVGEN
         //    return true;
         //}
 
-        public override TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             ArrayList values = new ArrayList();
             FieldInfo[] fis = _val.GetFields();
@@ -135,7 +132,7 @@ namespace AOVGEN
                 if (attributes.Length > 0)
                     values.Add(fi.GetValue(fi.Name));
             }
-            return new TypeConverter.StandardValuesCollection(values);
+            return new StandardValuesCollection(values);
         }
     }
 }

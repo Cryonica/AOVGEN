@@ -1,11 +1,17 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using Bunifu.Framework.UI;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class CreateAnalogue
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -305,24 +311,24 @@
 
         #endregion
 
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private Bunifu.Framework.UI.BunifuImageButton bunifuImageButton1;
-        private System.Windows.Forms.Panel panel1;
-        private Telerik.WinControls.UI.RadLabel radLabel1;
-        private Telerik.WinControls.UI.RadLabel radLabel2;
-        private Telerik.WinControls.UI.RadLabel radLabel3;
-        private Telerik.WinControls.UI.RadLabel radLabel4;
-        private Telerik.WinControls.UI.RadTextBox radTextBox1;
-        private Telerik.WinControls.UI.RadTextBox radTextBox2;
-        private Telerik.WinControls.UI.RadTextBox radTextBox3;
-        private Telerik.WinControls.UI.RadTextBox radTextBox4;
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.UI.RadTextBox radTextBox5;
-        private Telerik.WinControls.UI.RadLabel radLabel5;
-        private Telerik.WinControls.UI.RadLabel radLabel6;
-        private Telerik.WinControls.UI.RadLabel radLabel7;
-        private Telerik.WinControls.UI.RadTextBox radTextBox6;
-        private Telerik.WinControls.UI.RadLabel radLabel8;
-        private System.Windows.Forms.Timer timer1;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private BunifuImageButton bunifuImageButton1;
+        private Panel panel1;
+        private RadLabel radLabel1;
+        private RadLabel radLabel2;
+        private RadLabel radLabel3;
+        private RadLabel radLabel4;
+        private RadTextBox radTextBox1;
+        private RadTextBox radTextBox2;
+        private RadTextBox radTextBox3;
+        private RadTextBox radTextBox4;
+        private RadButton radButton1;
+        private RadTextBox radTextBox5;
+        private RadLabel radLabel5;
+        private RadLabel radLabel6;
+        private RadLabel radLabel7;
+        private RadTextBox radTextBox6;
+        private RadLabel radLabel8;
+        private Timer timer1;
     }
 }

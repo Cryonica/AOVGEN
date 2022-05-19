@@ -1,20 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.Collections;
-using System.ComponentModel;
-using System.IO;
 using System.Runtime.InteropServices.ComTypes;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using AutoCAD;
-//using Autodesk.AutoCAD.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
-using GKS_ASU_Loader;
+using System.Windows.Forms;
+using AutoCAD; //using Autodesk.AutoCAD.Runtime;
 
 namespace AOVGEN
 {
@@ -24,22 +18,6 @@ namespace AOVGEN
         #region Set Autocad windw to front
         [DllImport("user32.dll")]
         internal static extern IntPtr SetForegroundWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-        const UInt32 SWP_NOSIZE = 0x0001;
-        const UInt32 SWP_NOMOVE = 0x0002;
-        const UInt32 SWP_SHOWWINDOW = 0x0040;
-
-
-        [DllImport("user32.dll")]
-        internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-        [DllImport("user32.dll")]
-        static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, int wParam, int lParam);
-        const uint WM_KEYDOWN = 0x0100;
-        const int VK_ESCAPE = 0x01B;
-        const int SC_ESCAPE = 0x10001;
 
         #endregion
         #region Set inital variables
@@ -70,7 +48,7 @@ namespace AOVGEN
         delegate AcadDynamicBlockReferenceProperty GetProperty (AcadBlockReference acadBlock, string propertyName);
         #endregion
         #region Set user classes
-        protected class BlockTroubleException : System.Exception
+        protected class BlockTroubleException : Exception
         {
             public string BlockName { get; set; }
             public BlockTroubleException()
@@ -84,7 +62,7 @@ namespace AOVGEN
 
             }
 
-            public BlockTroubleException(string message, System.Exception innerException)
+            public BlockTroubleException(string message, Exception innerException)
                 : base(message, innerException)
             { }
             
@@ -98,14 +76,13 @@ namespace AOVGEN
         public static extern void GetRunningObjectTable(
             int reserved,
             out IRunningObjectTable prot);
-        private List<object> GetRunningInstances(string[] progIds)
+        private static List<object> GetRunningInstances(IEnumerable<string> AcadIDs)
         {
 
             // get the app clsid
-            List<string> clsIds = (from progId in progIds select Type.GetTypeFromProgID(progId) into type where type != null select type.GUID.ToString().ToUpper()).ToList();
+            List<string> clsIds = (from progId in AcadIDs select Type.GetTypeFromProgID(progId) into type where type != null select type.GUID.ToString().ToUpper()).ToList();
             // get Running Object Table ...
-            IRunningObjectTable Rot;
-            GetRunningObjectTable(0, out Rot);
+            GetRunningObjectTable(0, out var Rot);
             if (Rot == null) return null;
             // get enumerator for ROT entries
             Rot.EnumRunning(out var monikerEnumerator);
@@ -131,7 +108,7 @@ namespace AOVGEN
             return instances;
 
         }
-        private readonly string[] progIds =
+        private static readonly string[] progIds =
         {
             "AutoCAD.Application.17",
             "AutoCAD.Application.17.1",
@@ -174,8 +151,8 @@ namespace AOVGEN
                 Acad2019COM = GetAutoCad2019();
                 if (Acad2019COM == null)
                 {
-                    MessageBox.Show("Попытка запуска Autocad 2019\n" +
-                                    "Или попробуйте запустить его вручную");
+                    MessageBox.Show(@"Попытка запуска Autocad 2019\n" +
+                                    @"Или попробуйте запустить его вручную");
                     StartAcadTask = Task.Factory.StartNew(() => StartAutocad(Acad2019));
                 }
 
@@ -195,19 +172,14 @@ namespace AOVGEN
             
             try
             {
-                AutoCAD.AcadApplication acadApp = Acad2019COM;
-                
-                //Process[] localByName = Process.GetProcessesByName("acad");
-                //Process process = localByName[0];
-                //long pid = Acad2019COM.HWND;
+                AcadApplication acadApp = Acad2019COM;
                 IntPtr hWnd = new IntPtr(Acad2019COM.HWND);
                 if (hWnd != IntPtr.Zero)
                 {
                     SetForegroundWindow(hWnd);
-                    //SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
                 }
-                acadApp.WindowState = AutoCAD.AcWindowState.acMax;
-                System.Windows.Forms.SendKeys.Send("{ESC}");
+                acadApp.WindowState = AcWindowState.acMax;
+                SendKeys.Send("{ESC}");
 
                 if (acadApp.Documents.Count > 0)
                 {
@@ -217,29 +189,20 @@ namespace AOVGEN
                         {
                             acadDoc = acadDocument;
                             acadDoc.Activate();
-                            System.Windows.Forms.SendKeys.Send("{ESC}"); //drop all selection and commands in Autocad
+                            SendKeys.Send("{ESC}"); //drop all selection and commands in Autocad
                             break;
                         }
-                        else
-                        {
-                            AcadBlocks blocks = acadDocument.Blocks;
-                            if (blocks.Count>0)
-                            {
-                                AcadBlock podval = (from AcadBlock block in blocks
-                                    where block.Name == "Подвал1"
-                                    select block).FirstOrDefault();
-                                if (podval != null)
-                                {
-                                    acadDoc = acadDocument;
-                                    acadDoc.Activate();
-                                    System.Windows.Forms.SendKeys.Send("{ESC}");
-                                    break;
-                                }
-                                   
 
-                            }
-                                                                
-                        }
+                        AcadBlocks blocks = acadDocument.Blocks;
+                        if (blocks.Count <= 0) continue;
+                        AcadBlock podval = (from AcadBlock block in blocks
+                            where block.Name == "Подвал1"
+                            select block).FirstOrDefault();
+                        if (podval == null) continue;
+                        acadDoc = acadDocument;
+                        acadDoc.Activate();
+                        SendKeys.Send("{ESC}");
+                        break;
                     }
                 }
 
@@ -256,7 +219,7 @@ namespace AOVGEN
                 //acadDoc = acadApp.ActiveDocument;
 
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 if (ex.HResult == -2147467262)
                 {
@@ -280,13 +243,13 @@ namespace AOVGEN
             double[] max;
             double size;
             var blockObj1 = acadDoc.ModelSpace.InsertBlock(insertPoint, blockname, 1, 1, 1, 0, Type.Missing);
-            (blockObj1 as AutoCAD.AcadEntity).GetBoundingBox(out object minPt, out object maxPt);
+            (blockObj1 as AcadEntity).GetBoundingBox(out object minPt, out object maxPt);
             min = (double[])minPt;
             max = (double[])maxPt;
             size = max[0] - min[0];
             //startPnt[0] += size;
 
-            AutoCAD.AcadBlockReference acadBlock = blockObj1;
+            AcadBlockReference acadBlock = blockObj1;
             ArrayList list = new ArrayList
             {
                 acadBlock,
@@ -540,12 +503,12 @@ namespace AOVGEN
                                             {
                                                 case nameof(Room):
                                                     acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo,
-                                                        new double[] {12.5, 33});
+                                                        new[] {12.5, 33});
                                                     break;
                                                 case nameof(CrossSection):
                                                     SetCrossSectionShemaASUName();
                                                     acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo,
-                                                        new double[] {12.5, 33});
+                                                        new[] {12.5, 33});
                                                     break;
                                             }
 
@@ -572,7 +535,7 @@ namespace AOVGEN
                                     shemaASU = comp._SensorH?.ShemaASU;
                                     if (shemaASU != null)
                                     {
-                                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo, new double[] {37.5, 33});
+                                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo, new[] {37.5, 33});
                                         posname(acadBlock, "POSNAME").TextString = comp._SensorH.PosName;
                                         link(acadBlock, "LINK").TextString = cnt.ToString();
                                         shemaASU.ShemaLink1 = cnt;
@@ -607,7 +570,7 @@ namespace AOVGEN
 
 
                                             acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo,
-                                                new double[] {13, 32.67, 0});
+                                                new[] {13, 32.67, 0});
                                             posname(acadBlock, "POSNAME").TextString = outdoor.PosName;
                                             link(acadBlock, "LINK").TextString = cnt.ToString();
                                             shemaASU.ShemaLink1 = cnt;
@@ -1039,8 +1002,8 @@ namespace AOVGEN
                         AcadBlockReference frameblock = DrawFrame();
                         object[] blockproperies = frameblock.GetDynamicBlockProperties();
                         object[] basementpropyrties = basement.GetDynamicBlockProperties();
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> frameType = blockproperies
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Выбор формата");
                         frameType.ElementAt(0).Value = "A3альбом";
 
@@ -1049,8 +1012,8 @@ namespace AOVGEN
                         
 
                         //set basement size
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Расстояние2");
                         //basementProp.ElementAt(0).Value -= 77.96;
                         basementProp.ElementAt(0).Value = basementoffset;
@@ -1066,8 +1029,8 @@ namespace AOVGEN
                         AcadBlockReference frameblock = DrawFrame();
                         object[] blockproperies = frameblock.GetDynamicBlockProperties();
                         object[] basementpropyrties = basement.GetDynamicBlockProperties();
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> frameType = blockproperies
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Выбор формата");
                         frameType.ElementAt(0).Value = "А4х3";
 
@@ -1075,8 +1038,8 @@ namespace AOVGEN
                         AcadBlockReference stamp = DrawStamp(frameblock, "A4x3");
 
                         //set basement size
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Расстояние2");
                         basementProp.ElementAt(0).Value = basementoffset;
                         DrawApplicability_table(frameblock, "A4x3");
@@ -1091,8 +1054,8 @@ namespace AOVGEN
                         AcadBlockReference frameblock = DrawFrame();
                         object[] blockproperies = frameblock.GetDynamicBlockProperties();
                         object[] basementpropyrties = basement.GetDynamicBlockProperties();
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> frameType = blockproperies
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Выбор формата");
                         frameType.ElementAt(0).Value = "А4х4";
 
@@ -1101,8 +1064,8 @@ namespace AOVGEN
 
                         //set basement size
 
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Расстояние2");
 
 
@@ -1120,8 +1083,8 @@ namespace AOVGEN
                         AcadBlockReference frameblock = DrawFrame();
                         object[] blockproperies = frameblock.GetDynamicBlockProperties();
                         object[] basementpropyrties = basement.GetDynamicBlockProperties();
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> frameType = blockproperies
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Выбор формата");
                         frameType.ElementAt(0).Value = "А3х3";
 
@@ -1130,8 +1093,8 @@ namespace AOVGEN
 
                         //set basement size
 
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Расстояние2");
 
 
@@ -1146,8 +1109,8 @@ namespace AOVGEN
                         AcadBlockReference frameblock = DrawFrame();
                         object[] blockproperies = frameblock.GetDynamicBlockProperties();
                         object[] basementpropyrties = basement.GetDynamicBlockProperties();
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> frameType = blockproperies
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Выбор формата");
                         frameType.ElementAt(0).Value = "А3х3";
 
@@ -1156,8 +1119,8 @@ namespace AOVGEN
 
                         //set basement size
 
-                        IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
-                            .OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+                        IEnumerable<AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties
+                            .OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                             .Where(i => i.PropertyName == "Расстояние2");
 
 
@@ -1173,7 +1136,7 @@ namespace AOVGEN
                     #region Set basement attributes
 
                     object[] attributes = basement.GetAttributes();
-                    IEnumerable<AutoCAD.AcadAttributeReference> basementAttribut = attributes
+                    IEnumerable<AcadAttributeReference> basementAttribut = attributes
                         .OfType<AcadAttributeReference>()
                         .Where(i => i.TagString == "МАРКА_ЩИТА_C");
                     basementAttribut.ElementAt(0).TextString = pannel.PannelName;
@@ -2068,14 +2031,14 @@ namespace AOVGEN
         private AcadAttributeReference GetAttrFromBlock(AcadBlockReference acadBlock, string attrname)
         {
             object[] prop = acadBlock.GetAttributes();
-            IEnumerable<AutoCAD.AcadAttributeReference> Properties = prop.OfType<AutoCAD.AcadAttributeReference>()
+            IEnumerable<AcadAttributeReference> Properties = prop.OfType<AcadAttributeReference>()
                 .Where(i => i.TagString == attrname);
             return Properties?.ElementAt(0);
         }
         private static AcadDynamicBlockReferenceProperty GetBlockProperty (AcadBlockReference acadBlock, string propertyName)
         {
             object[] blockproperies = acadBlock.GetDynamicBlockProperties();
-            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> property = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
+            IEnumerable<AcadDynamicBlockReferenceProperty> property = blockproperies.OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                     .Where(i => i.PropertyName == propertyName);
             return property.ElementAt(0);
         }
@@ -2308,9 +2271,9 @@ namespace AOVGEN
                         {
                             char[] chars = shemaASU.Description1.ToCharArray(0, 33);
                             string s = new string(chars);
-                            string[] s2 = s.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            string[] s2 = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                             var s3 = s2.Take(s.Length - 1);
-                            string[] devidedescription = shemaASU.Description1.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            string[] devidedescription = shemaASU.Description1.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                             var k1 = devidedescription.Intersect(s3);
                             var k2 = devidedescription.Except(s3);

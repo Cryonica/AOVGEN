@@ -1,11 +1,15 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class SetCabName
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -119,11 +123,11 @@
 
         #endregion
 
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private Telerik.WinControls.UI.RadTextBox radTextBox1;
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Telerik.WinControls.UI.RadLabel radLabel1;
-        private Telerik.WinControls.UI.RadLabel radLabel2;
-        private Telerik.WinControls.UI.RadTextBox radTextBox2;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private RadTextBox radTextBox1;
+        private RadButton radButton1;
+        private RadLabel radLabel1;
+        private RadLabel radLabel2;
+        private RadTextBox radTextBox2;
     }
 }

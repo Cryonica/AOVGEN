@@ -1,11 +1,17 @@
-﻿namespace AOVGEN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using Bunifu.Framework.UI;
+using Telerik.WinControls.Themes;
+using Telerik.WinControls.UI;
+
+namespace AOVGEN
 {
     partial class CableSettings
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -593,39 +599,39 @@
 
         #endregion
 
-        private Telerik.WinControls.Themes.Office2007BlackTheme office2007BlackTheme1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
-        private Telerik.WinControls.UI.RadButton radButton1;
-        private Bunifu.Framework.UI.BunifuImageButton bunifuImageButton1;
-        private System.Windows.Forms.Panel panel1;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList1;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList3;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList5;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList7;
-        private Telerik.WinControls.UI.RadCheckedDropDownList radCheckedDropDownList1;
-        private Telerik.WinControls.UI.RadCheckedDropDownList radCheckedDropDownList2;
-        private Telerik.WinControls.UI.RadCheckedDropDownList radCheckedDropDownList3;
-        private Telerik.WinControls.UI.RadCheckedDropDownList radCheckedDropDownList4;
-        private System.Windows.Forms.Label label9;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList9;
-        private Bunifu.Framework.UI.BunifuImageButton bunifuImageButton2;
-        private Bunifu.Framework.UI.BunifuImageButton bunifuImageButton3;
-        private Bunifu.Framework.UI.BunifuImageButton bunifuImageButton4;
-        private Bunifu.Framework.UI.BunifuImageButton bunifuImageButton5;
-        private System.Windows.Forms.Panel panel2;
-        private Telerik.WinControls.UI.RadTextBoxControl radTextBoxControl1;
-        private Telerik.WinControls.UI.RadDropDownList radDropDownList10;
-        private Telerik.WinControls.UI.RadToggleSwitch radToggleSwitch1;
-        private System.Windows.Forms.Label label10;
-        private Telerik.WinControls.UI.RadCheckedDropDownList radCheckedDropDownList5;
-        private System.Windows.Forms.Label label11;
-        private Telerik.WinControls.UI.RadButton radButton2;
+        private Office2007BlackTheme office2007BlackTheme1;
+        private Label label1;
+        private Label label2;
+        private Label label3;
+        private Label label4;
+        private Label label5;
+        private Label label6;
+        private Label label7;
+        private Label label8;
+        private RadButton radButton1;
+        private BunifuImageButton bunifuImageButton1;
+        private Panel panel1;
+        private RadDropDownList radDropDownList1;
+        private RadDropDownList radDropDownList3;
+        private RadDropDownList radDropDownList5;
+        private RadDropDownList radDropDownList7;
+        private RadCheckedDropDownList radCheckedDropDownList1;
+        private RadCheckedDropDownList radCheckedDropDownList2;
+        private RadCheckedDropDownList radCheckedDropDownList3;
+        private RadCheckedDropDownList radCheckedDropDownList4;
+        private Label label9;
+        private RadDropDownList radDropDownList9;
+        private BunifuImageButton bunifuImageButton2;
+        private BunifuImageButton bunifuImageButton3;
+        private BunifuImageButton bunifuImageButton4;
+        private BunifuImageButton bunifuImageButton5;
+        private Panel panel2;
+        private RadTextBoxControl radTextBoxControl1;
+        private RadDropDownList radDropDownList10;
+        private RadToggleSwitch radToggleSwitch1;
+        private Label label10;
+        private RadCheckedDropDownList radCheckedDropDownList5;
+        private Label label11;
+        private RadButton radButton2;
     }
 }
