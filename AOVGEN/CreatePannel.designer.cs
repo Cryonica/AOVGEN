@@ -8,10 +8,44 @@ namespace AOVGEN
 {
     partial class CreatePannel
     {
+        private BunifuImageButton bunifuImageButton1;
+
         /// <summary>
         /// Required designer variable.
         /// </summary>
         private IContainer components = null;
+
+        private Office2007BlackTheme office2007BlackTheme1;
+
+        private Panel panel1;
+
+        private Panel panel2;
+
+        private Panel panel3;
+
+        private RadButton radButton1;
+
+        private RadDropDownList radDropDownList2;
+
+        private RadDropDownList radDropDownList3;
+
+        private RadLabel radLabel1;
+
+        private RadLabel radLabel4;
+
+        private RadLabel radLabel5;
+
+        private RadLabel radLabel6;
+
+        private RadLabel radLabel7;
+
+        private RadTextBox radTextBox1;
+
+        private RadToggleSwitch radToggleSwitch1;
+
+        private RadToggleSwitch radToggleSwitch2;
+
+        private Timer timer1;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -314,23 +348,5 @@ namespace AOVGEN
         }
 
         #endregion
-
-        private Office2007BlackTheme office2007BlackTheme1;
-        private Panel panel1;
-        private BunifuImageButton bunifuImageButton1;
-        private Timer timer1;
-        private RadButton radButton1;
-        private RadTextBox radTextBox1;
-        private RadLabel radLabel1;
-        private RadDropDownList radDropDownList3;
-        private RadLabel radLabel4;
-        private RadLabel radLabel5;
-        private RadToggleSwitch radToggleSwitch1;
-        private RadToggleSwitch radToggleSwitch2;
-        private RadLabel radLabel6;
-        private Panel panel2;
-        private RadDropDownList radDropDownList2;
-        private RadLabel radLabel7;
-        private Panel panel3;
     }
 }

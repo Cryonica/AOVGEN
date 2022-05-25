@@ -9,10 +9,102 @@ namespace AOVGEN
 {
     partial class Editor
     {
+        private BunifuImageButton bunifuImageButton1;
+
         /// <summary>
         /// Required designer variable.
         /// </summary>
         private IContainer components = null;
+
+        private Label label1;
+
+        private Office2007BlackTheme office2007BlackTheme1;
+
+        private Panel panel1;
+
+        private Panel panel2;
+
+        private Panel panel3;
+
+        private Panel panel4;
+
+        private PictureBox pictureBox1;
+
+        private PictureBox pictureBox10;
+
+        private PictureBox pictureBox11;
+
+        private PictureBox pictureBox12;
+
+        private PictureBox pictureBox13;
+
+        private PictureBox pictureBox14;
+
+        private PictureBox pictureBox15;
+
+        private PictureBox pictureBox16;
+
+        private PictureBox pictureBox2;
+
+        private PictureBox pictureBox3;
+
+        private PictureBox pictureBox4;
+
+        private PictureBox pictureBox5;
+
+        private PictureBox pictureBox6;
+
+        private PictureBox pictureBox7;
+
+        private PictureBox pictureBox8;
+
+        private PictureBox pictureBox9;
+
+        private RadAutoCompleteBox radAutoCompleteBox1;
+
+        private RadButton radButton1;
+
+        private RadButton radButton10;
+
+        private RadButton radButton11;
+
+        private RadButton radButton12;
+
+        private RadButton radButton13;
+
+        private RadButton radButton14;
+
+        private RadButton radButton15;
+
+        private RadButton radButton16;
+
+        private RadButton radButton2;
+
+        private RadButton radButton3;
+
+        private RadButton radButton4;
+
+        private RadButton radButton5;
+
+        private RadButton radButton6;
+
+        private RadButton radButton7;
+
+        private RadButton radButton8;
+
+        private RadButton radButton9;
+
+        private RadGroupBox radGroupBox1;
+
+        private RadGroupBox radGroupBox2;
+
+        private RadGroupBox radGroupBox3;
+
+        private RadGroupBox radGroupBox4;
+
+        private RadPropertyGrid radPropertyGrid1;
+
+        private Timer timer1;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -781,52 +873,5 @@ namespace AOVGEN
         }
 
         #endregion
-
-        private Panel panel2;
-        private Panel panel4;
-        private PictureBox pictureBox5;
-        private PictureBox pictureBox4;
-        private PictureBox pictureBox2;
-        private Panel panel1;
-        private RadPropertyGrid radPropertyGrid1;
-        private Panel panel3;
-        private Office2007BlackTheme office2007BlackTheme1;
-        private RadButton radButton2;
-        private RadButton radButton11;
-        private RadButton radButton10;
-        private RadButton radButton9;
-        private RadButton radButton8;
-        private RadButton radButton7;
-        private RadButton radButton6;
-        private RadButton radButton5;
-        private RadButton radButton4;
-        private RadButton radButton3;
-        private RadButton radButton1;
-        private RadButton radButton12;
-        private PictureBox pictureBox9;
-        private PictureBox pictureBox8;
-        private PictureBox pictureBox6;
-        private PictureBox pictureBox3;
-        private PictureBox pictureBox1;
-        private PictureBox pictureBox12;
-        private PictureBox pictureBox11;
-        private PictureBox pictureBox10;
-        private RadAutoCompleteBox radAutoCompleteBox1;
-        private BunifuImageButton bunifuImageButton1;
-        private Timer timer1;
-        private RadGroupBox radGroupBox2;
-        private RadGroupBox radGroupBox1;
-        private Label label1;
-        private PictureBox pictureBox14;
-        private PictureBox pictureBox13;
-        private RadButton radButton14;
-        private RadButton radButton13;
-        private PictureBox pictureBox16;
-        private PictureBox pictureBox15;
-        private RadGroupBox radGroupBox4;
-        private RadButton radButton16;
-        private RadGroupBox radGroupBox3;
-        private RadButton radButton15;
-        private PictureBox pictureBox7;
     }
 }

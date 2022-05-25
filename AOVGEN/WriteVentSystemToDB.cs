@@ -268,6 +268,7 @@ namespace AOVGEN
 					UpdateVensystem(ventsystemColumn);
 					return ID;
 				}
+
 				#endregion
 				#region Algorythm core
 				foreach (EditorV2.PosInfo item in ventSystem.ComponentsV2) // перебираем все элементы в вентсистеме
@@ -282,73 +283,74 @@ namespace AOVGEN
 							{
 								var ventguid = Guid.NewGuid().ToString();
 								SupplyVent supplyVent = (SupplyVent)item.Tag; //прямое преобразование item к причтоному вентилятору чтобы были доступны свойства его
-								PressureContol pressureContol = supplyVent._PressureContol; // выем датчика давления из вентилятора
+								
 								Vent.FControl fControl = supplyVent._FControl;
 								string voltage = supplyVent.Voltage.ToString();
 								string controltype = supplyVent.ControlType.ToString();
 								string power = supplyVent.Power;
 								string protectype = supplyVent.Protect.ToString();
 								string blockname = supplyVent.BlockName;
-								string posname = "M";
+								const string posname = "M";
 								string FCGuid = null;
-								Cable Cab1 = supplyVent.Cable1;
-								Cable Cab2 = supplyVent.Cable2;
-								Cable Cab3 = supplyVent.Cable3;
-								Cable Cab4 = supplyVent.Cable4;
-								string posinfoguid = WritePosInfoToDB(ref command, item, ventguid, ventSystem.GUID);
-								var cab1guid = Guid.NewGuid().ToString();
-								Cable Cab5 = pressureContol?.Cable1;
-								if (Cab5 != null)
-								{
-									string senstype = pressureContol.SensorType.ToString();
-									const string senscat = "Pressure";
-									string sensblockname = Cab5.ToBlockName;
-									string sensposname = Cab5.ToPosName;
-									string sortpriority = Cab5.SortPriority;
-									string description = Cab5.Description;
-									bool writeblock = Cab5.WriteBlock;
-									string cabattribute = Cab5.Attrubute.ToString();
-									sensguid1 = WriteSensToDB(ref command, senscat, sensblockname, sensposname, senstype, ventguid, sortpriority, description, writeblock, cabattribute, Cab5, pressureContol.Location);
-									Cab5.cableGUID = sensguid1;
+								
+								//write Posinfo
+                                string posinfoguid = WritePosInfoToDB(ref command, item, ventguid, ventSystem.GUID);
+								
+                                //write supplyvent cables
+                                Cable[] supplyVentCables =
+                                {
+                                    supplyVent.Cable1,
+                                    supplyVent.Cable2,
+                                    supplyVent.Cable3,
+                                    supplyVent.Cable4
+                                };
+                                foreach (Cable supplyVentCable in supplyVentCables)
+                                {
+                                    if (supplyVentCable == null) continue;
+                                    supplyVentCable.cableGUID = Guid.NewGuid().ToString();
+                                    WriteCableToDB(ref command, supplyVentCable.cableGUID, posname, ventguid, supplyVentCable.SortPriority, "Ventilator",
+                                        supplyVentCable.Description, supplyVentCable.WriteBlock, supplyVentCable.Attrubute.ToString(), blockname, supplyVentCable.WireNumbers);
+
+                                }
+
+								//write supplyvent pressure control cable
+                                if (supplyVent._PressureContol != null)
+                                {
+                                    PressureContol pressureContol = supplyVent._PressureContol; // выем датчика давления из вентилятора
+                                    Cable Cab5 = pressureContol.Cable1;
+                                    if (Cab5 != null)
+                                    {
+                                        string senstype = pressureContol.SensorType.ToString();
+                                        const string senscat = "Pressure";
+                                        string sensblockname = Cab5.ToBlockName;
+                                        string sensposname = Cab5.ToPosName;
+                                        string sortpriority = Cab5.SortPriority;
+                                        string description = Cab5.Description;
+                                        bool writeblock = Cab5.WriteBlock;
+                                        string cabattribute = Cab5.Attrubute.ToString();
+                                        sensguid1 = WriteSensToDB(ref command, senscat, sensblockname, sensposname, senstype, ventguid, sortpriority, description, writeblock, cabattribute, Cab5, pressureContol.Location);
+                                        Cab5.cableGUID = sensguid1;
+                                    }
 								}
-								if (fControl != null)
+
+                                //generation GUID for FC Control
+                                if (fControl != null)
 								{
 
 									FCGuid = Guid.NewGuid().ToString();
 									fControl.GUID = FCGuid;
 								}
+
+								//Write Supply Ventilator
 								string InsertQueryVent = "INSERT INTO Ventilator ([GUID], [SystemGUID], SystemName, Project, Voltage, " +
 														 "ControlType, Power, ProtectType, [SensPDS], [Cable1], BlockName, PosName, " +
 														 "Description, FControl, Location, Position, PosInfoGUID) VALUES " +
 														 $"('{ventguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}'," +
-														 $"'{voltage}','{controltype}','{power}','{protectype}','{sensguid1}','{ cab1guid}'," +
+														 $"'{voltage}','{controltype}','{power}','{protectype}','{sensguid1}','{ supplyVent.Cable1?.cableGUID}'," +
 														 $"'{blockname}', '{posname}', '{supplyVent.Description}', '{FCGuid}', 'Supply', " +
 														 $"'{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
 								command.CommandText = InsertQueryVent;
 								command.ExecuteNonQuery();
-								if (Cab1 != null)
-								{
-									WriteCableToDB(ref command, cab1guid, posname, ventguid, Cab1.SortPriority, "Ventilator",
-										Cab1.Description, Cab1.WriteBlock, Cab1.Attrubute.ToString(), blockname, Cab1.WireNumbers);
-								}
-								if (Cab2 != null)
-								{
-									var cab2guid = Guid.NewGuid().ToString();
-									WriteCableToDB(ref command, cab2guid, posname, ventguid, Cab2.SortPriority, "Ventilator",
-										Cab2.Description, Cab2.WriteBlock, Cab2.Attrubute.ToString(), blockname, Cab2.WireNumbers);
-								}
-								if (Cab3 != null)
-								{
-									var cab3guid = Guid.NewGuid().ToString();
-									WriteCableToDB(ref command, cab3guid, posname, ventguid, Cab3.SortPriority, "Ventilator",
-										Cab3.Description, Cab3.WriteBlock, Cab3.Attrubute.ToString(), blockname, Cab3.WireNumbers);
-								}
-								if (Cab4 != null)
-								{
-									var cab4guid = Guid.NewGuid().ToString();
-									WriteCableToDB(ref command, cab4guid, posname, ventguid, Cab4.SortPriority, "Ventilator",
-										Cab4.Description, Cab4.WriteBlock, Cab4.Attrubute.ToString(), blockname, Cab4.WireNumbers);
-								}
 
 								UpdateVensystem("SupplyVent");
 							}
@@ -375,59 +377,62 @@ namespace AOVGEN
 								string FCGuid = null;
 								const string posname = "M";
 								sensguid1 = string.Empty;
-								Cable Cab1 = extVent.Cable1;
-								Cable Cab2 = extVent.Cable2;
-								Cable Cab3 = extVent.Cable3;
-								Cable Cab4 = extVent.Cable4;
+								
+                                //write Posinfo
 								string posinfoguid = WritePosInfoToDB(ref command, item, ventguid, ventSystem.GUID);
-								var cab1guid = Guid.NewGuid().ToString();
-								Cable Cab5 = pressureContol?.Cable1;
-								if (Cab5 != null)
-								{
-									string senstype = pressureContol.SensorType.ToString();
-									const string senscat = "Pressure";
-									string sensblockname = Cab5.ToBlockName;
-									string sensposname = Cab5.ToPosName;
-									string sortpriority = Cab5.SortPriority;
-									string description = Cab5.Description;
-									bool writeblock = Cab5.WriteBlock;
-									string cabattribute = Cab5.Attrubute.ToString();
-									sensguid1 = WriteSensToDB(ref command, senscat, sensblockname, sensposname, senstype, ventguid, sortpriority, description, writeblock, cabattribute, Cab5, pressureContol.Location);
-									Cab5.cableGUID = sensguid1;
+
+								//Write Exhaust Vent Cabs
+                                Cable[] extVentCables =
+                                {
+                                    extVent.Cable1,
+                                    extVent.Cable2,
+                                    extVent.Cable3,
+                                    extVent.Cable4
+                                };
+                                foreach (Cable extVentCable in extVentCables)
+                                {
+									if (extVentCable == null) continue;
+									extVentCable.cableGUID = Guid.NewGuid().ToString();
+                                    WriteCableToDB(ref command, extVentCable.cableGUID, posname, ventguid, extVentCable.SortPriority, "Ventilator",
+                                        extVentCable.Description, extVentCable.WriteBlock, extVentCable.Attrubute.ToString(), blockname1, extVentCable.WireNumbers);
+								}
+
+                                if (extVent._PressureContol != null)
+                                {
+                                    PressureContol ExtVentPressureContol = extVent._PressureContol;
+                                    Cable Cab5 = ExtVentPressureContol.Cable1;
+                                    if (Cab5 != null)
+                                    {
+                                        string senstype = pressureContol.SensorType.ToString();
+                                        const string senscat = "Pressure";
+                                        string sensblockname = Cab5.ToBlockName;
+                                        string sensposname = Cab5.ToPosName;
+                                        string sortpriority = Cab5.SortPriority;
+                                        string description = Cab5.Description;
+                                        bool writeblock = Cab5.WriteBlock;
+                                        string cabattribute = Cab5.Attrubute.ToString();
+                                        sensguid1 = WriteSensToDB(ref command, senscat, sensblockname, sensposname, senstype, ventguid, sortpriority, description, writeblock, cabattribute, Cab5, pressureContol.Location);
+                                        Cab5.cableGUID = sensguid1;
+                                    }
+
 								}
 								if (fControl != null)
 								{
 									FCGuid = Guid.NewGuid().ToString();
 									fControl.GUID = FCGuid;
 								}
-								string InsertQueryVent1 = $"INSERT INTO Ventilator ([GUID], [SystemGUID], SystemName, [Project], Voltage, ControlType, Power, ProtectType, [SensPDS], [Cable1], BlockName, PosName, Description, FControl, Location, Position, PosInfoGUID) VALUES ('{ventguid}','{ventSystem.GUID}','{ventSystem.SystemName}','{ProjectGuid}','{voltage1}','{controltype1}','{power1}','{protectype1}','{sensguid1}','{cab1guid}','{blockname1}', '{posname}', '{extVent.Description}', '{FCGuid}', 'Exhaust', '{EditorV2.PosInfo.PosToString(item.Pos)}', '{posinfoguid}')";
+								string InsertQueryVent1 = "INSERT INTO Ventilator ([GUID], [SystemGUID], SystemName, [Project], " +
+                                                          "Voltage, ControlType, Power, ProtectType, [SensPDS], [Cable1], " +
+                                                          "BlockName, PosName, Description, FControl, Location, Position, " +
+                                                          "PosInfoGUID) " +
+                                                          $"VALUES ('{ventguid}','{ventSystem.GUID}','{ventSystem.SystemName}'," +
+                                                          $"'{ProjectGuid}','{voltage1}','{controltype1}','{power1}','{protectype1}'," +
+                                                          $"'{sensguid1}','{extVent.Cable1?.cableGUID}','{blockname1}', '{posname}', " +
+                                                          $"'{extVent.Description}', '{FCGuid}', 'Exhaust', '{EditorV2.PosInfo.PosToString(item.Pos)}', " +
+                                                          $"'{posinfoguid}')";
 								command.CommandText = InsertQueryVent1;
 								command.ExecuteNonQuery();
-								if (Cab1 != null)
-								{
-									WriteCableToDB(ref command, cab1guid, posname, ventguid, Cab1.SortPriority, "Ventilator",
-									Cab1.Description, Cab1.WriteBlock, Cab1.Attrubute.ToString(), blockname1, Cab1.WireNumbers);
-								}
-								if (Cab2 != null)
-								{
-									var cab2guid = Guid.NewGuid().ToString();
-									WriteCableToDB(ref command, cab2guid, posname, ventguid, Cab2.SortPriority, "Ventilator",
-									Cab2.Description, Cab2.WriteBlock, Cab2.Attrubute.ToString(), blockname1, Cab2.WireNumbers);
-								}
-								if (Cab3 != null)
-								{
-									var cab3guid = Guid.NewGuid().ToString();
-									WriteCableToDB(ref command, cab3guid, posname, ventguid, Cab3.SortPriority, "Ventilator",
-									Cab3.Description, Cab3.WriteBlock, Cab3.Attrubute.ToString(), blockname1, Cab3.WireNumbers);
-								}
-								if (Cab4 != null)
-								{
-									var cab4guid = Guid.NewGuid().ToString();
-									WriteCableToDB(ref command, cab4guid, posname, ventguid, Cab4.SortPriority, "Ventilator",
-									Cab4.Description, Cab4.WriteBlock, Cab4.Attrubute.ToString(), blockname1, Cab4.WireNumbers);
-								}
-								UpdateVensystem("ExtVent");
-
+                                UpdateVensystem("ExtVent");
 							}
 							catch
 							{
@@ -1299,6 +1304,7 @@ namespace AOVGEN
 				#endregion
 				#endregion
 				#region Common Functions
+				
 				string WriteSensToDB(ref SQLiteCommand oleDbCommand, string senscat, string sensbockname, string sensposname, string senstype, string hostguid, string sortpriority, string description, bool writeblock, string attribute, Cable cab, string location)
 				{
 					string vendor1 = string.Empty;
@@ -1328,9 +1334,12 @@ namespace AOVGEN
 
 					oleDbCommand.CommandText = QuerySens;
 					oleDbCommand.ExecuteNonQuery();
-					switch (senscat)
-					{
-						case "Pressure":
+                    
+                    switch (senscat)
+                    {
+                           
+
+                        case "Pressure":
 							WriteCableToDB(ref oleDbCommand, senscableguid, sensposname, BDsensguid, sortpriority, "SensPDS", description, writeblock, attribute, sensbockname, WireNumbers);
 							break;
 						case "Temperature":
@@ -1343,6 +1352,7 @@ namespace AOVGEN
 					}
 					return BDsensguid;
 				}
+				
 
 				string[] WriteValveToDB(ref SQLiteCommand oleDbCommand, string valveblockname, string valveposname, string valvetype, string hostguid, string description, Cable Cab1, Cable Cab2, Cable Cab3, Cable Cab4, Cable Cab5)
 				{
@@ -1583,6 +1593,7 @@ namespace AOVGEN
 					Cable Cab2 = vent.Cable2;
 					Cable Cab3 = vent.Cable3;
 					Cable Cab4 = vent.Cable4;
+
 					var cab1guid = Guid.NewGuid().ToString();
 					if (fControl != null)
 					{
@@ -1599,7 +1610,10 @@ namespace AOVGEN
 											 $"'{EditorV2.PosInfo.PosToString(item.Pos)}', '{item.GUID}', '{vent.AttributeSpare}', '{Spareventguid}')";
 					command.CommandText = InsertQueryVent;
 					command.ExecuteNonQuery();
-					if (Cab1 != null)
+
+                    
+                    
+                    if (Cab1 != null)
 					{
 						WriteCableToDB(ref command, cab1guid, posname, vent.GUID, Cab1.SortPriority, "Ventilator",
 							Cab1.Description, Cab1.WriteBlock, Cab1.Attrubute.ToString(), blockname, Cab1.WireNumbers);
@@ -1636,6 +1650,7 @@ namespace AOVGEN
 			
 
 		}
+		
 
 	}
 	

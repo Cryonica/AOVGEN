@@ -6,4 +6,3 @@ C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Release\Updater.csproj.Genera
 C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Release\Updater.csproj.CoreCompileInputs.cache
 C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Release\Updater.exe
 C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Release\Updater.pdb
-C:\Users\akoltakov\source\repos\AOVGEN\Updater\obj\Release\Updater.csproj.AssemblyReference.cache

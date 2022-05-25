@@ -20,9 +20,8 @@ namespace AOVGEN
 {
     public partial class DataBaseForm : Form
     {
-        public IRevitExternalService Service { get; set; }
-        bool mainformload;
-        bool connectOK;
+        private bool connectOK;
+        private bool mainformload;
         public DataBaseForm(IRevitExternalService externalService)
         {
             InitializeComponent();
@@ -31,11 +30,117 @@ namespace AOVGEN
             AnimationEmergence();
             Service = externalService;
         }
+
+        public string Configpath { get; set; }
+        public IRevitExternalService Service { get; set; }
+        public XmlDocument Xmldoc { get; set; }
+
+        public static int SpawnProcessSynchronous(string fileName, string args, out string stdOut, bool isVisible, DataReceivedEventHandler OutputDataReceivedDelegate)
+        {
+            int returnValue = 0;
+            var processInfo = new ProcessStartInfo();
+            stdOut = "";
+            processInfo.FileName = fileName;
+            processInfo.WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+            Debug.Print("Set working directory to: {0}", processInfo.WorkingDirectory);
+
+            processInfo.WindowStyle = isVisible ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
+            processInfo.UseShellExecute = false;
+            processInfo.RedirectStandardOutput = true;
+            processInfo.CreateNoWindow = true;
+
+            processInfo.Arguments = args;
+            using (Process process = Process.Start(processInfo))
+            {
+                if (OutputDataReceivedDelegate != null)
+                {
+                    if (process != null)
+                    {
+                        process.OutputDataReceived += OutputDataReceivedDelegate;
+                        process.BeginOutputReadLine();
+                    }
+                }
+                else
+                {
+                    if (process != null) stdOut = process.StandardOutput.ReadToEnd();
+                }
+                // do not reverse order of synchronous read to end and WaitForExit or deadlock
+                // Wait for the process to end.  
+                if (process == null) return returnValue;
+                process.WaitForExit();
+                returnValue = process.ExitCode;
+            }
+            return returnValue;
+        }
+
+        public string FindProvider()
+        {
+            string prov = string.Empty;
+            var reader = OleDbEnumerator.GetRootEnumerator();
+
+            var list = new List<String>();
+            while (reader.Read())
+            {
+                for (var i = 0; i < reader.FieldCount; i++)
+                {
+                    if (reader.GetName(i) == "SOURCES_NAME")
+                    {
+                        list.Add(reader.GetValue(i).ToString());
+                    }
+                }
+            }
+            reader.Close();
+            foreach (var provider in list)
+            {
+                if (provider.StartsWith("Microsoft.ACE.OLEDB"))
+                {
+                    prov = provider;
+                    break;
+                }
+            }
+            return prov;
+        }
+
+        private void CheckAndStartmainForm()
+        {
+            if (Opacity == 0)
+
+            {
+
+                //timer1.Stop();
+
+                //IList<string> bd = timer1.Tag as IList<string>;
+
+                //MainForm mainForm = new MainForm(bd[1].ToString(), bd[0].ToString()); 
+
+                //mainForm.Show();
+                //Close();
+
+            }
+        }
+
+        private void DataBaseForm_Load(object sender, EventArgs e)
+        {
+            timer2.Start();
+
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            System.Windows.Forms.Timer timer = (System.Windows.Forms.Timer)sender;
+            if (!mainformload) return;
+            timer.Stop();
+            Close();
+        }
+
         private void Timer1_Tick(object sender, EventArgs e)
         {
             CheckAndStartmainForm();
         }
         #region XML
+        private static void ShowMessage(string message) =>
+            MessageBox.Show(message, "Ахтунг!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
         private void LoadXML()
         {
             XmlDocument doc = new XmlDocument();
@@ -176,11 +281,14 @@ namespace AOVGEN
             }
             
         }
-        private static void ShowMessage(string message) => 
-            MessageBox.Show(message, "Ахтунг!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         #endregion
 
         #region ButtonsClick
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            mainformload = true;
+        }
+
         private void RadButton1_Click(object sender, EventArgs e)
         {
             //check selected item
@@ -272,12 +380,6 @@ namespace AOVGEN
             t.Start();
             
         }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            mainformload = true;
-        }
-
         private void RadButton2_Click(object sender, EventArgs e)
         {
             
@@ -326,33 +428,6 @@ namespace AOVGEN
 
         }
         #endregion
-        public string FindProvider()
-        {
-            string prov = string.Empty;
-            var reader = OleDbEnumerator.GetRootEnumerator();
-
-            var list = new List<String>();
-            while (reader.Read())
-            {
-                for (var i = 0; i < reader.FieldCount; i++)
-                {
-                    if (reader.GetName(i) == "SOURCES_NAME")
-                    {
-                        list.Add(reader.GetValue(i).ToString());
-                    }
-                }
-            }
-            reader.Close();
-            foreach (var provider in list)
-            {
-                if (provider.StartsWith("Microsoft.ACE.OLEDB"))
-                {
-                    prov = provider;
-                    break;
-                }
-            }
-            return prov;
-        }
         #region Animation
         private void AnimationEmergence()
         {
@@ -365,45 +440,12 @@ namespace AOVGEN
             };
             animator.Play(this, Animator.KnownProperties.Opacity);
         }
-       
+
         #endregion
-
-        public XmlDocument Xmldoc { get; set; }
-        public string Configpath { get; set; }
-        private void CheckAndStartmainForm()
-        {
-            if (Opacity ==0)
-           
-            {
-                
-                //timer1.Stop();
-                
-                //IList<string> bd = timer1.Tag as IList<string>;
-
-                //MainForm mainForm = new MainForm(bd[1].ToString(), bd[0].ToString()); 
-                
-                //mainForm.Show();
-                //Close();
-
-            }
-        }
-        private class BDMessage
-        {
-            internal const string MessageOk = "Соединение установлено";
-            internal const string MessageAccessFail = "Невозможно открыть базу данных \n Возможно не установлен Microsoft Access 2010 \n" + "или программа запущена в режиеме x32";
-            internal const string MessageSQLLiteFail = "Невозможно открыть базу данных SQL Lite";
-        }
-
-        private void DataBaseForm_Load(object sender, EventArgs e)
-        {
-            timer2.Start();
-            
-        }
-
         private void Timer2_Tick(object sender, EventArgs e)
         {
             if (!timer2.Enabled) return;
-            if (Opacity ==0)
+            if (Opacity == 0)
             {
                 AnimationEmergence();
             }
@@ -414,51 +456,12 @@ namespace AOVGEN
 
 
         }
-        private void Timer_Tick(object sender, EventArgs e)
+
+        private class BDMessage
         {
-            System.Windows.Forms.Timer timer = (System.Windows.Forms.Timer)sender;
-            if (!mainformload) return;
-            timer.Stop();
-            Close();
+            internal const string MessageAccessFail = "Невозможно открыть базу данных \n Возможно не установлен Microsoft Access 2010 \n" + "или программа запущена в режиеме x32";
+            internal const string MessageOk = "Соединение установлено";
+            internal const string MessageSQLLiteFail = "Невозможно открыть базу данных SQL Lite";
         }
-        public static int SpawnProcessSynchronous(string fileName, string args, out string stdOut, bool isVisible, DataReceivedEventHandler OutputDataReceivedDelegate)
-        {
-            int returnValue = 0;
-            var processInfo = new ProcessStartInfo();
-            stdOut = "";
-            processInfo.FileName = fileName;
-            processInfo.WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
-            Debug.Print("Set working directory to: {0}", processInfo.WorkingDirectory);
-
-            processInfo.WindowStyle = isVisible ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
-            processInfo.UseShellExecute = false;
-            processInfo.RedirectStandardOutput = true;
-            processInfo.CreateNoWindow = true;
-
-            processInfo.Arguments = args;
-            using (Process process = Process.Start(processInfo))
-            {
-                if (OutputDataReceivedDelegate != null)
-                {
-                    if (process != null)
-                    {
-                        process.OutputDataReceived += OutputDataReceivedDelegate;
-                        process.BeginOutputReadLine();
-                    }
-                }
-                else
-                {
-                    if (process != null) stdOut = process.StandardOutput.ReadToEnd();
-                }
-                // do not reverse order of synchronous read to end and WaitForExit or deadlock
-                // Wait for the process to end.  
-                if (process == null) return returnValue;
-                process.WaitForExit();
-                returnValue = process.ExitCode;
-            }
-            return returnValue;
-        }
-
-
     }
 }

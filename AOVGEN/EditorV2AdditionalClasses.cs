@@ -1,4 +1,5 @@
-﻿
+﻿using AOVGEN.Properties;
+using Bunifu.UI.WinForms;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,12 +14,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using AOVGEN.Properties;
-using Bunifu.UI.WinForms;
 using Telerik.WinControls.UI;
 
 namespace AOVGEN
 {
+    
     public partial class EditorV2 : RadForm
     {
         #region Global variables
@@ -38,6 +38,7 @@ namespace AOVGEN
         private bool isDrag;
         private Rectangle theRectangle = new Rectangle(new Point(0, 0), new Size(0, 0));
         private Point startPoint;
+
         private static readonly Dictionary<string, string> imageDictionary = new Dictionary<string, string>
         {
             {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_T), "room__arrow_supp_exh_T"},
@@ -46,16 +47,23 @@ namespace AOVGEN
             {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_TH), "room__arrow_supp_exh_TH"},
             {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_TH_big), "room__arrow_supp_exh_TH_big"},
             {MD5HashGenerator.GenerateKey(Resources.room__arrow_supply_TH), "room__arrow_supply_TH"},
-
-
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_exhaust_L), "room__arrow_exhaust_L"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_exhaust_R), "room__arrow_exhaust_R"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh), "room__arrow_supp_exh"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_supply), "room__arrow_supply"},
+            {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_big), "room__arrow_supp_exh_big"},
+            
         };
 
-        #endregion
+        #endregion Global variables
+
         #region User functions
+
         internal static Point CreatePointFromCell(int[] cell)
         {
             return new Point((cell[0] * 60) + 185, (cell[1] * 60) + 185);
         }
+
         private void GenerateCells()
         {
             const int cellSize = 60;
@@ -71,39 +79,39 @@ namespace AOVGEN
                 switch (t)
                 {
                     case 9:
-                    {
-                        var A4x3 = new Label
                         {
-                            Location = new Point(200 + t * cellSize, 160),
-                            AutoSize = true,
-                            Text = "A4x3"
-                        };
-                        A4x3.SendToBack();
-                        Controls.Add(A4x3);
-                        break;
-                    }
+                            var A4x3 = new Label
+                            {
+                                Location = new Point(200 + t * cellSize, 160),
+                                AutoSize = true,
+                                Text = "A4x3"
+                            };
+                            A4x3.SendToBack();
+                            Controls.Add(A4x3);
+                            break;
+                        }
                     case 13:
-                    {
-                        var A4x4 = new Label
                         {
-                            Location = new Point(200 + t * cellSize, 160),
-                            AutoSize = true,
-                            Text = "A4x4"
-                        };
-                        Controls.Add(A4x4);
-                        break;
-                    }
+                            var A4x4 = new Label
+                            {
+                                Location = new Point(200 + t * cellSize, 160),
+                                AutoSize = true,
+                                Text = "A4x4"
+                            };
+                            Controls.Add(A4x4);
+                            break;
+                        }
                     case 15:
-                    {
-                        var A3x3 = new Label
                         {
-                            Location = new Point(140 + t * cellSize, 160),
-                            AutoSize = true,
-                            Text = "A3x3"
-                        };
-                        Controls.Add(A3x3);
-                        break;
-                    }
+                            var A3x3 = new Label
+                            {
+                                Location = new Point(140 + t * cellSize, 160),
+                                AutoSize = true,
+                                Text = "A3x3"
+                            };
+                            Controls.Add(A3x3);
+                            break;
+                        }
                 }
             }
             for (var t = 0; t <= 5; t++)
@@ -137,6 +145,7 @@ namespace AOVGEN
                 }
             }
         }
+
         private int[] GetCellPos(object s)
         {
             //correct position in mattrix
@@ -147,7 +156,6 @@ namespace AOVGEN
                 bool bigout = posInfo.SizeX > 0 & posInfo.PozX == 14 & posInfo.PozX < 50 & posInfo.SizeY > 0 & posInfo.PozY == 4;
                 if (pursor.X >= 180 && pursor.Y >= 180 && pursor.Y <= 480 && pursor.X < 1080 && !bigout)
                 {
-
                     int mod1 = pursor.X % 60;
                     int mod2 = pursor.Y % 60;
                     int x;
@@ -163,13 +171,13 @@ namespace AOVGEN
 
                     if (mod2 < 60)
                     {
-                        y = (pursor.Y - mod2) ;
+                        y = (pursor.Y - mod2);
                     }
                     else
                     {
                         y = pursor.Y - mod2 + 60;
                     }
-                        
+
                     var oldLocation = button.Location;
                     int CellX = (x - 180) / 60;
                     int CellY = (y - 180) / 60;
@@ -182,9 +190,8 @@ namespace AOVGEN
                     mymas[1] = CellY;//calculated CellY
                     int sizeX = posInfo.SizeX; //Object SizeX
                     int sizeY = posInfo.SizeY; //Object SizeY
-                    if (s != null && CellX <= 15 && CellX >= 0)
+                    if (CellX >= 0)
                     {
-
                         var occupied = OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(mymas)); //set occupied cell to false
                         if (sizeX > 0 || sizeY > 0)
                         {
@@ -201,14 +208,13 @@ namespace AOVGEN
                                     mymas[1] = sizeMas[1];
                                     break;
                                 }
-
                             }
                         }
                         if (occupied)
                         {
-                            //совпадает позиция                            
+                            //совпадает позиция
                             present = true;
-                            return new[] { oldLocation.X, oldLocation.Y};
+                            return new[] { oldLocation.X, oldLocation.Y };
                         }
                         present = false;
                         GlobalPosInfo.Pos = mymas;
@@ -217,49 +223,50 @@ namespace AOVGEN
                         posInfo.Pos[1] = CellY;
                         button.BackColor = Color.FromArgb(250, 4, 243, 100);
 
-                        int kX =0, KY = 0;
+                        int kX = 0, KY = 0;
                         switch (posInfo.SizeY)
                         {
                             case 0:
                                 kX = (60 - button.Width) / 2;
                                 KY = (60 - button.Height) / 2;
                                 break;
+
                             case 1:
                                 kX = (60 - button.Width) / 2;
                                 KY = (120 - button.Height) / 2;
                                 break;
                         }
-                        return new[] { x + kX , y + KY };
+                        return new[] { x + kX, y + KY };
                     }
                 }
                 //out of mattrix
                 OutOfMattrix(posInfo, button);
             }
-            return new[] { pursor.X , pursor.Y  };
+            return new[] { pursor.X, pursor.Y };
             void OutOfMattrix(PosInfo posInfo, Bunifu.Framework.UI.BunifuImageButton pictureBox)
             {
                 posInfo.Pos[0] = 50;
                 posInfo.Pos[1] = 50;
                 pictureBox.BackColor = Color.Red;
-
             }
         }
-        private void CreateButton(Image image, Type type, dynamic ImageName )
+
+        private void CreateButton(Image image, Type type, dynamic ImageName)
         {
             lastSelectedImage = image;
-            
+
             DoubleBufferedBunifuImageButton button = new DoubleBufferedBunifuImageButton
             {
                 Image = image,
                 Size = new Size(50, 50),
-                
+
                 BackgroundImageLayout = ImageLayout.Stretch,
                 BackColor = Color.Red,
                 Location = new Point(Cursor.Position.X, Cursor.Position.Y),
                 Padding = new Padding(3),
                 InitialImage = image,
                 SizeMode = PictureBoxSizeMode.StretchImage,
-                Zoom= 15
+                Zoom = 15
             };
             //button.LocationChanged += Button_LocationChanged;
             object comp = CreateComp(type, image);
@@ -276,34 +283,37 @@ namespace AOVGEN
                     lastComponent = null;
                     lastPosInfo = null;
                     break;
+
                 case nameof(ExtVent):
                     ExtVentPresent = true;
                     lastComponent = null;
                     lastPosInfo = null;
                     break;
+
                 case nameof(SpareSuplyVent):
                     SupplyVentSparePresent = true;
                     lastComponent = null;
                     lastPosInfo = null;
                     break;
+
                 case nameof(SpareExtVent):
                     ExtVentSparePresent = true;
                     lastComponent = null;
                     lastPosInfo = null;
                     break;
+
                 default:
                     lastComponent = comp;
                     break;
             }
-           
-            
+
             button.Tag = posInfo;
             button.Click += button_Click;
             Controls.Add(button);
             Controls.SetChildIndex(button, 0);
             currObject = button;
-           
         }
+
         private void CreateButton(Image image, Type type, dynamic ImageName, object sender)
         {
             lastSelectedImage = image;
@@ -337,13 +347,8 @@ namespace AOVGEN
             Controls.SetChildIndex(button, 0);
             currObject = button;
             //return button;
-
         }
 
-        private static void Button_LocationChanged(object sender, EventArgs e)
-        {
-            var button = (DoubleBufferedBunifuImageButton)sender;
-        }
         private void CreateBigButton(Image image, Type type, int x, int y, dynamic ImageName)
         {
             lastSelectedImage = image;
@@ -359,7 +364,6 @@ namespace AOVGEN
                 InitialImage = image,
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Zoom = 5
-
             };
             object comp = CreateComp(type, image);
             PosInfo posInfo = new PosInfo
@@ -370,16 +374,15 @@ namespace AOVGEN
                 ImageName = ImageName
             };
             lastPosInfo = posInfo;
-            
-            
+
             button.Tag = posInfo;
             button.Click += button_Click;
             Controls.Add(button);
             Controls.SetChildIndex(button, 0);
             currObject = button;
             lastComponent = comp;
-
         }
+
         private void CreateBigButton(Image image, Type type, int x, int y, dynamic ImageName, object sender)
         {
             lastSelectedImage = image;
@@ -396,7 +399,6 @@ namespace AOVGEN
                 InitialImage = image,
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Zoom = 5
-
             };
             object comp = CreateComp(type, image);
             PosInfo posInfo = new PosInfo
@@ -408,69 +410,78 @@ namespace AOVGEN
             };
             lastPosInfo = posInfo;
 
-
             button.Tag = posInfo;
             button.Click += button_Click;
             Controls.Add(button);
             Controls.SetChildIndex(button, 0);
             currObject = button;
             lastComponent = comp;
-
         }
-        
+
         private static object CreateComp(Type type, Image image)
         {
             object comp = null;
             bool equalObjects(object obj1, object obj2) => MD5HashGenerator.GenerateKey(obj1) == MD5HashGenerator.GenerateKey(obj2);
-           
+
             string GetRoomImageName()
             {
-
                 return imageDictionary[MD5HashGenerator.GenerateKey(image)];
-                
             }
-            
+
             switch (type.Name)
             {
                 case nameof(OutdoorTemp):
                     break;
+
                 case nameof(SupplyTemp):
                     break;
+
                 case nameof(ExhaustTemp):
                     break;
+
                 case nameof(IndoorTemp):
                     break;
+
                 case nameof(WaterHeater):
                     comp = new WaterHeater();
                     break;
+
                 case nameof(ElectroHeater):
                     comp = new ElectroHeater();
                     break;
+
                 case nameof(Recuperator):
                     comp = new Recuperator();
                     break;
+
                 case nameof(SupplyFiltr):
                     comp = new SupplyFiltr();
                     break;
+
                 case nameof(ExtFiltr):
                     comp = new ExtFiltr();
                     break;
+
                 case nameof(Filtr):
                     comp = new Filtr
                     {
                         PressureProtect = Sensor.SensorType.Discrete
                     };
                     break;
+
                 case nameof(SupplyVent):
                     comp = new SupplyVent();
                     break;
+
                 case nameof(ExtVent):
                     comp = new ExtVent();
                     break;
+
                 case nameof(SpareSuplyVent):
                     comp = new SpareSuplyVent();
-                    
+
                     break;
+
                 case nameof(SpareExtVent):
                     comp = new SpareExtVent();
                     break;
@@ -478,9 +489,11 @@ namespace AOVGEN
                 case nameof(Humidifier):
                     comp = new Humidifier();
                     break;
+
                 case nameof(Froster):
                     comp = new Froster(Froster.FrosterType.Water);
                     break;
+
                 case nameof(CrossSection):
                     {
                         bool isT = equalObjects(Resources.cross1T, image);
@@ -490,11 +503,12 @@ namespace AOVGEN
                         comp = comp ?? new CrossSection(false, false);
                     }
                     break;
+
                 case nameof(Room):
                     {
-                        bool isT = 
-                            equalObjects(Resources.room__arrow_supp_exh_T, image)||
-                            equalObjects(Resources.room__arrow_supp_exh_T_big, image)||
+                        bool isT =
+                            equalObjects(Resources.room__arrow_supp_exh_T, image) ||
+                            equalObjects(Resources.room__arrow_supp_exh_T_big, image) ||
                             equalObjects(Resources.room__arrow_supply_T, image);
                         bool isTH =
                             equalObjects(Resources.room__arrow_supp_exh_TH, image) ||
@@ -506,7 +520,6 @@ namespace AOVGEN
                         comp = comp ?? new Room(false, false);
                     }
                     break;
-                
 
                 case nameof(SupplyDamper):
 
@@ -517,128 +530,120 @@ namespace AOVGEN
                             SetSensor = true
                         };
                         comp = supplyDamper;
-
                     }
                     else
                     {
                         comp = new SupplyDamper();
                     }
                     break;
+
                 case nameof(ExtDamper):
                     comp = new ExtDamper();
                     break;
-
             }
             return comp;
         }
-        
+
         private SQLiteConnection OpenDB()
         {
             string BDPath = DBFilePath;
             string connectionstr = @"Data Source=" + BDPath + ";";
             try
             {
-                SQLiteConnection connection = new SQLiteConnection(connectionstr);
-                return connection;
+                SQLiteConnection Connection = new SQLiteConnection(connectionstr);
+                return Connection;
             }
             catch
             {
             }
             return null;
-
         }
+
         private void DeleteVentSystem(string ventsystemGUID)
         {
-            SQLiteConnection connection = OpenDB();
-            connection.Open();
-            if (connection.State == ConnectionState.Open)
+            SQLiteConnection DeleteConnection = OpenDB();
+            DeleteConnection.Open();
+            SQLiteCommand command = new SQLiteCommand
             {
-                SQLiteCommand command = new SQLiteCommand
-                {
-                    Connection = connection
-                };
+                Connection = DeleteConnection
+            };
 
-                List<string> DeleteQuery = new List<string>
-                {
-                    $"DELETE FROM VentSystems WHERE [GUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Ventilator WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Filter WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM SensPDS WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Cable WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Damper WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM WaterHeater WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM ElectroHeater WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Pump WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Valve WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM SensT WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Humidifier WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM SensHum WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Recuperator WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Froster WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM KKB WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM FControl WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM FControl WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM PosInfo WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Room WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM CrossConnection WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM SpareVentilator WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM FControl WHERE [SystemGUID] = '{ventsystemGUID}'"
-                };
+            string[] DeleteQuery = {
+                $"DELETE FROM VentSystems WHERE [GUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Ventilator WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Filter WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM SensPDS WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Cable WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Damper WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM WaterHeater WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM ElectroHeater WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Pump WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Valve WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM SensT WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Humidifier WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM SensHum WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Recuperator WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Froster WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM KKB WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM FControl WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM FControl WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM PosInfo WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM Room WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM CrossConnection WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM SpareVentilator WHERE [SystemGUID] = '{ventsystemGUID}'",
+                $"DELETE FROM FControl WHERE [SystemGUID] = '{ventsystemGUID}'"
+            };
 
-                foreach (string query in DeleteQuery)
-                {
-                    command.CommandText = query;
-                    command.ExecuteNonQuery();
-                }
-                command.Dispose();
-                connection.Close();
-
+            foreach (string query in DeleteQuery)
+            {
+                command.CommandText = query;
+                command.ExecuteNonQuery();
             }
+
+            command.Dispose();
+            DeleteConnection.Close();
         }
+
         private void UpdatePannel(string newventystemGUID, string pannelguid)
         {
-
-            if (pannelguid != string.Empty)
+            if (pannelguid == string.Empty) return;
+            using (SQLiteConnection RenameConnection = OpenDB())
             {
-                using (SQLiteConnection connection = OpenDB())
+                RenameConnection.Open();
+                if (RenameConnection.State == ConnectionState.Open)
                 {
-                    connection.Open();
-                    if (connection.State == ConnectionState.Open)
+                    SQLiteCommand command = new SQLiteCommand
                     {
-                        SQLiteCommand command = new SQLiteCommand
-                        {
-                            Connection = connection
-                        };
+                        Connection = RenameConnection
+                    };
 
-                        string updatepannelquery1 = $"UPDATE Pannel SET SystemGUID = '{newventystemGUID}' WHERE [GUID] = '{pannelguid}'";
+                    string updatepannelquery1 = $"UPDATE Pannel SET SystemGUID = '{newventystemGUID}' WHERE [GUID] = '{pannelguid}'";
 
-                        command.CommandText = updatepannelquery1;
-                        command.ExecuteNonQuery();
-                        command.Dispose();
-                    }
-                    connection.Close();
+                    command.CommandText = updatepannelquery1;
+                    command.ExecuteNonQuery();
+                    command.Dispose();
                 }
+                RenameConnection.Close();
             }
-
         }
+
         private void UpdateVentSystemQuery(string newventsystemGUID, string pannelguid, string pannelname)
         {
             if (pannelguid != string.Empty)
             {
-                using (SQLiteConnection connection = OpenDB())
+                using (SQLiteConnection UpdateCaoonection = OpenDB())
                 {
-                    connection.Open();
-                    if (connection.State == ConnectionState.Open)
+                    UpdateCaoonection.Open();
+                    if (UpdateCaoonection.State == ConnectionState.Open)
                     {
                         SQLiteCommand command = new SQLiteCommand
                         {
-                            Connection = connection
+                            Connection = UpdateCaoonection
                         };
                         List<string> updatepannelquery = new List<string>
                         {
                             $"UPDATE VentSystems SET Pannel = '{pannelguid}' WHERE [GUID] = '{newventsystemGUID}'",
                             $"UPDATE VentSystems SET PannelName = '{pannelname}' WHERE [GUID] = '{newventsystemGUID}'"
-
                         };
                         foreach (string query in updatepannelquery)
                         {
@@ -646,48 +651,39 @@ namespace AOVGEN
                             command.ExecuteNonQuery();
                         }
 
-
                         command.Dispose();
                     }
-                    connection.Close();
+                    UpdateCaoonection.Close();
                 }
             }
         }
+
         private void UpdateConnectedCables(string ventystegGUID, string pannelguid, string pannelname)
         {
             try
             {
-
-                using (SQLiteConnection connection = OpenDB())
+                using (SQLiteConnection UpdateCablesConnection = OpenDB())
                 {
-
                     string InsertPannelToCableQuery = $"UPDATE Cable SET FromPannel = '{pannelname}', FromGUID = '{pannelguid}' WHERE SystemGUID = '{ventystegGUID}'";
 
-
-                    connection.Open();
-                    if (connection.State == ConnectionState.Open)
+                    UpdateCablesConnection.Open();
+                    SQLiteCommand command = new SQLiteCommand
                     {
-                        SQLiteCommand command = new SQLiteCommand
-                        {
-                            Connection = connection
-                        };
-                        command.CommandText = InsertPannelToCableQuery;
-                        command.ExecuteNonQuery();
-                        command.Dispose();
-                        connection.Close();
-                    }
-
+                        Connection = UpdateCablesConnection,
+                        CommandText = InsertPannelToCableQuery
+                    };
+                    command.ExecuteNonQuery();
+                    command.Dispose();
+                    UpdateCablesConnection.Close();
                 }
-
-
             }
             catch { }
         }
+
         private void UpdateConnectedPosNames(string systemguid, int AllConnectedSumm, string devider)
         {
             try
             {
-                string query;
                 SQLiteCommand command = new SQLiteCommand
                 {
                     Connection = connection,
@@ -698,15 +694,14 @@ namespace AOVGEN
                 DataTable dataTable = new DataTable();
                 dataTable.Load(dataReader);
                 dataReader.Close();
-                StringBuilder Pos;
                 foreach (DataRow dataRow in dataTable.Rows)
                 {
-                    Pos = new StringBuilder(dataRow["To"].ToString());
+                    var Pos = new StringBuilder(dataRow["To"].ToString());
                     int.TryParse(dataRow["ToCount"].ToString(), out int cntstr);
                     if (cntstr <= 0) continue;
-                    query = "SELECT [To], Cable.ToGUID, Cable.GUID, Cable.SortPriority, Cable.WriteBlock, Cable.TableForSearch FROM Cable " +
-                            $"WHERE((([To]) = '{Pos}') AND((Cable.SystemGUID) = '{systemguid}')) " +
-                            "ORDER BY Cable.SortPriority;";
+                    var query = "SELECT [To], Cable.ToGUID, Cable.GUID, Cable.SortPriority, Cable.WriteBlock, Cable.TableForSearch FROM Cable " +
+                                $"WHERE((([To]) = '{Pos}') AND((Cable.SystemGUID) = '{systemguid}')) " +
+                                "ORDER BY Cable.SortPriority;";
                     command.CommandText = query;
                     SQLiteDataReader readerchild = command.ExecuteReader();
                     DataTable dataTableChild = new DataTable();
@@ -749,17 +744,13 @@ namespace AOVGEN
                     }
                 }
                 command.Dispose();
-                
-
             }
             catch (Exception ex)
             {
-
                 MessageBox.Show(ex.Message + "; \n" + ex.StackTrace);
             }
-
-
         }
+
         internal static string UpdatePannelPower(RadTreeNode PannelNode, string connectionstring)
         {
             Pannel pannel = (Pannel)PannelNode.Tag;
@@ -792,30 +783,6 @@ namespace AOVGEN
             command.ExecuteNonQuery();
             command.Dispose();
             return Power.ToString();
-
-        }
-        
-        private RadTreeNode FindNodeByName(object text, RadTreeNodeCollection nodes)
-        {
-
-            foreach (RadTreeNode node in nodes)
-            {
-
-                if (node.Name.Equals(text))
-                {
-                    return node;
-                }
-
-                RadTreeNode n = FindNodeByName(text, node.Nodes);
-                if (n != null)
-                {
-                    return n;
-                }
-
-
-            }
-
-            return null;
         }
         internal static Pannel._Voltage UpdatePannelVoltage(RadTreeNode PannelNode, string connectionstring)
         {
@@ -830,9 +797,6 @@ namespace AOVGEN
                 .Where(e => e is IPower)
                 .Cast<IPower>()
                 .FirstOrDefault(e => e.Voltage == ElectroDevice._Voltage.AC380) != null ? Pannel._Voltage.AC380 : Pannel._Voltage.AC220;
-                
-
-
 
             SQLiteConnection connection = new SQLiteConnection(connectionstring);
             connection.Open();
@@ -842,70 +806,19 @@ namespace AOVGEN
                 Connection = connection,
                 CommandText = UpdatePannelPowerQuery
             };
-
-            //if (connection.State == ConnectionState.Closed) connection.Open();
+            
             command.ExecuteNonQuery();
             command.Dispose();
             return voltage;
-
-
-            //string findventsGUID = $"Select GUID FROM VentSystems WHERE Pannel = '{pannel.GetGUID()}'";
-            //SQLiteCommand command = new SQLiteCommand
-            //{
-            //    Connection = connection,
-            //    CommandText = findventsGUID
-            //};
-            //command.CommandText = findventsGUID;
-            //List<string> VSGuids = new List<string>();
-            //using (SQLiteDataReader reader = command.ExecuteReader())
-            //{
-            //    while (reader.Read())
-            //    {
-            //        if (reader[0].ToString() != string.Empty) VSGuids.Add(reader[0].ToString());
-            //    }
-
-
-            //}
-            //if (VSGuids.Count > 0)
-            //{
-            //    Pannel._Voltage _Voltage = Pannel._Voltage.AC220;
-
-            //    foreach (string GUID in VSGuids)
-            //    {
-            //        RadTreeNode VSnode = mainForm.FindNodeByName(GUID, pannelnode.Nodes);
-            //        if (VSnode != null)
-            //        {
-            //            VentSystem vent = (VentSystem)VSnode.Tag;
-            //            if (mainForm.GetVetSystemMaxVoltage(vent) == Pannel._Voltage.AC380)
-            //            {
-            //                _Voltage = Pannel._Voltage.AC380;
-            //                break;
-            //            }
-
-            //        }
-            //    }
-            //    pannel.Voltage = _Voltage;
-
-            //}
-            //else
-            //{
-            //    pannel.Voltage = Pannel._Voltage.AC220;
-            //}
-            //string UpdatePannelVoltageQuery = $"UPDATE Pannel SET Power = '{pannel.Power}', Voltage = '{pannel.Voltage}' WHERE [GUID] = '{pannel.GetGUID()}'";
-            //command.CommandText = UpdatePannelVoltageQuery;
-            //command.ExecuteNonQuery();
-            //command.Dispose();
-
-
-
+            
         }
+
         public static Task<bool> CheckLongPress(BunifuImageButton element, int duration)
         {
             Timer timer = new Timer();
 
             TaskCompletionSource<bool> task = new TaskCompletionSource<bool>();
             timer.Interval = duration;
-
 
             void touchUpHandler(object sender, MouseEventArgs e)
             {
@@ -928,6 +841,7 @@ namespace AOVGEN
             timer.Start();
             return task.Task;
         }
+
         public void Repeater(BunifuImageButton btn, int interval)
         {
             var timer = new Timer { Interval = interval };
@@ -941,18 +855,20 @@ namespace AOVGEN
             };
             void DoProgress()
             {
-
             }
         }
-        #endregion
+
+        #endregion User functions
+
         #region User Classes
+
         public class MD5HashGenerator
         {
-            private static readonly Object locker = new Object();
+            private static readonly object locker = new object();
 
             /// <summary>
             /// Generates a hashed - key for an instance of a class.
-            /// The hash is a classic MD5 hash (e.g. BF20EB8D2C4901112179BF5D242D996B). So you can distinguish different 
+            /// The hash is a classic MD5 hash (e.g. BF20EB8D2C4901112179BF5D242D996B). So you can distinguish different
             /// instances of a class. Because the object is hashed on the internal state, you can also hash it, then send it to
             /// someone in a serialized way. Your client can then deserialize it and check if it is in
             /// the same state.
@@ -963,9 +879,8 @@ namespace AOVGEN
             /// <param name="sourceObject">The object you'd like to have a key out of it.</param>
             /// <returns>An string representing a MD5 Hashkey corresponding to the object or null if the object couldn't be serialized.</returns>
             /// <exception cref="ApplicationException">Will be thrown if the key cannot be generated.</exception>
-            public static String GenerateKey(Object sourceObject)
+            public static string GenerateKey(object sourceObject)
             {
-
                 //Catch unuseful parameter values
                 if (sourceObject == null)
                 {
@@ -1042,35 +957,134 @@ namespace AOVGEN
                 }
                 catch
                 {
-                    //If something occured during serialization, this method is called with an null argument. 
+                    //If something occured during serialization, this method is called with an null argument.
                     Console.WriteLine("Hash has not been generated.");
                     return null;
                 }
             }
         }
-        
-        class DoubleBufferedBunifuImageButton : Bunifu.Framework.UI.BunifuImageButton
+        public class FastHash
+        {
+            private static readonly object locker = new object();
+
+            public static string GenerateKey(object sourceObject)
+            {
+                if (sourceObject == null)
+                {
+                    throw new ArgumentNullException("Null as parameter is not allowed");
+                }
+                try
+                {
+                    
+                    string hashString = CalculateHash(ObjectToByteArray(sourceObject));
+                    return hashString;
+                }
+                catch (AmbiguousMatchException ame)
+                {
+                    throw new ApplicationException("Could not definitly decide if object is serializable. Message:" + ame.Message);
+                }
+            }
+            private static byte[] ObjectToByteArray(object objectToSerialize)
+            {
+                MemoryStream fs = new MemoryStream();
+                BinaryFormatter formatter = new BinaryFormatter();
+                try
+                {
+                    //Here's the core functionality! One Line!
+                    //To be thread-safe we lock the object
+                    lock (locker)
+                    {
+                        formatter.Serialize(fs, objectToSerialize);
+                    }
+                    return fs.ToArray();
+                }
+                catch (SerializationException se)
+                {
+                    Console.WriteLine("Error occured during serialization. Message: " + se.Message);
+                    return null;
+                }
+                finally
+                {
+                    fs.Close();
+                }
+            }
+            public static unsafe string CalculateHash(byte[] dataToHash)
+            {
+                Int32 dataLength = dataToHash.Length;
+                if (dataLength == 0)
+                    return "";
+                UInt32 hash = (UInt32)dataLength;
+                Int32 remainingBytes = dataLength & 3; // mod 4
+                Int32 numberOfLoops = dataLength >> 2; // div 4
+
+                fixed (byte* firstByte = &(dataToHash[0]))
+                {
+                    /* Main loop */
+                    UInt16* data = (UInt16*)firstByte;
+                    for (; numberOfLoops > 0; numberOfLoops--)
+                    {
+                        hash += *data;
+                        UInt32 tmp = (UInt32)(*(data + 1) << 11) ^ hash;
+                        hash = (hash << 16) ^ tmp;
+                        data += 2;
+                        hash += hash >> 11;
+                    }
+                    switch (remainingBytes)
+                    {
+                        case 3:
+                            hash += *data;
+                            hash ^= hash << 16;
+                            hash ^= ((UInt32)(*(((Byte*)(data)) + 2))) << 18;
+                            hash += hash >> 11;
+                            break;
+                        case 2:
+                            hash += *data;
+                            hash ^= hash << 11;
+                            hash += hash >> 17;
+                            break;
+                        case 1:
+                            hash += *((Byte*)data);
+                            hash ^= hash << 10;
+                            hash += hash >> 1;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                /* Force "avalanching" of final 127 bits */
+                hash ^= hash << 3;
+                hash += hash >> 5;
+                hash ^= hash << 4;
+                hash += hash >> 17;
+                hash ^= hash << 25;
+                hash += hash >> 6;
+
+                return hash.ToString();
+            }
+
+        }
+
+        private sealed class DoubleBufferedBunifuImageButton : Bunifu.Framework.UI.BunifuImageButton
         {
             public DoubleBufferedBunifuImageButton()
             {
                 DoubleBuffered = true;
-                
-
             }
-            
-
         }
-        
+
         internal class PosInfo
         {
             private readonly int[] _Pos;
-        
-            internal int[] Pos { get => _Pos;
+
+            internal int[] Pos
+            {
+                get => _Pos;
                 set => SetNewPos(value);
             }
-        
+
             internal string ImageName { get; set; }
-        
+
             internal int[] Size;
             internal object Tag { get; set; }
             internal string GUID { get; set; }
@@ -1080,48 +1094,59 @@ namespace AOVGEN
                 _Pos = new[] { 50, 50 };
                 Size = new[] { 0, 0 };
             }
+
             public int PozX => _Pos[0];
             public int PozY => _Pos[1];
-            public int SizeX { get => Size[0];
+
+            public int SizeX
+            {
+                get => Size[0];
                 set => Size[0] = Convert.ToInt32(value);
             }
-            public int SizeY { get => Size[1];
+
+            public int SizeY
+            {
+                get => Size[1];
                 set => Size[1] = Convert.ToInt32(value);
             }
+
             internal static Point PosToPoint(int[] cell)
             {
                 return new Point((cell[0] * 60) + 205, (cell[1] * 60) + 205);
             }
+
             internal static double[] PosToAcadPoint(int[] cell)
             {
-                return new double[] { cell[0]*50, cell[1]*50, 0};
+                return new double[] { cell[0] * 50, cell[1] * 50, 0 };
             }
+
             internal static string PosToString(int[] Pos)
             {
                 return $"{Pos[0]};{Pos[1]}";
             }
+
             internal void PosDBToClassPos(string pos)
             {
-                
                 Pos = pos.Split(';')
                     .Select(r => Convert.ToInt32(r))
                     .ToArray();
             }
+
             internal void SizeDBtoClassSize(string size)
             {
                 Size = size.Split(';')
                     .Select(r => Convert.ToInt32(r))
                     .ToArray();
             }
+
             private void SetNewPos(object val)
             {
                 int[] mas = (int[])val;
                 _Pos[0] = mas[0];
                 _Pos[1] = mas[1];
             }
-
         }
-       
+
         protected class VentSystemEmptyException : Exception
         {
             public VentSystemEmptyException()
@@ -1135,6 +1160,7 @@ namespace AOVGEN
                 : base(message, innerException)
             { }
         }
+
         public class TransparentPanel : Panel
         {
             protected override CreateParams CreateParams
@@ -1146,16 +1172,18 @@ namespace AOVGEN
                     return cp;
                 }
             }
+
             protected override void OnPaintBackground(PaintEventArgs e)
             {
                 //base.OnPaintBackground(e);
             }
         }
+
         internal struct Posnames
         {
-            internal string Oldposname { get; set; }
-            internal string Newposname { get; set; }
+           internal string Newposname { get; set; }
         }
-        #endregion
+
+        #endregion User Classes
     }
 }

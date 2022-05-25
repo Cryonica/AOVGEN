@@ -8,10 +8,48 @@ namespace AOVGEN
 {
     partial class CreateAnalogue
     {
+        private BunifuImageButton bunifuImageButton1;
+
         /// <summary>
         /// Required designer variable.
         /// </summary>
         private IContainer components = null;
+
+        private Office2007BlackTheme office2007BlackTheme1;
+
+        private Panel panel1;
+
+        private RadButton radButton1;
+
+        private RadLabel radLabel1;
+
+        private RadLabel radLabel2;
+
+        private RadLabel radLabel3;
+
+        private RadLabel radLabel4;
+
+        private RadLabel radLabel5;
+
+        private RadLabel radLabel6;
+
+        private RadLabel radLabel7;
+
+        private RadLabel radLabel8;
+
+        private RadTextBox radTextBox1;
+
+        private RadTextBox radTextBox2;
+
+        private RadTextBox radTextBox3;
+
+        private RadTextBox radTextBox4;
+
+        private RadTextBox radTextBox5;
+
+        private RadTextBox radTextBox6;
+
+        private Timer timer1;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -310,25 +348,5 @@ namespace AOVGEN
         }
 
         #endregion
-
-        private Office2007BlackTheme office2007BlackTheme1;
-        private BunifuImageButton bunifuImageButton1;
-        private Panel panel1;
-        private RadLabel radLabel1;
-        private RadLabel radLabel2;
-        private RadLabel radLabel3;
-        private RadLabel radLabel4;
-        private RadTextBox radTextBox1;
-        private RadTextBox radTextBox2;
-        private RadTextBox radTextBox3;
-        private RadTextBox radTextBox4;
-        private RadButton radButton1;
-        private RadTextBox radTextBox5;
-        private RadLabel radLabel5;
-        private RadLabel radLabel6;
-        private RadLabel radLabel7;
-        private RadTextBox radTextBox6;
-        private RadLabel radLabel8;
-        private Timer timer1;
     }
 }

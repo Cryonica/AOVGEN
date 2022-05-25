@@ -13,6 +13,28 @@ namespace AOVGEN
         /// </summary>
         private IContainer components = null;
 
+        private Label label1;
+
+        private Office2007BlackTheme office2007BlackTheme1;
+
+        private Panel panel1;
+
+        private PictureBox pictureBox1;
+
+        private RadButton radButton1;
+
+        private RadButton radButton2;
+
+        private RadButton radButton3;
+
+        private RadDropDownList radDropDownList1;
+
+        private RadListView radListView1;
+
+        private Timer timer1;
+
+        private Timer timer2;
+
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -174,17 +196,5 @@ namespace AOVGEN
         }
 
         #endregion
-
-        private RadButton radButton1;
-        private Office2007BlackTheme office2007BlackTheme1;
-        private RadListView radListView1;
-        private Panel panel1;
-        private PictureBox pictureBox1;
-        private RadButton radButton2;
-        private Timer timer1;
-        private RadButton radButton3;
-        private Timer timer2;
-        private Label label1;
-        private RadDropDownList radDropDownList1;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoCAD; //using Autodesk.AutoCAD.Runtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,25 +10,24 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using AutoCAD; //using Autodesk.AutoCAD.Runtime;
 
 namespace AOVGEN
 {
-    
-    class TableExternalConnections
+    internal class TableExternalConnections
     {
-        
         [DllImport("user32.dll")]
         internal static extern IntPtr SetForegroundWindow(IntPtr hWnd);
+
         [DllImport("ole32.dll")]
-        static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
+        private static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
+
         [DllImport("ole32.dll")]
         public static extern void GetRunningObjectTable(
             int reserved,
             out IRunningObjectTable prot);
+
         private static List<object> GetRunningInstances(IEnumerable<string> AcadIDs)
         {
-
             // get the app clsid
             List<string> clsIds = (from progId in AcadIDs select Type.GetTypeFromProgID(progId) into type where type != null select type.GUID.ToString().ToUpper()).ToList();
             // get Running Object Table ...
@@ -55,8 +55,8 @@ namespace AOVGEN
                 }
             }
             return instances;
-
         }
+
         private static readonly string[] progIds =
         {
             "AutoCAD.Application.17",
@@ -77,12 +77,13 @@ namespace AOVGEN
             "AutoCAD.Application.23",
             "AutoCAD.Application.23.0"
         };
+
         internal string Author { get; set; }
         internal string BuildingName { get; set; }
         internal string Project { get; set; }
 
-
         private AcadDocument acadDoc;
+
         #region Custom Exception
 
         private readonly Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> level3;
@@ -100,11 +101,11 @@ namespace AOVGEN
         private AcadBlockReference PrevioscablePblock { get; set; }
         //Dictionary<Cable.CableAttribute, string> lastdict = new Dictionary<Cable.CableAttribute, string>();
 
-        #endregion
+        #endregion Custom Exception
+
         //[CommandMethod("NewDrawing", CommandFlags.Session)]
         internal int Execute()
         {
-
             int result = 0;
             List<object> instances = GetRunningInstances(progIds);
             dynamic GetAutoCad2019()
@@ -121,7 +122,6 @@ namespace AOVGEN
             Task<dynamic> StartAcadTask = null;
             try
             {
-
                 Acad2019COM = GetAutoCad2019();
                 if (Acad2019COM == null)
                 {
@@ -129,7 +129,6 @@ namespace AOVGEN
                                     @"Или попробуйте запустить его вручную");
                     StartAcadTask = Task.Factory.StartNew(() => StartAutocad(Acad2019));
                 }
-
             }
             catch
             {
@@ -139,7 +138,6 @@ namespace AOVGEN
             StartAcadTask?.Wait();
             if (Acad2019COM == null)
             {
-
                 Acad2019COM = Marshal.GetActiveObject(Acad2019.progID);
                 if (Acad2019COM == null) return result;
             }
@@ -154,10 +152,9 @@ namespace AOVGEN
                     }
                     acadApp.WindowState = AcWindowState.acMax;
                     SendKeys.Send("{ESC}");
-                    
+
                     if (acadApp.Documents.Count > 0)
                     {
-
                         foreach (AcadDocument acadDocument in acadApp.Documents) //
                         {
                             if (acadDocument.Name == "Блоки.dwg")
@@ -180,7 +177,6 @@ namespace AOVGEN
                             acadDoc.Activate();
                             SendKeys.Send("{ESC}");
                             break;
-
                         }
                     }
 
@@ -190,7 +186,6 @@ namespace AOVGEN
                                          @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\Blocks.dwt";
                         acadDoc = acadApp.Documents.Add(docpath);
                         //acadDoc.Activate();
-
                     }
 
                     const string prompt1 = "Вставьте блок";
@@ -219,13 +214,12 @@ namespace AOVGEN
                             select keyValuePair.Value)
                         {
                             cablelist.AddRange(from ventcomp in ventcompdic
-                                let comppos = ventcomp.Key
-                                from cable in ventcomp.Value
-                                select cable);
+                                               let comppos = ventcomp.Key
+                                               from cable in ventcomp.Value
+                                               select cable);
                         }
 
                         allcables.Add(keyValuePair1.Key, cablelist);
-
                     });
                     Cable GetCableFromCableList(IEnumerable<Cable> cabs, Cable.CableAttribute attr, int cableNums)
                     {
@@ -297,7 +291,6 @@ namespace AOVGEN
 
                         foreach (KeyValuePair<string, Dictionary<string, List<Cable>>> keyValuePair in level2)
                         {
-
                             string ventname = keyValuePair.Key;
                             VentSystem ventSystem = ventsystemDict[ventname];
                             Dictionary<string, List<Cable>> ventcompdic = keyValuePair.Value;
@@ -311,19 +304,16 @@ namespace AOVGEN
                                 double[] cablearrpt = { 0, 0, 0 };
                                 foreach (Cable cable in cables)
                                 {
-
                                     bool printblock = cable.WriteBlock;
 
                                     if (printblock)
                                     {
-
                                         ArrayList list = InsertDevBlock(startPnt, cable.ToBlockName);
                                         AcadBlockReference acadBlock = (AcadBlockReference)list[0];
                                         switch (cable.CompTable)
                                         {
                                             case "KKB":
                                                 Froster froster = ventSystem.ComponentsV2
-                                                    .AsParallel()
                                                     .Select(e => e.Tag)
                                                     .Where(e => e.GetType().Name == nameof(Froster))
                                                     .Cast<Froster>()
@@ -362,6 +352,7 @@ namespace AOVGEN
                                                 }
 
                                                 break;
+
                                             case "Humidifier":
                                                 if (acadBlock.IsDynamicBlock)
                                                 {
@@ -381,6 +372,7 @@ namespace AOVGEN
                                                                 case "ED-220-HC":
                                                                     prop.Value = "1";
                                                                     break;
+
                                                                 case "ED-380-HC":
                                                                     prop.Value = "Упр. Вкл./Выкл.";
                                                                     break;
@@ -389,8 +381,6 @@ namespace AOVGEN
                                                 }
 
                                                 break;
-
-
                                         } //read displacement
 
                                         size = Convert.ToDouble(list[1]);
@@ -411,10 +401,8 @@ namespace AOVGEN
                                     }
 
                                     i++;
-
                                 }
                             }
-
                         }
 
                         if (cableP3_Down.Count > 0)
@@ -437,7 +425,6 @@ namespace AOVGEN
                         startPnt[1] -= 5;
 
                         acadDoc.Regen(AcRegenType.acActiveViewport);
-
                     }
                 }
             }
@@ -449,13 +436,13 @@ namespace AOVGEN
             }
 
             return result;
-            
         }
+
         private static void WriteDevAttribute(IAcadBlockReference acadBlock, Cable cable)
         {
             if (acadBlock == null) return;
             object[] prop = acadBlock.GetAttributes();
-            IEnumerable<AcadAttributeReference> ppp1 = prop.OfType<AcadAttributeReference>().Where(i => i.TagString == "DEVNAME1"); 
+            IEnumerable<AcadAttributeReference> ppp1 = prop.OfType<AcadAttributeReference>().Where(i => i.TagString == "DEVNAME1");
             IEnumerable<AcadAttributeReference> ppp2 = prop.OfType<AcadAttributeReference>().Where(i => i.TagString == "DEVNAME2");
             var acadAttributeReferences = ppp1 as AcadAttributeReference[] ?? ppp1.ToArray();
             if (acadAttributeReferences.Any())
@@ -465,10 +452,11 @@ namespace AOVGEN
             if (attributeReferences.Any())
                 attributeReferences.ElementAt(0).TextString = cable.ToPosName;
         }
+
         private ArrayList InsertDevBlock(double[] insertPoint, string blockname)
         {
             var blockObj1 = acadDoc.ModelSpace.InsertBlock(insertPoint, blockname, 1, 1, 1, 0, Type.Missing);
-            ((AcadEntity) blockObj1).GetBoundingBox(out object minPt, out object maxPt);
+            ((AcadEntity)blockObj1).GetBoundingBox(out object minPt, out object maxPt);
             var minPoint = (double[])minPt;
             var maxPoint = (double[])maxPt;
             var size = maxPoint[0] - minPoint[0];
@@ -479,6 +467,7 @@ namespace AOVGEN
             };
             return list;
         }
+
         private void InsertCableBlock(IReadOnlyList<double> cablearrpt, Cable cable, int index, Dictionary<string, string> lastdict)
         {
             double startx = cablearrpt[0];
@@ -496,6 +485,7 @@ namespace AOVGEN
                             cabpt[0] = startx + 9.8684274;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
 
                             cabpt[0] = startx + 22.3684274;
@@ -503,6 +493,7 @@ namespace AOVGEN
                             break;
                     }
                     break;
+
                 case "ED_Pump_220":
                 case "ED-24":
                 case "ED-220-NORO":
@@ -510,6 +501,7 @@ namespace AOVGEN
                     cabpt[0] = startx + 9.86842739;
                     cabpt[1] = starty - 72.16543687;
                     break;
+
                 case "SENS-TS-2WIRE":
                 case "SENS-MS-2WIRE":
                 case "SENS-PDS-2WIRE":
@@ -525,9 +517,7 @@ namespace AOVGEN
                     cabpt[0] = startx + 7.5;
                     cabpt[1] = starty - 72.16543687;
 
-
                     break;
-
 
                 case "ED-380-FC":
 
@@ -537,29 +527,34 @@ namespace AOVGEN
                             cabpt[0] = startx + 15.11449886;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 30.10098211;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 40.13389483;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 3:
                             cabpt[0] = startx + 50.05161304;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 4:
                             cabpt[0] = startx + 60.03515668;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 5:
                             cabpt[0] = startx + 70.01870033;
                             cabpt[1] = starty - 72.16543687;
                             break;
-
                     }
                     break;
+
                 case "ED-220-HC":
                     switch (index)
                     {
@@ -567,30 +562,34 @@ namespace AOVGEN
                             cabpt[0] = startx + 12.61449885;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 30.10098211;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 40.05161304;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 3:
                             cabpt[0] = startx + 50.05161304;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 4:
                             cabpt[0] = startx + 60.11743847;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 5:
                             cabpt[0] = startx + 70.01870033;
                             cabpt[1] = starty - 72.16543687;
                             break;
-
-
                     }
                     break;
+
                 case "ED-380-TK-NORO":
                 case "ED-380-Posistor-NORO":
                     switch (index)
@@ -599,11 +598,11 @@ namespace AOVGEN
                             cabpt[0] = startx + 15;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 53.72110679;
                             cabpt[1] = starty - 72.16543687;
                             break;
-
                     }
 
                     break;
@@ -612,6 +611,7 @@ namespace AOVGEN
                     cabpt[0] = startx + 15;
                     cabpt[1] = starty - 72.16543687;
                     break;
+
                 case "ED-380-TK-RO":
                 case "ED-380-Posistor-RO":
                 case "ED-380-RO":
@@ -622,25 +622,26 @@ namespace AOVGEN
                             cabpt[0] = startx + 15;
                             cabpt[1] = starty - 149.96324493;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 15;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
 
                             cabpt[0] = startx + 53.72110679;
                             cabpt[1] = starty - 72.16543687;
 
                             break;
+
                         case 3:
                             cabpt[0] = startx + 34.99999992;
                             cabpt[1] = starty - 149.96324493;
 
                             break;
-
                     }
                     break;
-
 
                 case "ED-380-TK-Transform":
                     switch (index)
@@ -649,21 +650,24 @@ namespace AOVGEN
                             cabpt[0] = startx + 16.74999994;
                             cabpt[1] = starty - 149.96324493;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 16.74999994;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 34.99999992;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 3:
                             cabpt[0] = startx + 53.72110679;
                             cabpt[1] = starty - 149.96324493;
                             break;
-
                     }
                     break;
+
                 case "ED-380-Posistor-Transform":
                     switch (index)
                     {
@@ -671,21 +675,24 @@ namespace AOVGEN
                             cabpt[0] = startx + 15;
                             cabpt[1] = starty - 149.96324493;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 15;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 34.99999992;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 3:
                             cabpt[0] = startx + 53.72110679;
                             cabpt[1] = starty - 149.96324493;
                             break;
-
                     }
                     break;
+
                 case "ED-380-Transform":
                     switch (index)
                     {
@@ -693,23 +700,26 @@ namespace AOVGEN
                             cabpt[0] = startx + 17.49999992;
                             cabpt[1] = starty - 149.96324493;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 17.49999992;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 53.72110679;
                             cabpt[1] = starty - 72.16543687;
 
                             break;
+
                         case 3:
                             cabpt[0] = startx + 34.99999992;
                             cabpt[1] = starty - 149.96324493;
 
                             break;
-
                     }
                     break;
+
                 case "ED-380-HC"://увлажнитель
                     switch (index)
                     {
@@ -717,21 +727,24 @@ namespace AOVGEN
                             cabpt[0] = startx + 15.11449887;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 30.11449894;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 40.11449894;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 3:
                             cabpt[0] = startx + 52.61449886;
                             cabpt[1] = starty - 72.16543687;
                             break;
-
                     }
                     break;
+
                 case "ZASL-220_SQ":
                     switch (index)
                     {
@@ -739,14 +752,14 @@ namespace AOVGEN
                             cabpt[0] = startx + 9.8684274;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 27.3684274;
                             cabpt[1] = starty - 72.16543687;
                             break;
-
-
                     }
                     break;
+
                 case "ED-24-010V":
                     switch (index)
                     {
@@ -754,13 +767,14 @@ namespace AOVGEN
                             cabpt[0] = startx + 9.87127349;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 22.40532387;
                             cabpt[1] = starty - 72.16543687;
                             break;
-
                     }
                     break;
+
                 case "EH-220-TK":
                     switch (index)
                     {
@@ -768,27 +782,31 @@ namespace AOVGEN
                             cabpt[0] = startx + 12.61449887;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 30.10098211;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 40.13389483;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 3:
                             cabpt[0] = startx + 50.05161304;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 4:
                             cabpt[0] = startx + 60.03515668;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 5:
                             cabpt[0] = startx + 70.01870033;
                             cabpt[1] = starty - 72.16543687;
                             break;
-
                     }
                     break;
 
@@ -799,29 +817,34 @@ namespace AOVGEN
                             cabpt[0] = startx + 12.61449887;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
-                            cabpt[0] = startx + 25.0980425 + 10 * (index-1);
+                            cabpt[0] = startx + 25.0980425 + 10 * (index - 1);
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 25.0980425 + 10 * (index - 1);
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 3:
                             cabpt[0] = startx + 25.0980425 + 10 * (index - 1);
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 4:
                             cabpt[0] = startx + 25.0980425 + 10 * (index - 1);
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 5:
                             cabpt[0] = startx + 25.0980425 + (10 * (index - 1));
                             cabpt[1] = starty - 72.16543687;
                             break;
-
                     }
                     break;
+
                 case "ED-220-3POS":
                     switch (index)
                     {
@@ -829,22 +852,24 @@ namespace AOVGEN
                             cabpt[0] = startx + 9.87127349;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 22.41;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 34.87;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 3:
                             cabpt[0] = startx + 49.87;
                             cabpt[1] = starty - 72.16543687;
                             break;
-
-
                     }
                     break;
+
                 case "ED-220-TK-RO":
                 case "ED-220-Posistor-RO":
 
@@ -854,17 +879,19 @@ namespace AOVGEN
                             cabpt[0] = startx + 9.8684274;
                             cabpt[1] = starty - 149.96324493;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 9.8684274;
                             cabpt[1] = starty - 72.16543687;
                             break;
+
                         case 2:
                             cabpt[0] = startx + 22.3684274;
                             cabpt[1] = starty - 72.16543687;
                             break;
-
                     }
                     break;
+
                 case "ED-220-RO": //вынести отдельно
                     switch (index)
                     {
@@ -872,6 +899,7 @@ namespace AOVGEN
                             cabpt[0] = startx + 9.26607424;
                             cabpt[1] = starty - 149.96324493;
                             break;
+
                         case 1:
                             cabpt[0] = startx + 9.26607424;
                             cabpt[1] = starty - 72.16543687;
@@ -879,7 +907,6 @@ namespace AOVGEN
                     }
                     break;
             }
-                   
 
             string cableblockname;
             string cabletype;
@@ -899,6 +926,7 @@ namespace AOVGEN
                             cablename = cable.CableName;
                         }
                         break;
+
                     case "Damper":
                     case "Valve":
                         if (writecableValve)
@@ -909,7 +937,6 @@ namespace AOVGEN
                         }
                         break;
                 }
-
             }
             else
             {
@@ -917,7 +944,7 @@ namespace AOVGEN
                 cabletype = cable.CableType;
                 cablename = cable.CableName;
             }
-           
+
             dynamic blockObj1 = acadDoc.ModelSpace.InsertBlock(cabpt, cableblockname, 1, 1, 1, 0, Type.Missing);
             AcadBlockReference cableblock = blockObj1;
 
@@ -948,10 +975,7 @@ namespace AOVGEN
             crosssection.ElementAt(0).TextString = string.Empty;
             if (cabletype != "Кабель по проекту ЭОМ" && cabletype != string.Empty)
             {
-                
                 cabletypeattr.ElementAt(0).TextString = cable.CableType;
-                
-                   
             }
             else
             {
@@ -959,17 +983,13 @@ namespace AOVGEN
                 {
                     cabletypeattr.ElementAt(0).TextString = "Null";
                 }
-                
             }
-                
+
             if (cable.Lenght != 0 && cabletype != "Кабель по проекту ЭОМ")
             {
-              
                 cablelenght.ElementAt(0).TextString = cable.Lenght + " м";
             }
 
-
-           
             if (cable.cableGUID != string.Empty)
             {
                 blockGUIDattr.ElementAt(0).TextString = cable.cableGUID;
@@ -978,13 +998,14 @@ namespace AOVGEN
             switch (cable.Attrubute + cable.WireNumbers.ToString())
             {
                 case "P3":
-                    
+
                     cabYpos.ElementAt(0).Value += 4.86;
                     if (cabpt[1] < starty - 133)
                     {
                         cableP3_Down.Add(cableblock);
                     }
                     break;
+
                 case "P5":
                     cabYpos.ElementAt(0).Value += 9.36155431;
                     if (cabpt[1] < starty - 133)
@@ -992,17 +1013,22 @@ namespace AOVGEN
                         cableP5_Down.Add(cableblock);
                     }
                     break;
+
                 case "A2":
                     cabYpos.ElementAt(0).Value -= 8.83247477;
                     break;
+
                 case "A3":
                     break;
+
                 case "D2":
                     cabYpos.ElementAt(0).Value -= 0;
                     break;
+
                 case "D3":
                     cabYpos.ElementAt(0).Value -= 50.10804803;
                     break;
+
                 case "D4":
                     if (cabpt[1] < starty - 133)
                     {
@@ -1012,29 +1038,26 @@ namespace AOVGEN
                     {
                         cabYpos.ElementAt(0).Value -= 82.06611587;
                     }
-                        
+
                     break;
+
                 case "C2":
                     break;
+
                 case "C3":
                     break;
+
                 case "PL3":
                     cabYpos.ElementAt(0).Value -= 87.73567356;
                     break;
-
-
-
-
             }
-            
+
             lastdict.TryGetValue(cable.Attrubute + cable.WireNumbers.ToString(), out string lastguid);
             if (lastguid != string.Empty)
             {
-                
                 if (cable.cableGUID == lastguid)
                 {
-                    
-                    if (cable.Attrubute == Cable.CableAttribute.P && index ==1)
+                    if (cable.Attrubute == Cable.CableAttribute.P && index == 1)
                     {
                         object[] previoscablePblock_blockproperies = PrevioscablePblock.GetDynamicBlockProperties();
                         IEnumerable<AcadDynamicBlockReferenceProperty> previoscablePblock_visible = previoscablePblock_blockproperies.OfType<AcadDynamicBlockReferenceProperty>()
@@ -1047,10 +1070,8 @@ namespace AOVGEN
                         previoscablePblock_visible.ElementAt(0).Value = "ВСЁ_овал";
                         var acadDynamicBlockReferenceProperties = previoscablePblock_cableline as AcadDynamicBlockReferenceProperty[] ?? previoscablePblock_cableline.ToArray();
                         acadDynamicBlockReferenceProperties.ElementAt(0).Value += tempsize;
-
                     }
-                    
-                    
+
                     visible.ElementAt(0).Value = "ВСЁ_овал"; // last cable with specifical property
                     IEnumerable<AcadDynamicBlockReferenceProperty> cableline = blockproperies.OfType<AcadDynamicBlockReferenceProperty>()
                         .Where(i => i.PropertyName == "Расстояние5");
@@ -1059,13 +1080,11 @@ namespace AOVGEN
                     double size = (maxx - minx - 53.7 < 0) ? 0 : maxx - minx - 53.7;
                     var dynamicBlockReferenceProperties = cableline as AcadDynamicBlockReferenceProperty[] ?? cableline.ToArray();
                     dynamicBlockReferenceProperties.ElementAt(0).Value += size;
-
                 }
                 else
                 {
                     visible.ElementAt(0).Value = "НОМЕР_КАБЕЛЯ_И_ДЛИНЫ_овал";
                 }
-                
             }
             else
             {
@@ -1075,8 +1094,8 @@ namespace AOVGEN
                 }
             }
             if (cable.Attrubute == Cable.CableAttribute.P) PrevioscablePblock = cableblock;
-
         }
+
         private static void SetLastLine(IAcadBlockReference acadBlock, double minx)
         {
             object[] blockproperies = acadBlock.GetDynamicBlockProperties();
@@ -1094,8 +1113,8 @@ namespace AOVGEN
                 var dynamicBlockReferenceProperties = cableline as AcadDynamicBlockReferenceProperty[] ?? cableline.ToArray();
                 dynamicBlockReferenceProperties.ElementAt(0).Value += size;
             }
-
         }
+
         private AcadBlockReference InsertPannelBlock(double[] min, double maxX, Pannel pannel)
         {
             double[] PannelPoint = new double[3];
@@ -1114,8 +1133,8 @@ namespace AOVGEN
             double heighttext = 3;
             acadDoc.ModelSpace.AddText(pannel.PannelName, pannelNamePoint, heighttext);
             return pannelblock;
-
         }
+
         private void InsertFire_Dispatching(AcadBlockReference PannelBlock)
         {
             object insertpoint = PannelBlock.InsertionPoint;
@@ -1125,12 +1144,11 @@ namespace AOVGEN
             double[] latpoint = new double[3];
             latpoint[0] = maxP[0] - 24.51687801;
             latpoint[1] = ip[1];
-           
+
             if (Pannel.FireProtect == Pannel._FireProtect.Yes)
             {
                 acadDoc.ModelSpace.InsertBlock(latpoint, "Fire_Alarm", 1, 1, 1, 0, Type.Missing);
                 latpoint[0] += 12.258439;
-                
             }
             if (Pannel.Dispatching != Pannel._Dispatching.Yes) return;
             dynamic blockObj = acadDoc.ModelSpace.InsertBlock(latpoint, "dispatching", 1, 1, 1, 0, Type.Missing); //вставка блока
@@ -1140,6 +1158,7 @@ namespace AOVGEN
                 .Where(i => i.TagString == "ПРОТОКОЛ");
             dispatching.ElementAt(0).TextString = Pannel.Protocol.ToString();
         }
+
         private double[] SetNoteAndStamp(AcadBlockReference PannelBlock)
         {
             object insertpoint = PannelBlock.InsertionPoint;
@@ -1152,38 +1171,37 @@ namespace AOVGEN
             double[] noteIP = new double[3];
             double[] frameIP = new double[3];
             noteIP[0] = ip[0];
-            noteIP[1] = ip[1]-20;
-            frameIP[0] = ip[0] -20;
+            noteIP[1] = ip[1] - 20;
+            frameIP[0] = ip[0] - 20;
             frameIP[1] = ip[1] - 73.53047188;
             double multiplicity = Math.Ceiling(size / 185);
-            
+
             acadDoc.ModelSpace.InsertBlock(noteIP, "note", 1, 1, 1, 0, Type.Missing); //вставка блока примечаний
-            dynamic frame= acadDoc.ModelSpace.InsertBlock(frameIP, "_Рамка", 1, 1, 1, 0, Type.Missing); //вставка блока рамки
+            dynamic frame = acadDoc.ModelSpace.InsertBlock(frameIP, "_Рамка", 1, 1, 1, 0, Type.Missing); //вставка блока рамки
             AcadBlockReference frameblock = frame;
             object[] blockproperies = frameblock.GetDynamicBlockProperties();
             IEnumerable<AcadDynamicBlockReferenceProperty> frameType = blockproperies.OfType<AcadDynamicBlockReferenceProperty>() //получение свойств
                 .Where(i => i.PropertyName == "Выбор формата");
-
 
             var acadDynamicBlockReferenceProperties = frameType as AcadDynamicBlockReferenceProperty[] ?? frameType.ToArray();
             if (multiplicity < 3 && multiplicity > 0)
             {
                 acadDynamicBlockReferenceProperties.ElementAt(0).Value = "A3альбом";
             }
-            if (multiplicity >2 && multiplicity <10)
+            if (multiplicity > 2 && multiplicity < 10)
             {
                 acadDynamicBlockReferenceProperties.ElementAt(0).Value = $"А4х{Convert.ToInt32(multiplicity)}";
             }
-            
+
             double[] StampInsertionPoint = new double[3];
             double newpt;
-            if ( multiplicity==1)
+            if (multiplicity == 1)
             {
                 newpt = 210 * 2 + frameIP[0] - 5;
             }
             else
             {
-                 newpt= 210 * multiplicity + frameIP[0] - 5;
+                newpt = 210 * multiplicity + frameIP[0] - 5;
             }
             StampInsertionPoint[0] = newpt;
             StampInsertionPoint[1] = frameIP[1] + 5;
@@ -1204,9 +1222,9 @@ namespace AOVGEN
             drawingproject.ElementAt(0).TextString = Project;
             return frameIP;
 
-
             //MessageBox.Show($"Distance = {(latpoint[0] - insertPoint[1]).ToString()}");
         }
+
         private static dynamic StartAutocad((string path, string progID) Acad)
         {
             string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
@@ -1224,13 +1242,12 @@ namespace AOVGEN
                 throw new ApplicationException($"Не могу найти Autocad по пути \n{ acadfile }\nгенерация схем невозомжна");
                 //return null;
             }
-            
+
             acadProc.Start();
             if (!acadProc.WaitForInputIdle(300000))
                 throw new ApplicationException("Слишком долго стартует Autocad, выход");
             while (true)
             {
-
                 try
                 {
                     dynamic acadApp = Marshal.GetActiveObject(Acad.progID);
@@ -1243,13 +1260,9 @@ namespace AOVGEN
                     Thread.Sleep(1000);
                 }
             }
-            
-
-
-
-
         }
-        internal  TableExternalConnections(Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> inputdict, Dictionary<string, VentSystem> inputvensystemDict, bool[] inputcabsettings, Dictionary<string, Pannel> pannels  )
+
+        internal TableExternalConnections(Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> inputdict, Dictionary<string, VentSystem> inputvensystemDict, bool[] inputcabsettings, Dictionary<string, Pannel> pannels)
         {
             var cabsettings = inputcabsettings;
             level3 = inputdict;
@@ -1260,6 +1273,7 @@ namespace AOVGEN
             checkedpannels = pannels;
         }
     }
+
     public static class EnumExtensionMethods
     {
         public static string GetEnumDescription(this Enum enumValue)
@@ -1271,6 +1285,4 @@ namespace AOVGEN
             return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
         }
     }
-
 }
-
