@@ -5,16 +5,23 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
 using System.Reflection;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Management;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Serialization;
 using Telerik.WinControls.UI;
 using WinFormAnimation;
+using Path = WinFormAnimation.Path;
 using PositionChangedEventArgs = Telerik.WinControls.UI.Data.PositionChangedEventArgs;
+using Size = System.Drawing.Size;
 using Timer = System.Windows.Forms.Timer;
 
 namespace AOVGEN
@@ -77,18 +84,18 @@ namespace AOVGEN
         
         private void EditorV2_Load(object sender, EventArgs e)
         {
-            int[] t12 = {1, 2};
+            //int[] t12 = {1, 2};
             
-            Stopwatch sw = Stopwatch.StartNew();
-            string h1= MD5HashGenerator.GenerateKey(t12);
-            sw.Stop();
-            var result1= sw.ElapsedMilliseconds;
-            Stopwatch sw2 = Stopwatch.StartNew();
-            string h2 = FastHash.GenerateKey(t12);
-            sw2.Stop();
-            var result2 = sw.ElapsedMilliseconds;
+            //Stopwatch sw = Stopwatch.StartNew();
+            //string h1= MD5HashGenerator.GenerateKey(t12);
+            //sw.Stop();
+            //var result1= sw.ElapsedMilliseconds;
+            //Stopwatch sw2 = Stopwatch.StartNew();
+            //string h2 = FastHash.GenerateKey(t12);
+            //sw2.Stop();
+            //var result2 = sw.ElapsedMilliseconds;
             
-            bool s = false;
+            //bool s = false;
 
 
 
@@ -110,11 +117,11 @@ namespace AOVGEN
             bunifuImageButton1.MouseDown += BunifuImageButton1_MouseDown;
             bunifuImageButton9.MouseDown += BunifuImageButton9_MouseDown;
             bunifuImageButton10.MouseDown += BunifuImageButton10_MouseDown;
+            
 
             if (VentSystem == null)
             {
-                var myventSystem = new VentSystem();
-                VentSystem = myventSystem;
+                VentSystem = new VentSystem();
                 radAutoCompleteBox1.Text = "VentsystemName;";
             }
             else
@@ -267,7 +274,7 @@ namespace AOVGEN
             path += @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\";
             XmlDocument doc = new XmlDocument();
             doc.Load(path + @"Presets.xml");
-            ReadXMLPresets(doc);
+            ReadXMLPresets(doc, Type.Missing);
         }
         private void mouseEvent(object sender, MouseEventArgs e)
         {
@@ -1016,8 +1023,8 @@ namespace AOVGEN
                     .ToList()
                     .OrderBy(y => y.PozY)
                     .ToList();
-                var t = AddCrossection(controlsWithPosInfo);
-                if (t.Count > 0) controlsWithPosInfo.AddRange(t);
+                //var t = AddCrossection(controlsWithPosInfo);//можно убрать
+                //if (t.Count > 0) controlsWithPosInfo.AddRange(t);
                 if (controlsWithPosInfo.Count > 0)
                 {
                     var Components = controlsWithPosInfo
@@ -1036,10 +1043,12 @@ namespace AOVGEN
 
                         var oldvensystemguid = VentSystem.GUID;
                         VentSystem.GUID = Guid.NewGuid().ToString(); //create ventsystem GUID
-                        if (!OpenForEdit) VentSystem.SystemName = radAutoCompleteBox1.Text; //get ventsystem name
                         VentSystem.ComponentsV2.Clear();
-
                         VentSystem.ComponentsV2 = controlsWithPosInfo;
+                        if (!OpenForEdit) VentSystem.SystemName = radAutoCompleteBox1.Text; //get ventsystem name
+
+
+
 
                         // Open DataBase
                         if (connection.State == ConnectionState.Closed)
@@ -1047,96 +1056,98 @@ namespace AOVGEN
                             connection = OpenDB(); //open DataBase
                             connection.Open();
                         }
-                        else
+
+                        var command = new SQLiteCommand
                         {
-                            var command = new SQLiteCommand
+                            Connection = connection
+                        };
+
+
+                        //Write Ventsystem (host) to DataBase
+                        var date = DateTime.Now.ToString("dd-MM-yyyy");
+                        const string vesrsion = "1";
+                        var InsertQueryVensystem =
+                            $"INSERT INTO Ventsystems ([GUID], SystemName, [Project], Modyfied, Version, Author, [Place]) VALUES ('{VentSystem.GUID}', '{VentSystem.SystemName}', '{Project.GetGUID()}', '{date}', '{vesrsion}', '{Author}', '{Building.BuildGUID}')";
+                        command.CommandText = InsertQueryVensystem;
+                        command.ExecuteNonQuery();
+                        var connectionstring = command.Connection.ConnectionString;
+                        // Write Ventsystem components to DataBase
+                        WriteVentSystemToDB.Execute(connectionstring, VentSystem, Project, Building);
+
+                        command.Dispose();
+                        connection.Close();
+                        // Make TreeNode in Ventsystems Tree and Update Posnames
+                        var ventsystemnode = new RadTreeNode
+                        {
+                            Name = VentSystem.GUID,
+                            Value = VentSystem.SystemName,
+                            Text = VentSystem.SystemName,
+                            Tag = VentSystem
+                        };
+                        var projectnode = mainForm.FindNodeByName(projectGuid, Projecttree.Nodes);
+                        var buildNode = mainForm.FindNodeByName(Building.BuildGUID, projectnode?.Nodes);
+                        if (OpenForEdit)
+                        {
+                            DeleteVentSystem(oldvensystemguid);
+                            var treeNode = mainForm.FindNodeByName(oldvensystemguid, Joinedsystems);
+                            Task task = null;
+                            var pannelnode = treeNode?.Parent;
+
+                            if (pannelnode != null)
                             {
-                                Connection = connection
-                            };
+                                SelectedNode.Name = VentSystem.GUID;
+                                SelectedNode.Tag = VentSystem;
+                                var ventnode = mainForm.FindNodeByName(oldvensystemguid, pannelnode.Nodes);
 
-                            //Write Ventsystem (host) to DataBase
-                            var date = DateTime.Now.ToString("dd-MM-yyyy");
-                            const string vesrsion = "1";
-                            var InsertQueryVensystem =
-                                $"INSERT INTO Ventsystems ([GUID], SystemName, [Project], Modyfied, Version, Author, [Place]) VALUES ('{VentSystem.GUID}', '{VentSystem.SystemName}', '{Project.GetGUID()}', '{date}', '{vesrsion}', '{Author}', '{Building.BuildGUID}')";
-                            command.CommandText = InsertQueryVensystem;
-                            command.ExecuteNonQuery();
-                            var connectionstring = command.Connection.ConnectionString;
-                            // Write Ventsystem components to DataBase
-                            WriteVentSystemToDB.Execute(connectionstring, VentSystem, Project, Building);
+                                ventnode.Name = VentSystem.GUID;
+                                ventnode.Tag = VentSystem;
+                                var ventcnt = pannelnode.Nodes.Count;
+                                var pannelGUID = pannelnode.Name;
+                                var pannelname = pannelnode.Text;
+                                var pannel = (Pannel) pannelnode.Tag;
+                                task = Task.Factory.StartNew(() =>
+                                {
+                                    UpdatePannel(ventsystemnode.Name, pannelGUID);
+                                    UpdateVentSystemQuery(ventsystemnode.Name, pannelGUID, pannelname);
+                                    UpdateConnectedCables(ventsystemnode.Name, pannelGUID, pannelname);
+                                    UpdateConnectedPosNames(ventsystemnode.Name, ventcnt, ".");
+                                    Task.Factory.StartNew(() =>
+                                        pannel.Power = UpdatePannelPower(pannelnode, connectionstring)
+                                    );
+                                    Task.Factory.StartNew(() =>
+                                        pannel.Voltage = UpdatePannelVoltage(pannelnode, connectionstring)
+                                    );
+                                });
+                            }
 
-                            command.Dispose();
-                            connection.Close();
-                            // Make TreeNode in Ventsystems Tree and Update Posnames
-                            var ventsystemnode = new RadTreeNode
+                            if (task != null)
                             {
-                                Name = VentSystem.GUID,
-                                Value = VentSystem.SystemName,
-                                Text = VentSystem.SystemName,
-                                Tag = VentSystem
-                            };
-                            var projectnode = mainForm.FindNodeByName(projectGuid, Projecttree.Nodes);
-                            var buildNode = mainForm.FindNodeByName(Building.BuildGUID, projectnode.Nodes);
-                            if (OpenForEdit)
-                            {
-                                DeleteVentSystem(oldvensystemguid);
-                                var treeNode = mainForm.FindNodeByName(oldvensystemguid, Joinedsystems);
-                                Task task = null;
-                                var pannelnode = treeNode?.Parent;
-
-                                if (pannelnode != null)
-                                {
-                                    SelectedNode.Name = VentSystem.GUID;
-                                    SelectedNode.Tag = VentSystem;
-                                    var ventnode = mainForm.FindNodeByName(oldvensystemguid, pannelnode.Nodes);
-
-                                    ventnode.Name = VentSystem.GUID;
-                                    ventnode.Tag = VentSystem;
-                                    var ventcnt = pannelnode.Nodes.Count;
-                                    var pannelGUID = pannelnode.Name;
-                                    var pannelname = pannelnode.Text;
-                                    var pannel = (Pannel)pannelnode.Tag;
-                                    task = Task.Factory.StartNew(() =>
-                                    {
-                                        UpdatePannel(ventsystemnode.Name, pannelGUID);
-                                        UpdateVentSystemQuery(ventsystemnode.Name, pannelGUID, pannelname);
-                                        UpdateConnectedCables(ventsystemnode.Name, pannelGUID, pannelname);
-                                        UpdateConnectedPosNames(ventsystemnode.Name, ventcnt, ".");
-                                        Task.Factory.StartNew(() =>
-                                            pannel.Power = UpdatePannelPower(pannelnode, connectionstring)
-                                        );
-                                        Task.Factory.StartNew(() =>
-                                            pannel.Voltage = UpdatePannelVoltage(pannelnode, connectionstring)
-                                        );
-                                    });
-                                }
-
-                                if (task != null)
-                                {
-                                    task.Wait();
-                                    mainForm.UpdateBuildNode(buildNode);
-                                }
-                                else
-                                {
-                                    mainForm.UpdateBuildNode(buildNode);
-                                }
-                                //SelectedNode.Name = ventSystem.GUID;
-                                //SelectedNode.Tag = ventSystem;
+                                task.Wait();
+                                mainForm.UpdateBuildNode(buildNode);
                             }
                             else
                             {
-                                Ventree.Nodes.Add(ventsystemnode);
+                                mainForm.UpdateBuildNode(buildNode);
                             }
-                            Ventree.Update();
-                            Ventree.SelectedNode = null;
-                            Close();
+                            //SelectedNode.Name = ventSystem.GUID;
+                            //SelectedNode.Tag = ventSystem;
                         }
+                        else
+                        {
+                            Ventree.Nodes.Add(ventsystemnode);
+                        }
+
+                        Ventree.Update();
+                        Ventree.SelectedNode = null;
+                        Close();
+                    }
+                    else
+                    {
+
+                        throw new VentSystemEmptyException("Не создано ни одного элемента");
                     }
                 }
-                else
-                {
-                    throw new VentSystemEmptyException("Не создано ни одного элемента");
-                }
+
             }
             catch (VentSystemEmptyException ex)
             {
@@ -1327,8 +1338,22 @@ namespace AOVGEN
         {
             radDropDownList2.Items.Clear();
 
+            //var items = (IGrouping<string, (string presetName, string presetType)>)
+            //    radDropDownList1.Items[e.Position].Tag;
+            //foreach (var VARIABLE in items)
+            //{
+
+            //    radDropDownList2.Items.Add(
+            //        new RadListDataItem
+            //        {
+            //            Text = VARIABLE.presetName,
+            //            Tag = VARIABLE
+            //        });
+            //}
+
+
             var dataItem =
-                ((Dictionary<string, KeyValuePair<(string, string), List<PosInfo>>>)radDropDownList1.Items[e.Position]
+                ((Dictionary<string, KeyValuePair<(string, string), byte[]>>)radDropDownList1.Items[e.Position]
                     .Tag)
                 .Values;
             foreach (var radListDataItem in dataItem.Select(keyValuePair => new RadListDataItem
@@ -1337,6 +1362,7 @@ namespace AOVGEN
                 Tag = keyValuePair.Value
             }))
             {
+                
                 radDropDownList2.Items.Add(radListDataItem);
             }
         }
@@ -1404,7 +1430,10 @@ namespace AOVGEN
                 RadListDataItem dataItem = radDropDownList2.SelectedItem;
 
                 if (dataItem == null) return;
-                List<PosInfo> posInfos = (List<PosInfo>)dataItem.Tag;
+                
+                var t = (byte[])dataItem.Tag;
+
+                List<PosInfo> posInfos = (List<PosInfo>) MD5HashGenerator.ByteArrayToObject(dataItem.Tag as byte[]);
                 SupplyVentPresent = posInfos
                     .Count(re => re.Tag is SupplyVent || re.Tag is SpareSuplyVent) > 0;
                 ExtVentPresent = posInfos
@@ -1459,6 +1488,12 @@ namespace AOVGEN
             }
         }
 
+        List<PosInfo> ReadSystemPreset((string, string) preset)
+        {
+            return null;
+        }
+
+
         private void label2_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             WritePrestToXML.Write(Controls);
@@ -1476,8 +1511,37 @@ namespace AOVGEN
             XmlElement documentElement = xmlPresetsDocument.DocumentElement;
             if (documentElement == null) return;
             XmlNodeList PresetsNodes = documentElement.SelectNodes("/Presets/Preset");
-            Dictionary<(string, string), List<PosInfo>> presetsDictionary =
-                new Dictionary<(string, string), List<PosInfo>>();
+           
+           
+
+            if (PresetsNodes == null) return;
+            var presetList = (
+                    from XmlNode presets in PresetsNodes
+                    let xmlAttributeCollection = presets.Attributes
+                    where xmlAttributeCollection != null
+                    let presetName = xmlAttributeCollection["presetName"].Value
+                    let presetType = xmlAttributeCollection["presetType"].Value
+                    select (presetName, presetType)).ToList()
+                .GroupBy(e => e.presetType);
+
+            
+            foreach (var preset in presetList)
+            {
+                radDropDownList1.Items.Add(
+                    new RadListDataItem
+                    {
+                        Text = preset.Key,
+                        Tag = preset
+                    });
+            }
+        }
+        private void ReadXMLPresets(XmlDocument xmlPresetsDocument, object obj)
+        {
+            XmlElement documentElement = xmlPresetsDocument.DocumentElement;
+            if (documentElement == null) return;
+            XmlNodeList PresetsNodes = documentElement.SelectNodes("/Presets/Preset");
+            Dictionary<(string, string), byte[]> presetsDictionary =
+                new Dictionary<(string, string), byte[]>();
             //if (VentSystem == null) VentSystem = new VentSystem();
 
             if (PresetsNodes == null) return;
@@ -2107,30 +2171,135 @@ namespace AOVGEN
                 }
 
                 var presetkey = (presetName, presetType);
-                presetsDictionary.Add(presetkey, posInfos);
+
+                presetsDictionary.Add(presetkey, MD5HashGenerator.ObjectToByteArray(posInfos));
             }
 
             var t = presetsDictionary
                 .GroupBy(e => e.Key.Item2)
                 .ToList();
-            foreach (var dataItem in t.Select(VARIABLE => new RadListDataItem
+            
+            foreach (var dataItem in t.Select(VARIABLE =>
             {
-                Text = VARIABLE.Key,
-                Tag = VARIABLE
-                    .ToDictionary(e => e.Key.Item1)
+                return new RadListDataItem
+                {
+                    Text = VARIABLE.Key,
+                    Tag = VARIABLE
+                        .ToDictionary(e => e.Key.Item1)
+                };
             }))
             {
                 radDropDownList1.Items.Add(dataItem);
             }
 
-            foreach (KeyValuePair<(string, string), List<PosInfo>> keyValuePair in presetsDictionary)
+        }
+
+        internal bool EncodedData(object obj)
+        {
+            
+            var dataArray = MD5HashGenerator.ObjectToByteArray(obj); //data for encrypt to byte array
+
+            //get disk  ID
+            ManagementObject dsk = new ManagementObject(@"win32_logicaldisk.deviceid=""c:""");
+            dsk.Get();
+            string diskID = dsk["VolumeSerialNumber"].ToString();
+
+            //get MB ID
+            ManagementObjectCollection mbsList = null;
+            ManagementObjectSearcher mbs = new ManagementObjectSearcher("Select * From Win32_processor");
+            mbsList = mbs.Get();
+            string CPUid = "";
+            foreach (var o in mbsList)
             {
-                RadListDataItem dataItem = new RadListDataItem();
-                dataItem.Text = keyValuePair.Key.Item1;
-                dataItem.Tag = keyValuePair.Value;
-                radDropDownList2.Items.Add(dataItem);
+                var mo = (ManagementObject)o;
+                CPUid = mo["ProcessorID"].ToString();
+            }
+
+            //convert IDs to bytes[16]
+            var HWID = diskID + CPUid;
+            var bytes = Encoding.ASCII.GetBytes(HWID);
+            var bytes2 = Encoding.ASCII.GetBytes(MD5HashGenerator.GenerateKey(HWID));
+
+            var key = new byte[16];
+            byte[] iv = new byte[16];
+            Array.Copy(bytes2, key, 16);
+            Array.Copy(bytes, iv, 16);
+
+            //encrypt data
+            var crypto = new AesCryptographyService();
+            var encrypted = crypto.Encrypt(dataArray, key, iv);
+
+            //decrypt data
+            const string
+                MYHWID =
+                    "C2FCB34BBFEBFBFF000906ED"; //its my joined disk and CPU IDs (disk ID = C2FCB34B; CPU ID = BFEBFBFF000906ED)
+            var encryptBytesKey = new byte[16];
+            var encryptedBytesIV = new byte[16];
+            Array.Copy(Encoding.ASCII.GetBytes(MD5HashGenerator.GenerateKey(MYHWID)), encryptBytesKey, 16);
+            Array.Copy(Encoding.ASCII.GetBytes(MYHWID), encryptedBytesIV, 16);
+
+            var decrypt = crypto.Decrypt(encrypted, encryptBytesKey, encryptedBytesIV);
+            List<PosInfo> decryptedPosInfos = MD5HashGenerator.ByteArrayToObject(decrypt) as List<PosInfo>;
+
+            if (decryptedPosInfos != null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public class AesCryptographyService
+        {
+            public byte[] Encrypt(byte[] data, byte[] key, byte[] iv)
+            {
+                using (var aes = Aes.Create())
+                {
+                    aes.KeySize = 128;
+                    aes.BlockSize = 128;
+                    aes.Padding = PaddingMode.Zeros;
+
+                    aes.Key = key;
+                    aes.IV = iv;
+
+                    using (var encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
+                    {
+                        return PerformCryptography(data, encryptor);
+                    }
+                }
+            }
+
+            public byte[] Decrypt(byte[] data, byte[] key, byte[] iv)
+            {
+                using (var aes = Aes.Create())
+                {
+                    aes.KeySize = 128;
+                    aes.BlockSize = 128;
+                    aes.Padding = PaddingMode.Zeros;
+
+                    aes.Key = key;
+                    aes.IV = iv;
+
+                    using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
+                    {
+                        return PerformCryptography(data, decryptor);
+                    }
+                }
+            }
+
+            private byte[] PerformCryptography(byte[] data, ICryptoTransform cryptoTransform)
+            {
+                using (var ms = new MemoryStream())
+                using (var cryptoStream = new CryptoStream(ms, cryptoTransform, CryptoStreamMode.Write))
+                {
+                    cryptoStream.Write(data, 0, data.Length);
+                    cryptoStream.FlushFinalBlock();
+
+                    return ms.ToArray();
+                }
             }
         }
+
 
         private static PosInfo SetXmlProPertyToPosInfo(XmlNode posInfoNode)
         {
@@ -2243,18 +2412,15 @@ namespace AOVGEN
             if (ySupplyPosInfo != null)
             {
                 int YSupplyPos = ySupplyPosInfo.PozY; //забираем Y приточки
-                var LeftX = posInfos
+                var RightX = posInfos
                     .Where(e => e.PozY == YSupplyPos)
                     .OrderBy(e => e.PozX)
                     .DefaultIfEmpty()
-                    .FirstOrDefault()?.PozX;
-                var RightX = posInfos.Where(e => e.PozY == YSupplyPos)
-                    .OrderBy(e => e.PozX)
-                    .DefaultIfEmpty()
-                    .Last().PozX;
+                    .Last()?.PozX;
+               
+                
 
-
-                for (int i = 0; i < RightX - LeftX; i++)
+                for (int i = 0; i <= RightX; i++)
                 {
                     int[] arr = { i, YSupplyPos };
                     if (OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(arr))) continue;
@@ -2272,14 +2438,14 @@ namespace AOVGEN
             if (yExtPosInfo == null) return exitPosInfos;
             {
                 int YExtPos = yExtPosInfo.PozY;
-                var LeftX = posInfos
+                var RightX = posInfos
                     .Where(e => e.PozY == YExtPos)
                     .OrderBy(e => e.PozX)
                     .DefaultIfEmpty()
-                    .FirstOrDefault()?.PozX;
+                    .Last()?.PozX;
                 
 
-                for (int i = 0; i < LeftX; i++) //for (int i = 0; i < RightX - LeftX; i++)
+                for (int i = 0; i <= RightX; i++) //for (int i = 0; i < RightX - LeftX; i++)
                 {
                     int[] arr = { i, YExtPos };
                     if (OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(arr))) continue;
@@ -2616,5 +2782,15 @@ namespace AOVGEN
             }
         }
         #endregion
+
+        private void bunifuImageButton1_MouseUp(object sender, MouseEventArgs e)
+        {
+            MessageBox.Show("");
+        }
+
+        private void bunifuImageButton1_MouseEnter(object sender, EventArgs e)
+        {
+            
+        }
     }
 }

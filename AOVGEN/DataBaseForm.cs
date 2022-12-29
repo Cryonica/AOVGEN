@@ -90,33 +90,17 @@ namespace AOVGEN
                 }
             }
             reader.Close();
-            foreach (var provider in list)
+            foreach (var provider in list.Where(provider => provider.StartsWith("Microsoft.ACE.OLEDB")))
             {
-                if (provider.StartsWith("Microsoft.ACE.OLEDB"))
-                {
-                    prov = provider;
-                    break;
-                }
+                prov = provider;
+                break;
             }
             return prov;
         }
 
         private void CheckAndStartmainForm()
         {
-            if (Opacity == 0)
-
-            {
-
-                //timer1.Stop();
-
-                //IList<string> bd = timer1.Tag as IList<string>;
-
-                //MainForm mainForm = new MainForm(bd[1].ToString(), bd[0].ToString()); 
-
-                //mainForm.Show();
-                //Close();
-
-            }
+          return;
         }
 
         private void DataBaseForm_Load(object sender, EventArgs e)
@@ -194,7 +178,7 @@ namespace AOVGEN
                 }
 
             radListView1.SelectedIndex = trueindex;
-            XmlNodeList showdialognodes = documentElement.SelectNodes("/Config/STARTUP/SHOWDIALOG");
+            XmlNodeList showdialognodes = documentElement?.SelectNodes("/Config/STARTUP/SHOWDIALOG");
            
 
             if (showdialognodes != null && showdialognodes.Item(0)?.InnerText == "True")
@@ -219,12 +203,21 @@ namespace AOVGEN
                                               return radListDataItem;
                                           })
                                           .ToList();
-            radDropDownList1.Text = (radDropDownList1.DataSource as IEnumerable<RadListDataItem>)
-                .ToList()
-                .Where(e => (bool)e.Tag)
-                .Select(e => e)
-                .FirstOrDefault()
-                ?.Text;
+            try
+            {
+                radDropDownList1.Text = (radDropDownList1.DataSource as IEnumerable<RadListDataItem>)
+                    .ToList()
+                    .Where(e => (bool)e.Tag)
+                    .Select(e => e)
+                    .FirstOrDefault()
+                    ?.Text;
+
+            }
+            catch (Exception ex)
+            {
+               Console.Write(ex.Message);
+            }
+            
         }
         private void WriteToXMLAttr(string dbname)
         {
@@ -368,7 +361,7 @@ namespace AOVGEN
             });
             _thread.SetApartmentState(ApartmentState.STA);
             _thread.Start();
-            Timer aTimer = new Timer();
+            
             System.Windows.Forms.Timer t = new System.Windows.Forms.Timer
             {
                 Interval = 10 // specify interval time as you want
@@ -380,11 +373,9 @@ namespace AOVGEN
             t.Start();
             
         }
-        private void RadButton2_Click(object sender, EventArgs e)
-        {
-            
-            Close();
-        }
+
+        private void RadButton2_Click(object sender, EventArgs e) => Close();
+        
         private void RadButton3_Click(object sender, EventArgs e)
         {
             string BDPath = radListView1.SelectedItem.Text;
@@ -453,11 +444,9 @@ namespace AOVGEN
             {
                 timer2.Stop();
             }
-
-
         }
 
-        private class BDMessage
+        private static class BDMessage
         {
             internal const string MessageAccessFail = "Невозможно открыть базу данных \n Возможно не установлен Microsoft Access 2010 \n" + "или программа запущена в режиеме x32";
             internal const string MessageOk = "Соединение установлено";

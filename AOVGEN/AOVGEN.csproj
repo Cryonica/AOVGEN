@@ -166,6 +166,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbotForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AbotForm.Designer.cs">
+      <DependentUpon>AbotForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="AddSensorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -285,6 +291,9 @@
     </Compile>
     <Compile Include="VentSystem.cs" />
     <Compile Include="WriteVentSystemToDB.cs" />
+    <EmbeddedResource Include="AbotForm.resx">
+      <DependentUpon>AbotForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="AddSensorForm.resx">
       <DependentUpon>AddSensorForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -350,6 +359,9 @@
     <EmbeddedResource Include="VendorForm.resx">
       <DependentUpon>VendorForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -414,6 +426,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AOVGENico.ico" />
+    <None Include="Resources\red_light.png" />
+    <None Include="Resources\3dgifmaker98263.gif" />
+    <None Include="Resources\3dgifmaker98777.gif" />
     <None Include="Resources\green_light.png" />
     <None Include="Resources\fan_left_dual.png" />
     <None Include="Resources\fan_right_dual.png" />

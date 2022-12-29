@@ -1,6 +1,10 @@
 ﻿
+using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using GKS_ASU_Loader;
+using  System.ServiceModel;
+using System.ServiceModel.Description;
 
 namespace AOVGEN
 {
@@ -10,7 +14,38 @@ namespace AOVGEN
         private IRevitExternalService Service { get; }
         public RunRevitCommand(IRevitExternalService externalService )
         {
-            Service = externalService;
+            //Service = externalService;
+            string uri = "net.tcp://localhost:6565/";
+            NetTcpBinding binding = new NetTcpBinding(SecurityMode.None)
+            {
+                MaxBufferPoolSize = 2147483647,
+                MaxBufferSize = 2147483647,
+                MaxReceivedMessageSize = 2147483647,
+                ReaderQuotas =
+                {
+                    MaxStringContentLength = 2147483647,
+                    MaxArrayLength = 2147483647,
+                    MaxDepth = 2147483647,
+                    MaxBytesPerRead = 2147483647
+                }
+            };
+            var endpoint = new EndpointAddress(uri);
+            var channel = new ChannelFactory<IRevitExternalService>(binding, endpoint);
+            foreach (OperationDescription op in channel.Endpoint.Contract.Operations)
+            {
+                DataContractSerializerOperationBehavior dataContractBehavior =
+                    op.Behaviors.Find<DataContractSerializerOperationBehavior>();
+                if (dataContractBehavior != null)
+                {
+                    dataContractBehavior.MaxItemsInObjectGraph = 2147483646;
+                }
+            }
+            IRevitExternalService proxy = channel.CreateChannel();
+
+            //var proxy = channel.CreateChannel(endpoint);
+           
+            Service = proxy;
+
         }
         public string GetCurrentDocPath()
         {
@@ -31,13 +66,31 @@ namespace AOVGEN
         }
         public (string, string) StateInfo()
         {
-            return Service.GetStateInfo();
+            var info = Service.GetStateInfo();
+            if (!string.IsNullOrEmpty(info.Item1))
+            {
+                
+                StatusChanged?.Invoke(this, new  StatuChangeArgs(){docinfo = info.Item1});
+                
+            }
+            else
+            {
+                StatusChanged?.Invoke(this, new StatuChangeArgs() { docinfo = String.Empty });
+            }
+            return info;
         }
-        public int PlacePan(List<(string, string, string, string, string, string, string, string, string, double)> IDPannelList)
+        public int LoadPannels(List<(string, string, string, string, string, string, string, string, string, double)> IDPannelList)
         {
-            int result = Service.PlacePannels(IDPannelList);
+            int result = Service.LoadPannels(IDPannelList);
             return result;
         }
+        public int PlacePannels()
+        {
+            int result = Service.PlacePannels();
+            return result;
+        }
+
+
         public Dictionary<string, List<string>> FamilyTypes()
         {
             try
@@ -52,6 +105,18 @@ namespace AOVGEN
             
             
         }
+
+        public void SetUIApp()
+        {
+            try
+            {
+                Service.SetUIApp();
+            }
+            catch 
+            {
+              
+            }
+        }
         public List<(string, string)> GetFamilyListID()
         {
             return Service?.GetFamilyListID();
@@ -60,6 +125,13 @@ namespace AOVGEN
         {
             return (int)Service?.GetPlaceResult();
         }
+
+        public event EventHandler StatusChanged;
+        public class StatuChangeArgs: EventArgs
+        {
+            public string docinfo { get; set; }
+        }
+
 
     }
 }

@@ -81,3 +81,4 @@ C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\obj\x86\Release\AOVGEN.csproj.Core
 C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\obj\x86\Release\AOVGEN.csproj.CopyComplete
 C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\obj\x86\Release\AOVGEN.exe
 C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\obj\x86\Release\AOVGEN.pdb
+C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\obj\x86\Release\AOVGEN.AbotForm.resources

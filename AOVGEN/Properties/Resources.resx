@@ -247,6 +247,9 @@
   <data name="OpenFolder" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\OpenFolder.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="red_light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\red_light.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="rooms" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\rooms.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -300,5 +303,8 @@
   </data>
   <data name="waterheater1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\waterheater1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="_3dgifmaker98263" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\3dgifmaker98263.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

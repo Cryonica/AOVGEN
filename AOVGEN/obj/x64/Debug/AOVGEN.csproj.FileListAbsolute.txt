@@ -82,3 +82,4 @@ C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\bin\x64\Debug\Bunifu.UI.WinForms.B
 C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\bin\x64\Debug\Bunifu.UI.WinForms.BunifuButton.dll
 C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\bin\x64\Debug\Bunifu.UI.WinForms.BunifuButton.xml
 C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\obj\x64\Debug\AOVGEN.EditorV2.resources
+C:\Users\akoltakov\source\repos\AOVGEN\AOVGEN\obj\x64\Debug\AOVGEN.AbotForm.resources

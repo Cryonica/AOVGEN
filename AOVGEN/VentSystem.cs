@@ -66,14 +66,10 @@ namespace AOVGEN
 		[Description("Нет")]
 		No
 	}
-
-
-
-
 	[Serializable]
-	class VentSystem : IEnumerable,  ICloneable 
+    internal class VentSystem : IEnumerable,  ICloneable 
 	{
-        static string Appfolder()
+        private static string Appfolder()
 		{
 			return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\";
 
@@ -257,14 +253,12 @@ namespace AOVGEN
 
     }
 
-
-
-
-	#endregion
+    #endregion
 	#region Vent
-	abstract class Vent : ElectroDevice, ICompGUID, IGetSensors
+	[Serializable]
+    internal abstract class Vent : ElectroDevice, ICompGUID, IGetSensors
 	{
-        //private _Voltage VoltageVariable;
+        
 		private _PressureProtect PressureProtectVariable;
 		private AHUProtect aHUProtectVariable;
 		private AHUContolType ContolTypeVariable;
@@ -324,9 +318,7 @@ namespace AOVGEN
 		public _PressureProtect PressureProtect { get => PressureProtectVariable; set => CheckPressureType(value); }
 		internal string SortPriority => MakeSortPriority(VoltageVariable);
 
-        //public bool ECType { get; set; }
-
-		internal Cable Cable2;
+        internal Cable Cable2;
 		internal Cable Cable3;
 		internal Cable Cable4;
 		internal string Description2;
@@ -362,8 +354,7 @@ namespace AOVGEN
 										Cable2 = null;
 										Cable3 = null;
 										break;
-									case AHUProtect.No:
-									default:
+                                    default:
 										blockname = "ED-380-NORO";
 										Cable2 = null;
 										Cable3 = null;
@@ -550,8 +541,7 @@ namespace AOVGEN
 										Cable3.MakeControlSortpriority(SortPriority + "3");
 										Cable4.MakeControlSortpriority(SortPriority + "4");
 										break;
-									case AHUProtect.No:
-									default:
+                                    default:
 										blockname = "ED-380-Transform";
 										ShemaASU.ReSetAllIO();
 										ShemaASU.SetIO(ShemaASU.IOType.DO, 1);
@@ -671,8 +661,7 @@ namespace AOVGEN
 										Cable2.MakeControlSortpriority(SortPriority + "2");
 										Cable3.MakeControlSortpriority(SortPriority + "3");
 										break;
-									case AHUProtect.No:
-									default:
+                                    default:
 										blockname = "ED-220-RO";
 										ShemaASU.ReSetAllIO();
 										ShemaASU.SetIO(ShemaASU.IOType.DO, 1);
@@ -704,8 +693,7 @@ namespace AOVGEN
 									case AHUProtect.Posistor:
 										blockname = "ED-220-Posistor-Transform";
 										break;
-									case AHUProtect.No:
-									default:
+                                    default:
 										blockname = "ED-220-Transform";
 										break;
 
@@ -1039,7 +1027,8 @@ namespace AOVGEN
 				
             }
         }
-		internal class FControl : IVendoInfo, ICompGUID
+		[Serializable]
+        internal class FControl : IVendoInfo, ICompGUID
 		{
 
 			string VendorName;
@@ -1096,7 +1085,7 @@ namespace AOVGEN
 		}
 
 	}
-
+	[Serializable]
     internal class SupplyVent : Vent, IPower
     {
         
@@ -1185,8 +1174,8 @@ namespace AOVGEN
 
 		}
 	}
-
-    class SpareSuplyVent : IPower, ICompGUID, IGetSensors
+    [Serializable]
+	class SpareSuplyVent : IPower, ICompGUID, IGetSensors
 	{
         private ElectroDevice._Voltage voltage;
         private string power;
@@ -1342,8 +1331,8 @@ namespace AOVGEN
            
 		}
     }
-
-    class SpareExtVent : IPower, ICompGUID, IGetSensors
+    [Serializable]
+	class SpareExtVent : IPower, ICompGUID, IGetSensors
 	{
 		private ElectroDevice._Voltage voltage;
 		private string power;
@@ -1504,6 +1493,7 @@ namespace AOVGEN
 
 		}
 	}
+    [Serializable]
 	class ExtVent : Vent, IPower
 	{
 		public static string ImagePath = VentSystem.AppFolder + "Images\\4_1.png";
@@ -1591,6 +1581,7 @@ namespace AOVGEN
 	}
 	#endregion
 	#region Filtr
+    [Serializable]
 	class Filtr : ICompGUID, IGetSensors
 	{
 		private protected VentComponents ComponentVariable;
@@ -1712,8 +1703,8 @@ namespace AOVGEN
 			PressureProtect = Sensor.SensorType.Discrete;
 		}
 	}
-
-    internal class SupplyFiltr : Filtr //это производный для притока. они нужны были изначально чтобы хранить в себе разные картиники
+	[Serializable]
+	internal class SupplyFiltr : Filtr //это производный для притока. они нужны были изначально чтобы хранить в себе разные картиники
 	{
 		public static string Imagepath = VentSystem.AppFolder + "Images\\2_1.png";
 		public static string ImageNullPath = VentSystem.AppFolder + "Images\\2_0.png";
@@ -1729,8 +1720,8 @@ namespace AOVGEN
 			PressureProtect = Sensor.SensorType.Discrete;
 		}
 	}
-
-    internal class ExtFiltr : Filtr //это производный для вытяжки
+    [Serializable]
+	internal class ExtFiltr : Filtr //это производный для вытяжки
 	{
 		public static string Imagepath = VentSystem.AppFolder + "Images\\5_1.png";
 		public static string ImageNullPath = VentSystem.AppFolder + "Images\\5_0.png";
@@ -1750,8 +1741,8 @@ namespace AOVGEN
 	}
 	#endregion
 	#region Damper
-
-    internal abstract class Damper : ElectroDevice, ICompGUID
+    [Serializable]
+	internal abstract class Damper : ElectroDevice, ICompGUID
 	{
 		internal ShemaASU ShemaASU;
 		[DisplayName("Обозначение")]
@@ -1802,8 +1793,8 @@ namespace AOVGEN
 
 
 	}
-
-    internal class SupplyDamper : Damper, IPower
+    [Serializable]
+	internal class SupplyDamper : Damper, IPower
 	{
 		public static string ImagePath = VentSystem.AppFolder + "Images\\3_1.png";
 		public static string ImageNullPath = VentSystem.AppFolder + "Images\\3_0.png";
@@ -1926,6 +1917,7 @@ namespace AOVGEN
 		}
 
 	}
+    [Serializable]
 	class ExtDamper : Damper, IPower
 	{
 		public static string ImagePath = VentSystem.AppFolder + "Images\\6_1.png";
@@ -2012,6 +2004,7 @@ namespace AOVGEN
 	}
 	#endregion
 	#region Heaters
+    [Serializable]
 	class WaterHeater : IEnumerable, ICompGUID, IGetSensors
 	{
 
@@ -2274,8 +2267,8 @@ namespace AOVGEN
 			{
 				_Pump.HasTK = pumpTK;
 
-			};
-		}
+			}
+        }
 		private void CheckValveType(object val)
 		{
 			valveType = (Valve.ValveType)val;
@@ -2407,7 +2400,7 @@ namespace AOVGEN
 			ShemaASU.SetIO(ShemaASU.IOType.AO, 1);
 
 		}
-
+		[Serializable]
 		internal class Pump : Damper, IPower
 		{
 
@@ -2499,7 +2492,8 @@ namespace AOVGEN
 				}
 			}
 		}
-		internal class Valve : ElectroDevice, IPower, ICompGUID
+		[Serializable]
+        internal class Valve : ElectroDevice, IPower, ICompGUID
 		{
 			[TypeConverter(typeof(EnumDescConverter))]
 			internal enum ValveType
@@ -2604,6 +2598,7 @@ namespace AOVGEN
 
 		}
 	}
+    [Serializable]
 	class ElectroHeater : ElectroDevice, IPower ,ICompGUID
 	{
 		#region Enums
@@ -2950,6 +2945,7 @@ namespace AOVGEN
 	}
 	#endregion
 	#region Froster
+    [Serializable]
 	class Froster : ElectroDevice, IEnumerable, IPower, ICompGUID, IGetSensors
 	{
 		#region Enums
@@ -3509,8 +3505,7 @@ namespace AOVGEN
 							_KKB.ShemaASU.SetIO(ShemaASU.IOType.DO, 1);
 
 							break;
-						case KKB.KKBControlType.No:
-						default:
+                        default:
 							_KKB.Cable2 = null;
 							_KKB.Cable3 = null;
 							_KKB.Cable4 = null;
@@ -3731,7 +3726,8 @@ namespace AOVGEN
 		}
 		#endregion
 		#region Interenal Classes
-		internal class Valve : ElectroDevice, IPower, ICompGUID
+		[Serializable]
+        internal class Valve : ElectroDevice, IPower, ICompGUID
 		{
 			[TypeConverter(typeof(EnumDescConverter))]
 			internal enum ValveType
@@ -3796,7 +3792,8 @@ namespace AOVGEN
 			}
 
 		}
-		internal class ProtectSensor : SensorT
+		[Serializable]
+        internal class ProtectSensor : SensorT
 		{
 			public enum FrosterSensorType
 			{
@@ -3847,6 +3844,7 @@ namespace AOVGEN
 
 
 		}
+		[Serializable]
 		internal class KKB : ElectroDevice, IPower, ICompGUID
 		{
 			[TypeConverter(typeof(EnumDescConverter))]
@@ -4066,6 +4064,7 @@ namespace AOVGEN
 	}
 	#endregion
 	#region Humudifier
+    [Serializable]
 	class Humidifier : ElectroDevice, IPower, ICompGUID, IGetSensors
 	{
 		#region Pictures Path
@@ -4323,6 +4322,7 @@ namespace AOVGEN
 				
         }
 		#endregion
+		[Serializable]
 		internal class HumiditySens : Sensor
 		{
 			internal new string SortPriority => sortpriority;
@@ -4482,7 +4482,8 @@ namespace AOVGEN
 	#endregion
 	#region Recuperator
 
-    internal class Recuperator :IEnumerable, ICompGUID, IGetSensors
+	[Serializable]
+	internal class Recuperator :IEnumerable, ICompGUID, IGetSensors
 	{
 		#region Pictures Path
 		public static string ImageNullPath = VentSystem.AppFolder + "Images\\9_0.png";
@@ -5009,6 +5010,7 @@ namespace AOVGEN
 		}
 		#endregion
 		#region Internal Classes
+		[Serializable]
 		internal class Drive : WaterHeater.Valve, IPower
 		{
 
@@ -5048,7 +5050,7 @@ namespace AOVGEN
 
 		}
 		
-		
+		[Serializable]
 		internal class Pump : Damper, IPower
 		{
 
@@ -5149,7 +5151,7 @@ namespace AOVGEN
 	}
 	#endregion
 	#region Sensors
-	
+	[Serializable]
 	abstract class Sensor  : ICompGUID, IVendoInfo
 	{
 		
@@ -5227,6 +5229,7 @@ namespace AOVGEN
 
 
 	}
+    [Serializable]
 	class SensorT : Sensor, IGetSensors, IVendoInfo
 	{
 		internal override void CheckSensorType(object val)
@@ -5334,8 +5337,8 @@ namespace AOVGEN
         }
 
 	}
-
-    internal class OutdoorTemp : SensorT
+	[Serializable]
+	internal class OutdoorTemp : SensorT
 	{
 		private VentComponents ComponentVariable;
 		
@@ -5446,6 +5449,7 @@ namespace AOVGEN
         }
 
 	}//в заслонке
+    [Serializable]
 	class SupplyTemp : SensorT
 	{
 		private VentComponents ComponentVariable;
@@ -5558,6 +5562,7 @@ namespace AOVGEN
             ShemaASU.Description1 = Description;
         }
 	}//в воздуховоде
+    [Serializable]
 	class ExhaustTemp : SensorT
 	{
 		private VentComponents ComponentVariable;
@@ -5721,6 +5726,7 @@ namespace AOVGEN
 
         }
 	} //в воздуховоде
+    [Serializable]
 	class IndoorTemp : SensorT
 	{
 		private VentComponents ComponentVariable;
@@ -5894,6 +5900,7 @@ namespace AOVGEN
             ShemaASU.Description1 = Description;
         }
 	} // в комнате
+    [Serializable]
 	class PressureContol : Sensor
 	{
 		
@@ -6090,7 +6097,8 @@ namespace AOVGEN
 
 
 	}
-	class ElectroDevice 
+    [Serializable]
+    internal class ElectroDevice 
 	{
 		[TypeConverter(typeof(EnumDescConverter))]
 		public enum _Voltage
@@ -6129,7 +6137,8 @@ namespace AOVGEN
         }
 	}
 	#endregion
-	class Cable
+	[Serializable]
+    class Cable
 	{
 		internal enum CableAttribute
 		{
@@ -6156,7 +6165,7 @@ namespace AOVGEN
 		public string FromPosName { get; set; }
 		[DisplayName("Куда")]
 		public string ToPosName { get; set; }
-		//public string FromBlockName { get; set; }
+		
 		internal string ToBlockName { get; set; }
 		internal string FromGUID { get; set; }
 		internal string ToGUID { get; set; }
@@ -6164,7 +6173,7 @@ namespace AOVGEN
 		public string CableName { get; set; }
 		[DisplayName("Тип кабеля")]
 		public string CableType { get; set; }
-		//public string HostGUID { get; set; }
+		
 		internal string HostTable { get; set; }
 		[DisplayName("Описание")]
 		public string Description { get; set; }
@@ -6471,7 +6480,7 @@ namespace AOVGEN
 		}
 		
 	}
-
+	[Serializable]
     internal class CrossSection
     {
 		internal SensorT _SensorT;
@@ -6621,7 +6630,7 @@ namespace AOVGEN
 		}
 		
 	}
-	
+	[Serializable]
 	class Room : CrossSection
 	{
 		//private static Room instance;
@@ -6740,34 +6749,39 @@ namespace AOVGEN
 				.SetValue(p, attributes.ToArray());
 		}
 	}
-	interface ISchemaASU
+
+    internal interface ISchemaASU
     {
 		double ScheUpSize { get; set; }
 		int ShemaPos { get; set; }
 		string ShemaUp { get; set; }
 
 	}
-	interface IPower
+
+    internal interface IPower
     {
 		string Power { get; set; }
 		 ElectroDevice._Voltage Voltage { get; set; }
 	}
-	interface ICompGUID
+
+    internal interface ICompGUID
     {
 		 string GUID { get; set; }
 	}
-	interface IVendoInfo
+
+    internal interface IVendoInfo
     {
 		(string VendorName, string ID, string VendorDescription, string DBTable, string Assignment, string DefaultDescription, string MainDBTable) GetVendorInfo();
 		void SetVendorInfo(string vendorName, string ID, string vendorDescription, string dbTable, string assignment);
 		void ClearVendorInfo();		
 	}
-	interface IGetSensors
+
+    internal interface IGetSensors
     {
 		List<dynamic> GetSensors();
     }
 
-	class Singleton
+    internal class Singleton
 	{
         
 		

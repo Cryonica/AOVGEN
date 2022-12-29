@@ -13,7 +13,7 @@ using AutoCAD; //using Autodesk.AutoCAD.Runtime;
 namespace AOVGEN
 {
 #pragma warning disable IDE1006
-    class ShemaASUTP
+     class ShemaASUTP
     {
         #region Set Autocad windw to front
         [DllImport("user32.dll")]
@@ -281,7 +281,11 @@ namespace AOVGEN
             internal string md5hashFiltr;
             internal string md5hashVent;
             internal string md5hashDamp;
+            internal string md5hashSupplyVent;
             internal string md5hashExtVentPressure;
+            internal string md5hashSupplyVentControl;
+            internal string md5hashExtVentControl;
+            internal string md5hashSupplyVentPressure;
 
 
         }
@@ -302,7 +306,7 @@ namespace AOVGEN
                         .FirstOrDefault(e => e.Tag is SupplyVent || e.Tag is SpareSuplyVent) != null;
                     bool ExtVentPresent = Posinfos //вычисляем, есть ли вытяжной вентилятор
                         .FirstOrDefault(e => e.Tag is ExtVent || e.Tag is SpareExtVent) != null;
-                    if (!SupplyVentPresent || ExtVentPresent) //если вент.система содержит только вытяжной вентилятор
+                    if (true) //если вент.система содержит и приточный и вытяжной вентилятор
                     {
                         SignificantInfo significantInfo = new SignificantInfo();//создаем экземпляр структуры
                         foreach (var component in from posInfo in Posinfos where (posInfo.Tag != null) select posInfo.Tag) //начинаем перебирать Posinfo в компонентах
@@ -316,6 +320,8 @@ namespace AOVGEN
                                     {
                                         significantInfo.md5hashExtVentPressure =extVent._PressureContol.ShemaASU.ShemaUp;
                                     }
+
+                                    significantInfo.md5hashExtVentControl = extVent.ControlType.ToString();
                                     break;
                                 case nameof(SpareExtVent): //сдвоенный вытяжной
                                     ExtVent mainExtVent = ((SpareExtVent)component).MainExtVent; //у сдвоенного я забираю инфу у основного вытяжного вентилятора, тк у резервного тоже самое
@@ -324,6 +330,26 @@ namespace AOVGEN
                                     {
                                         significantInfo.md5hashExtVentPressure =mainExtVent._PressureContol.ShemaASU.ShemaUp; //если есть датчик перепада то забираю его название
                                     }
+                                    significantInfo.md5hashExtVentControl = mainExtVent.ControlType.ToString();
+                                    break;
+                                case nameof(SupplyVent): //приточный вентилятор
+                                    SupplyVent supplyVent = (SupplyVent)component;
+                                    significantInfo.md5hashSupplyVent = supplyVent.ShemaASU.ShemaUp; //и  в структуру со значимой инфой кладу названия блоков для схемы автоматизации
+                                    if (supplyVent._PressureContol != null)
+                                    {
+                                        significantInfo.md5hashSupplyVentPressure = supplyVent._PressureContol.ShemaASU.ShemaUp;
+                                    }
+
+                                    significantInfo.md5hashSupplyVentControl = supplyVent.ControlType.ToString();
+                                    break;
+                                case nameof(SpareSuplyVent): //сдвоенный приточный
+                                    SupplyVent mainSupplyVent = ((SpareSuplyVent)component).MainSupplyVent; //у сдвоенного я забираю инфу у основного вытяжного вентилятора, тк у резервного тоже самое
+                                    significantInfo.md5hashVent = mainSupplyVent.ShemaASU.ShemaUp;
+                                    if (mainSupplyVent._PressureContol != null)
+                                    {
+                                        significantInfo.md5hashSupplyVentPressure = mainSupplyVent._PressureContol.ShemaASU.ShemaUp; //если есть датчик перепада то забираю его название
+                                    }
+                                    significantInfo.md5hashSupplyVentControl = mainSupplyVent.ControlType.ToString();
                                     break;
                                 case nameof(CrossSection): //воздуховод
                                     CrossSection crossSection = (CrossSection)component;

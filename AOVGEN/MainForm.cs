@@ -28,18 +28,20 @@ using WinFormAnimation;
 using Path = WinFormAnimation.Path;
 using PositionChangedEventArgs = Telerik.WinControls.UI.Data.PositionChangedEventArgs;
 using Timer = System.Windows.Forms.Timer;
+using static AOVGEN.RunRevitCommand;
 
 namespace AOVGEN
 {
 #pragma warning disable IDE1006
     public partial class MainForm : RadForm
     {
-        private enum RevitState
+        public enum RevitState
         {
             Open,
             Close,
             DocumentPresent
         }
+        
 
         public SQLiteConnection connection;
         public SQLiteConnection connectionvendor;
@@ -49,6 +51,8 @@ namespace AOVGEN
         public string DBFileName { get; set; }
         public string DBFilePath { get; set; }
         public string DBType { get; set; }
+        private string tableExtDocName { get; set; }
+        
 
         private readonly string Author;
         public IRevitExternalService Service { get; set; }
@@ -61,6 +65,9 @@ namespace AOVGEN
                
             }
         }
+
+        internal Timer timer;
+     
 
         [DllImport("user32.dll")]
         internal static extern IntPtr SetForegroundWindow(IntPtr hWnd);
@@ -84,14 +91,130 @@ namespace AOVGEN
             radRibbonBar1.RibbonBarElement.CaptionBorder.Visibility = ElementVisibility.Collapsed;
             //this.radRibbonBar1.RibbonBarElement.TabStripElement.ItemContainer.Margin = new Padding(5, 0, 76, 0);
             radRibbonBar1.RibbonBarElement.TabStripElement.ItemContainer.Padding = new Padding(5, 0, 76, 0);
+            RunRevitCommand revitCommand = new RunRevitCommand(Service);
+            
+            revitCommand.SetUIApp();
+            Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            CheckRevitStaus();
+            timer = new Timer();
+            timer.Interval = (int)TimeSpan.FromMinutes(10).TotalMilliseconds;
+            timer.Tick += delegate(object sender, EventArgs e)
+            {
+               
+                CheckRevitStaus();
+            };
             // connect to Revit
+            timer.Start();
+
+            Icon = Resources.AOVGEN_white_ico;
+            ribbonTab1.IsSelected = true;
+            RadGridLocalizationProvider.CurrentProvider = new MyRussianRadGridLocalizationProvider();
+            
+            
+
+        }
+
+        public class RevitStatusArg: EventArgs
+        {
+            public RevitState revitState { get; set; }
+
+            public RevitStatusArg(RevitState state)     
+            {
+                this.revitState = state;
+            }
+
+
+        }
+
+        private void CheckRevitStaus()
+        {
             try
             {
+
+                //var t = CheckStaus().Status;
+
+
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                var token = cts.Token;
                 RunRevitCommand revitCommand = new RunRevitCommand(Service);
-                revitCommand.StateInfo();
-                Thread.Sleep(1000);
-                var (docId, _) = revitCommand.StateInfo();
-                RevitConnectionState = string.IsNullOrEmpty(docId) ? RevitState.Open : RevitState.DocumentPresent;
+                revitCommand.StatusChanged += (s, args) =>
+                {
+
+                    Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                    var docArgs = args as RunRevitCommand.StatuChangeArgs;
+                    if (!string.IsNullOrEmpty(docArgs?.docinfo))
+                    {
+                        pictureBox2.Image = Resources.green_light;
+                        RevitConnectionState = RevitState.DocumentPresent;
+                       
+                    }
+                    else
+                    {
+                        pictureBox2.Image = Resources.red_light;
+                       
+                        RevitConnectionState = RevitState.Close;
+                        
+                        
+                    }
+                };
+
+
+                Task<RevitStatusArg>.Factory.StartNew(() =>
+                {
+
+                    try
+                    {
+                        // occasionally, execute this line:
+                        var docinfo = revitCommand.StateInfo().Item1;
+
+                        token.ThrowIfCancellationRequested();
+
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        var docinfo = revitCommand.StateInfo().Item1;
+                        if (string.IsNullOrEmpty(docinfo))
+                        {
+                            RevitStatusArg arg = new RevitStatusArg(RevitState.Close);
+
+
+
+                            return arg;
+                        }
+                        else
+                        {
+                            RevitConnectionState = RevitState.DocumentPresent;
+                            RevitStatusArg arg = new RevitStatusArg(RevitState.DocumentPresent);
+
+                            return arg;
+                        }
+
+
+
+
+                    }
+                    catch (Exception ex)
+                    {
+                        return new RevitStatusArg(RevitState.Close);
+                    }
+
+                    return new RevitStatusArg(RevitState.Open);
+
+                }).ContinueWith((x) => RevitConnectionState, TaskScheduler.FromCurrentSynchronizationContext());
+
+
+                // Thread.Sleep(1000);
+                //if (t.Status == TaskStatus.Canceled)
+                //{
+                //    RevitConnectionState = RevitState.Close;
+                //}
+                //else
+                //{
+                //     var (docId, _) = revitCommand.StateInfo();
+                //    RevitConnectionState = string.IsNullOrEmpty(docId) ? RevitState.Open : RevitState.DocumentPresent;
+                // }
+
+
 
             }
             catch (Exception ex)
@@ -102,13 +225,8 @@ namespace AOVGEN
                 }
             }
 
-            Icon = Resources.AOVGEN_white_ico;
-            ribbonTab1.IsSelected = true;
-            
-            
-            RadGridLocalizationProvider.CurrentProvider = new MyRussianRadGridLocalizationProvider();
-            
         }
+
         public MainForm(string dbfilename, string dbfilepath, string DataBaseType, string author)
         {
             DBFileName = dbfilename;
@@ -118,7 +236,8 @@ namespace AOVGEN
             InitializeComponent();
             Icon = Resources.AOVGEN_white_ico;
             ribbonTab1.IsSelected = true;            
-            RadGridLocalizationProvider.CurrentProvider = new MyRussianRadGridLocalizationProvider();                   
+            RadGridLocalizationProvider.CurrentProvider = new MyRussianRadGridLocalizationProvider();
+           
         }
         protected override void OnLoad(EventArgs e)
         {
@@ -130,6 +249,7 @@ namespace AOVGEN
             radMenuItem1.Click += RaMenuItem1_Click;
             radMenuItem2.Click += RadTreeView5MenuItem2_Click;
             radMenuItem5.Click += RadMenuItem5_Click;
+           
             //в Levels лежат уровни, считанные из ревит
             //foreach (string level in Levels.Values)
 
@@ -690,9 +810,16 @@ namespace AOVGEN
                 //Close();
             }
         }
+        private void Timer2_Tick(object sender, EventArgs e)
+        {
+            
+        }
+
+
         private void MainForm_Load(object sender, EventArgs e)
         {
 
+            
             AutoUpdate();
 
             connection = OpenDB(DBFilePath);
@@ -1570,7 +1697,11 @@ namespace AOVGEN
                 }
                 command1.Dispose();
 
-                radTreeView1.Nodes.Remove(radTreeNode.Name);
+                radTreeView1.AllowRemove = true;
+                radTreeView1.Nodes.Remove(radTreeNode);
+                radTreeView1.TreeViewElement.Update(RadTreeViewElement.UpdateActions.Reset);
+                radTreeView1.AllowRemove = false;
+                
                 DataTable dataSource = new DataTable("fileSystem");
                 dataSource.Columns.Add("ProjectName", typeof(string));
                 dataSource.Columns.Add("DateofCreate", typeof(string));
@@ -1578,6 +1709,7 @@ namespace AOVGEN
                 dataSource.Columns.Add("CheefEngeneer", typeof(string));
 
                 radGridView2.DataSource = dataSource;
+                
 
 
             }
@@ -2074,7 +2206,7 @@ namespace AOVGEN
                                         ventSystem.ComponentsV2.Add(pos);
                                     }
                                 }
-                                //ventSystem._WaterHeater = ReadWaterHeater(row["WaterHeater"].ToString(), command, "GUID");
+                                
                             }
                             if (electroHeat)
                             {
@@ -2098,7 +2230,7 @@ namespace AOVGEN
                                     }
                                 }
 
-                                //ventSystem._Froster = ReadFroster(row["Froster"].ToString(), command, "GUID");
+                                
                             }
                             if (humidifier)
                             {
@@ -2111,7 +2243,7 @@ namespace AOVGEN
                                     }
                                 }
 
-                                //ventSystem._Humidifier = ReadHumidifier(row["Humidifier"].ToString(), command, "GUID");
+                                
                             }
                             if (extVent)
                             {
@@ -2121,7 +2253,7 @@ namespace AOVGEN
                                     {
                                         ventSystem.ComponentsV2.Add(pos);
                                     }
-                                //ventSystem._ExtVent = ReadVent<ExtVent>(row["ExtVent"].ToString(), command, "GUID");
+                                
                             }
                             if (filter)
                             {
@@ -2156,7 +2288,7 @@ namespace AOVGEN
                                         ventSystem.ComponentsV2.Add(pos);
                                     }
                                 }
-                                //ventSystem._Recuperator = ReadRecuperator(row["Recuperator"].ToString(), command, "GUID");
+                                
                             }
                             if (room)
                             {
@@ -2205,13 +2337,15 @@ namespace AOVGEN
                                         .FirstOrDefault()
                                         .Tag).ShemaASU is ShemaASU shemaAsu) shemaAsu.ShemaLink2 = "Arrow_Supply_Left"; //Arrow_Ext_Left
 
-                                    //if (ventSystem.ComponentsV2
-                                    //        .Where(e => e.Tag.GetType().Name == nameof(CrossSection) && e.PozY == Y)?
-                                    //        .DefaultIfEmpty()
-                                    //        .OrderBy(e => e?.PozX)
-                                    //        .First()
-                                    //        ?.Tag is CrossSection SupplyCrossSectionLeft)
-                                    //        SupplyCrossSectionLeft.ShemaASU.ShemaUp = "CrossSection_Supply_Start";
+                                    var s = ventSystem.ComponentsV2
+                                        .AsQueryable()
+                                        .Where(e => e.PozY == Y)
+                                        .DefaultIfEmpty()
+                                        .OrderBy(e => e.PozX)
+                                        .FirstOrDefault();
+                                    
+
+
                                 }
                             }
                             //Rename Forst Crossection BlockName in ExihaustLine
@@ -2845,7 +2979,7 @@ namespace AOVGEN
                 //}
                 if (current.Name != "ProjectName") return;
                 RadTreeNode projectnode = radTreeView1.SelectedNode;
-                projectnode.Name = current.Value.ToString();
+                //projectnode.Name = current.Value.ToString();
                 projectnode.Value = current.Value;
                 projectnode.Text = current.Value.ToString();
                 radTreeView1.Update();
@@ -5525,86 +5659,7 @@ namespace AOVGEN
                         break;
                 }
             }
-            //if (ventSystem._Recuperator != null)
-            //{
-                
-            //    (from t in ventSystem._Recuperator
-            //             .Cast<object>()
-            //             .Where(e => e is IPower)
-            //     select (IPower)t)
-            //      .ToList()
-            //     .ForEach(e =>
-            //     {
-            //         try
-            //         {
-            //             power += Convert.ToDouble(e.Power);
-            //         }
-            //         catch { }
-
-            //     });
-            //    //старый метод
-            //    //foreach (var recuperatrocomp in recuperator)
-            //    //{
-            //    //    try
-            //    //    {
-            //    //        if (recuperatrocomp is IPower) power += Convert.ToDouble(((IPower)recuperatrocomp).Power);
-            //    //    }
-            //    //    catch { }
-            //    //}
-            //}
-            //if (ventSystem._WaterHeater != null)
-            //{
-            //    //WaterHeater waterHeater = ventSystem._WaterHeater;
-            //    (from t in ventSystem._WaterHeater
-            //            .Cast<object>()
-            //            .Where(e => e is IPower)
-            //     select (IPower)t)
-            //     .ToList()
-            //     .ForEach(e =>
-            //     {
-            //         try
-            //         {
-            //             power += Convert.ToDouble(e.Power);
-            //         }
-            //         catch { }
-            //     });                 
-            //    //старый метод
-            //    //foreach (var waterheatercomp in waterHeater)
-            //    //{
-            //    //    try
-            //    //    {
-            //    //        if (waterheatercomp is IPower) power += Convert.ToDouble(((IPower)waterheatercomp).Power);
-            //    //    }
-            //    //    catch { }                    
-            //    //}
-            //}
-            //if (ventSystem._Froster != null)
-            //{
-            //    (from t in ventSystem._Froster
-            //            .Cast<object>()
-            //            .Where(e => e is IPower)
-            //     select (IPower)t)
-            //     .ToList()
-            //     .ForEach(e =>
-            //     {
-            //         try
-            //         {
-            //             power += Convert.ToDouble(e.Power);
-            //         }
-            //         catch { }
-
-            //     });
-            //    //старый метод
-            //    //foreach (var frostercomp in froster)
-            //    //{
-            //    //    try
-            //    //    {
-            //    //        if (frostercomp is IPower) power += Convert.ToDouble(((IPower)frostercomp).Power);
-            //    //    }
-            //    //    catch { }
-                    
-            //    //}
-            //}
+            
             return power;
         }
         internal Pannel._Voltage GetVetSystemMaxVoltage(VentSystem ventSystem)
@@ -7186,7 +7241,7 @@ namespace AOVGEN
                         //    }
                         //}
                         var SortedDict = level3.OrderBy(obj => obj.Key).ToDictionary(obj => obj.Key, obj => obj.Value);
-                        TableExternalConnections table = new TableExternalConnections(SortedDict, ventsystemDict, cabsettings, CheckedPannels) 
+                        TableExternalConnections table = new TableExternalConnections(SortedDict, ventsystemDict, cabsettings, CheckedPannels, tableExtDocName) 
                         {
                             Author = Author, 
                             BuildingName = building.Buildname, 
@@ -7194,6 +7249,7 @@ namespace AOVGEN
                         };
                         
                         int result = table.Execute();
+                       
                         if (result == 1)
                         {
                             TopMost = true;
@@ -7202,6 +7258,7 @@ namespace AOVGEN
                         }
                         else
                         {
+                            tableExtDocName = table.TableExternalConnectionDocName;
                             table = null;
                         }
 
@@ -8337,87 +8394,103 @@ namespace AOVGEN
             AutoUpdater.RunUpdateAsAdmin = false;
             var curentDirecttory = new DirectoryInfo(Environment.CurrentDirectory);
             AutoUpdater.ReportErrors = false;
-            AutoUpdater.InstallationPath = curentDirecttory.FullName;
-            AutoUpdater.DownloadPath = curentDirecttory.FullName; //Application.StartupPath;
+            AutoUpdater.InstallationPath = Application.StartupPath;//curentDirecttory.FullName;
+            AutoUpdater.DownloadPath = System.IO.Path.GetTempPath() + "\\UpdateExtrator\\";
             AutoUpdater.AppTitle = "AOVGEN";
             const string versioninfofile = @"W:\Группа автоматизации\Revit Plugins\Плагины собственной разработки\GKSASU\AOVGen\buildinfo.xml";
             AutoUpdater.Start(versioninfofile);
         }
 
+        
         private bool ReadLevelsAndRooms(RunRevitCommand revitCommand, Building building, Project project)
         {
             bool result = false;
-            DialogResult dialogResult = MessageBox.Show("Сейчас будут считаны и перезаписаны уровни и помещения!\n" +
-                        "Привязанные к помещениям шкафы нужно будеть привязать снова", "Изменения в базе данных!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (dialogResult == DialogResult.Yes)
-            {
-                //make treeview with levels and rooms
-                try
-                {
-                    //try to update variable in loader class via WCF
-                    Task task = Task.Factory.StartNew(revitCommand.GetRooms);
-                    task.Wait();
-                    //System.Threading.Thread.Sleep(5);
-                    //try to get dictioanery with rooms via WCF
-                    Dictionary<(string, string, double), List<(string, string, string)>> rooms = revitCommand.GetRooms();
-                    if (rooms.Count > 0)
-                    {
-                        radTreeView5.Nodes.Clear();
-                        //get levels from room dictionary keys, convert to List and sorting by level Elevation
-                        List<(string, string, double)> levels = new List<(string, string, double)>(rooms.Keys)
-                            .OrderBy(o => o.Item3)
-                            .ToList();
-                        foreach ((string, string, double) level in levels)
-                        {
-                            var levelname = level.Item2;
-                            var levelID = level.Item1;
-                            bool levelpresent = СheckLevelPresent(levelID);
-                            string levelGUID = CreateLevel(levelID, levelname, level.Item3, building.BuildGUID, project.GetGUID(), levelpresent );
-                            //make level node
-                            RadTreeNode LevelNode = new RadTreeNode
-                            {
-                                Name = levelGUID,
-                                Text = levelname
-                            };
-                            //get Rooms from room dictionary by level as key and sorting by room number
-                            List<(string, string, string)> levelrooms = rooms[level]
-                                //.OrderBy(o => GetOnlyLetters(o.Item2))
-                                //.ThenBy(o => Convert.ToInt32(GetOnlyNumbers(o.Item2)))
-                                .OrderBy(o=> o.Item2)
-                                .ThenBy(o=> o.Item1)
-                                .ToList();
-                            foreach (var (roomID, roomnum, roomname) in levelrooms)
-                            {
-                                (string RoomNumber, string RoomName, string RoomID) roomInfo;
-                                roomInfo.RoomName = roomname;
-                                roomInfo.RoomNumber = roomnum;
-                                roomInfo.RoomID = roomID;
-                                
 
-                                //make room node
-                                bool RoomPresent = CheckRoomPresent(roomID, levelGUID);
-                                CreateRoom(roomname, roomnum, roomID, levelGUID, levelname, building.BuildGUID, project.GetGUID(), RoomPresent);
-                                RadTreeNode RoomNode = new RadTreeNode
-                                {
-                                    Name = roomID,
-                                    Text = $"({roomnum}) " + roomname,
-                                    Tag = roomInfo
-                                };
-                                //add room node to level node
-                                LevelNode.Nodes.Add(RoomNode);
-                            }
-                            //add level node to treeview
-                            radTreeView5.Nodes.Add(LevelNode);
-                        }                        
-                        radTreeView5.Update();                        
+            //make treeview with levels and rooms
+            try
+            {
+                //try to update variable in loader class via WCF
+                Dictionary<(string, string, double), List<(string, string, string)>> rooms =
+                    new Dictionary<(string, string, double), List<(string, string, string)>>();
+                for (int i = 0; i <= 3; i++)
+                {
+                    //Task task = Task.Factory.StartNew(revitCommand.GetRooms);
+                    //task.Wait();
+                    revitCommand.GetRooms();
+                    System.Threading.Thread.Sleep(1);
+                    rooms = revitCommand.GetRooms(); 
+                    if (rooms.Count> 0) break;
+                }
+                
+                //try to get dictioanery with rooms via WCF
+
+                //Dictionary<(string, string, double), List<(string, string, string)>> rooms = revitCommand.GetRooms();
+                if (rooms.Count > 0)
+                {
+                    radTreeView5.Nodes.Clear();
+                    //get levels from room dictionary keys, convert to List and sorting by level Elevation
+                    List<(string, string, double)> levels = new List<(string, string, double)>(rooms.Keys)
+                        .OrderBy(o => o.Item3)
+                        .ToList();
+                    foreach ((string, string, double) level in levels)
+                    {
+                        var levelname = level.Item2;
+                        var levelID = level.Item1;
+                        bool levelpresent = СheckLevelPresent(levelID);
+                        string levelGUID = CreateLevel(levelID, levelname, level.Item3, building.BuildGUID,
+                            project.GetGUID(), levelpresent);
+                        //make level node
+                        RadTreeNode LevelNode = new RadTreeNode
+                        {
+                            Name = levelGUID,
+                            Text = levelname
+                        };
+                        //get Rooms from room dictionary by level as key and sorting by room number
+                        List<(string, string, string)> levelrooms = rooms[level]
+                            //.OrderBy(o => GetOnlyLetters(o.Item2))
+                            //.ThenBy(o => Convert.ToInt32(GetOnlyNumbers(o.Item2)))
+                            .OrderBy(o => o.Item2)
+                            .ThenBy(o => o.Item1)
+                            .ToList();
+                        foreach (var (roomID, roomnum, roomname) in levelrooms)
+                        {
+                            (string RoomNumber, string RoomName, string RoomID) roomInfo;
+                            roomInfo.RoomName = roomname;
+                            roomInfo.RoomNumber = roomnum;
+                            roomInfo.RoomID = roomID;
+
+
+                            //make room node
+                            bool RoomPresent = CheckRoomPresent(roomID, levelGUID);
+                            CreateRoom(roomname, roomnum, roomID, levelGUID, levelname, building.BuildGUID,
+                                project.GetGUID(), RoomPresent);
+                            RadTreeNode RoomNode = new RadTreeNode
+                            {
+                                Name = roomID,
+                                Text = $"({roomnum}) " + roomname,
+                                Tag = roomInfo
+                            };
+                            //add room node to level node
+                            LevelNode.Nodes.Add(RoomNode);
+                        }
+
+                        //add level node to treeview
+                        radTreeView5.Nodes.Add(LevelNode);
                     }
+
+                    radTreeView5.TreeViewElement.Update(RadTreeViewElement.UpdateActions.Reset);
+
+                    //radTreeView5.Update();                        
                     result = true;
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
-                }                
+                
+
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
+            }
+
             WindowState = FormWindowState.Normal;
             return result;
         }
@@ -9192,7 +9265,16 @@ namespace AOVGEN
             }
             SaveXLS(workbook, "Сохранение задания для ЭОМ в XLS");
         }
-
+        private void ShowProgressHandler(object o)
+        {
+            Loading form = o as Loading;
+            for (int i = 0; i < 100; i++)
+            {
+                int i1 = i;
+                this.Invoke((MethodInvoker)(() => form.OnProgress(i1)));
+                Thread.Sleep(100);
+            }
+        }
         private void radButtonElement21_Click(object sender, EventArgs e)
         {
             if (radTreeView1.SelectedNode != null)
@@ -9200,94 +9282,124 @@ namespace AOVGEN
                 RadTreeNode buildnode = radTreeView1.SelectedNode;
                 if (buildnode.Tag is Building building)
                 {
-                    Project project = buildnode.Parent.Tag as Project;
-                    (string DocID, string DocTitle) StateInfo;
-                    StateInfo.DocID = string.Empty;
-                    RunRevitCommand revitCommand = new RunRevitCommand(Service);
-                    try
+                    DialogResult dialogResult = MessageBox.Show("Сейчас будут считаны и перезаписаны уровни и помещения!\n" +
+                                                                "Привязанные к помещениям шкафы нужно будеть привязать снова", "Изменения в базе данных!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
                     {
+                        
 
-                        StateInfo = revitCommand.StateInfo();
-                        Thread.Sleep(1);
-                        StateInfo = revitCommand.StateInfo();
-                        if (string.IsNullOrEmpty(StateInfo.DocID)) RevitConnectionState = RevitState.Open;
-                    }
-                    catch
-                    {
-                        RevitConnectionState = RevitState.Close;
-                    }
-                    switch (RevitConnectionState)
-                    {
-                        case RevitState.Close:
-                            MessageBox.Show("Перезапустите AOVGEN с запущенным Revit.\n" +
-                                "Для связи с моделью сначала должен быть запущен Revit, а затем AOVGEN (не наоборот!)\n" +
-                                "Если в процессе работы был закрыт Revit, то AOVGEN придется перезапустить", "Не получится установить связь", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        case RevitState.Open:
-                            DialogResult dialogResult1 = MessageBox.Show("Не найдена модель\n" +
-                                "Будет предпринято несколько попыток установить с ней связь", "Связь с моделью", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                            if (dialogResult1 == DialogResult.Yes)
-                            {
-                                try
+                        Project project = buildnode.Parent.Tag as Project;
+                        (string DocID, string DocTitle) StateInfo;
+                        StateInfo.DocID = string.Empty;
+                        RunRevitCommand revitCommand = new RunRevitCommand(Service);
+                        //try
+                        //{
+
+                        //    StateInfo = revitCommand.StateInfo();
+                        //    Thread.Sleep(500);
+                        //    StateInfo = revitCommand.StateInfo();
+                        //    if (string.IsNullOrEmpty(StateInfo.DocID)) RevitConnectionState = RevitState.Open;
+                        //}
+                        //catch
+                        //{
+                        //    RevitConnectionState = RevitState.Close;
+                        //}
+                        switch (RevitConnectionState)
+                        {
+                            case RevitState.Close:
+                                pictureBox2.Image = Resources.red_light;
+                                timer.Stop();
+                                MessageBox.Show("Перезапустите AOVGEN с запущенным Revit.\n" +
+                                    "Для связи с моделью сначала должен быть запущен Revit, а затем AOVGEN (не наоборот!)\n" +
+                                    "Если в процессе работы был закрыт Revit, то AOVGEN придется перезапустить", "Не получится установить связь", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            case RevitState.Open:
+                                DialogResult dialogResult1 = MessageBox.Show("Не найдена модель\n" +
+                                    "Будет предпринято несколько попыток установить с ней связь", "Связь с моделью", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                                if (dialogResult1 == DialogResult.Yes)
                                 {
-                                    for (int t = 1; t < 5; t++) //запускаем 5 попыток получить ID
+                                    try
                                     {
-                                        try
+                                        for (int t = 1; t < 5; t++) //запускаем 5 попыток получить ID
                                         {
-                                            Thread thread = new Thread(() =>
+                                            try
                                             {
-                                                var attempform = new Attempt { Num = t };
-                                                Application.Run(attempform);
-                                            });
-                                            thread.SetApartmentState(ApartmentState.STA);
-                                            thread.Start();
+                                                Thread thread = new Thread(() =>
+                                                {
+                                                    var attempform = new Attempt { Num = t };
+                                                    Application.Run(attempform);
+                                                });
+                                                thread.SetApartmentState(ApartmentState.STA);
+                                                thread.Start();
+                                            }
+                                            catch { }
+                                            StateInfo = revitCommand.StateInfo();
+                                            if (!string.IsNullOrEmpty(StateInfo.DocID)) break;
                                         }
-                                        catch { }
-                                        StateInfo = revitCommand.StateInfo();
-                                        if (!string.IsNullOrEmpty(StateInfo.DocID)) break;
-                                    }
-                                    if (!string.IsNullOrEmpty(StateInfo.DocID))
-                                    {
-                                        RevitConnectionState = RevitState.DocumentPresent;
-                                        revitCommand.GetRooms();
-                                        bool readresult = ReadLevelsAndRooms(revitCommand, building, project);
-                                        if (readresult)
+                                        if (!string.IsNullOrEmpty(StateInfo.DocID))
                                         {
-                                            UpdateBuildNode(buildnode);
-                                            MessageBox.Show("Готово");
-
+                                            RevitConnectionState = RevitState.DocumentPresent;
+                                            revitCommand.GetRooms();
+                                            bool readresult = ReadLevelsAndRooms(revitCommand, building, project);
+                                            if (readresult)
+                                            {
+                                                MessageBox.Show(radTreeView5.Nodes.Count > 0
+                                                    ? "Готово"
+                                                    : "Похоже, в модели нет уровней");
+                                            }
+                                            WindowState = FormWindowState.Normal;
                                         }
+                                    }
+                                    catch
+                                    {
+                                        MessageBox.Show("Не удалось подключиться к модели", "Ошибка подключения", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        WindowState = FormWindowState.Normal;
+                                        return;
+                                    }
+                                    if (string.IsNullOrEmpty(StateInfo.DocID))
+                                    {
+                                        MessageBox.Show("Похоже, в Revit по-прежнему нет открытой модели");
                                         WindowState = FormWindowState.Normal;
                                     }
                                 }
-                                catch
-                                {
-                                    MessageBox.Show("Не удалось подключиться к модели", "Ошибка подключения", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    WindowState = FormWindowState.Normal;
-                                    return;
-                                }
-                                if (string.IsNullOrEmpty(StateInfo.DocID))
-                                {
-                                    MessageBox.Show("Похоже, в Revit по-прежнему нет открытой модели");
-                                    WindowState = FormWindowState.Normal;
-                                }
-                            }
 
-                            break;
-                        case RevitState.DocumentPresent:
-                            bool result = ReadLevelsAndRooms(revitCommand, building, project);
-                            if (result)
-                            {
-                                MessageBox.Show("Готово");
-                            }
-                            WindowState = FormWindowState.Normal;
-                            break;
+                                break;
+                            case RevitState.DocumentPresent:
+
+
+                                bool result = ReadLevelsAndRooms(revitCommand, building, project);
+                                if (result)
+                                {
+                                   
+                                    MessageBox.Show(radTreeView5.Nodes.Count > 0
+                                        ? "Готово"
+                                        : "Похоже, в модели нет уровней\nПопробуйте прочитать их еще раз");
+                                    //ReadLevelsAndRooms(revitCommand, building, project);
+                                    
+
+                                    //if (radTreeView5.Nodes.Count == 0)
+                                    //{
+                                    //    ReadLevelsAndRooms(revitCommand, building, project);
+                                    //}
+                                    
+                                    //MessageBox.Show("Готово2");
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Не удалось получить уровни из Revit, попробуйте еще раз");
+                                }
+                                WindowState = FormWindowState.Normal;
+                                break;
+                        }
                     }
+                    else
+                    {
+                        MessageBox.Show("Выберите здание");
+                    }
+
                 }
-                else
-                {
-                    MessageBox.Show("Выберите здание");
-                }
+
+
             }
         }
         private void radButtonElement22_Click(object sender, EventArgs e)
@@ -9346,7 +9458,7 @@ namespace AOVGEN
             radRibbonBarGroup9.Enabled = RevitConnectionState == RevitState.DocumentPresent && radTreeView1.SelectedNode.Level == 1;                      
         }
 
-        private void radButtonElement24_Click(object sender, EventArgs e)
+        private async void radButtonElement24_Click(object sender, EventArgs e)
         {
             //List<RadTreeNode> allnodes =  radTreeView5.TreeViewElement.GetNodes().ToList();
             RunRevitCommand revitCommand = new RunRevitCommand(Service);
@@ -9354,45 +9466,79 @@ namespace AOVGEN
             PlacePannelsForm placePannelsForm = new PlacePannelsForm(radTreeView5, famdict);
             //System.Threading.Thread.Sleep(1000);
             DialogResult dialogResult = placePannelsForm.ShowDialog();
-            int ticks = 0;
-            Timer t = new Timer();
-            if (dialogResult != DialogResult.OK) return;
+            
             var ListInfo = placePannelsForm.listinfo;
             placePannelsForm.Close();
             RunRevitCommand revitCommand1 = new RunRevitCommand(Service);//создаем запрос в ревит
-            int returninfo =  revitCommand1.PlacePan(ListInfo); //говорим что нужно сделать. если команда прошла в dll, то вернётся 1
-            bool success = returninfo == 1;
-            if (success)//если команда успешно прошла через ревит
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            var token = cts.Token;
+            int returninfo = -1;
+            await Task.Factory.StartNew(() =>
             {
-                t.Interval = 1000; // запускаем таймер на всякий случай с тиками по 1 сек
-                t.Tick += delegate
-                {
-                    if (ticks >= 15) t.Stop();
-                    ticks++;
-                };                    
-                t.Start(); //запускаем таймер
-                RunRevitCommand revitCommand2 = new RunRevitCommand(Service);//созаем очередной запрос в ревит (пока он пустой)
-                while (returninfo != 2) //пока не 2 (2 означает что всё отработало в ревите)
-                {
-                    if (!t.Enabled) break; //если таймер остановился, то выход из цикла
-                    returninfo = revitCommand2.GetPlaceResult();//помещаем в запрос получение результата расстановки семейств
-                    if (returninfo == 2) //если все прошло там успешно
-                    {
-                        t.Stop(); //тормозим таймер
-                        RunRevitCommand revitCommand3 = new RunRevitCommand(Service); //создаем еще один запрос в ревит
-                        revitCommand3.GetFamilyListID();
-                    }
 
-                    if (returninfo != 3) continue;
-                    MessageBox.Show("Расстановка не удалась");
-                    break;
+                try
+                {
+                    token.ThrowIfCancellationRequested();
+                    Stopwatch sw = new Stopwatch();
+                   
+                    returninfo =  revitCommand1.LoadPannels(ListInfo); //говорим что нужно сделать. если команда прошла в dll, то вернётся 1
+                    Thread.Sleep(10);
+                    if (returninfo == 1)
+                    {
+                        var reveitCommanr2 = new RunRevitCommand(Service);
+                        int result2 = reveitCommanr2.PlacePannels();
+                        Thread.Sleep(10);
+                        returninfo = result2;
+                    }
+                   
+                    
+                    //if (returninfo ==2) MessageBox.Show("Готово");
                 }
-            }
-            bool fault = returninfo == -1;
-            if (fault)
+                catch (OperationCanceledException oc)
+                {
+                    MessageBox.Show("Вышло время ожидания размещения шкафов");
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception);
+                    throw;
+                }
+            }, token);
+            if (returninfo == 1)
             {
-                MessageBox.Show("Похоже что команда не пришла в Ревит");
+
+                Timer getressultTimer = new Timer();
+                getressultTimer.Interval = 2000;
+                RunRevitCommand reveitCommanr2 = new RunRevitCommand(Service);
+                getressultTimer.Tick += (s, a) =>
+                {
+                    var retinfo2 = reveitCommanr2.GetPlaceResult();
+                    if (retinfo2 != 1)
+                    {
+                        getressultTimer.Stop();
+
+                        switch (retinfo2)
+                        {
+                            case 2:
+                                RunRevitCommand revitCommand3 = new RunRevitCommand(Service); //создаем еще один запрос в ревит
+                                var PennelIDS = revitCommand3.GetFamilyListID();
+                                MessageBox.Show($"Готово, расставил {PennelIDS.Count} шкафов");
+                                break;
+                            case 3:
+                                MessageBox.Show("Ошибка!");
+                                break;
+                            case -1:
+                                MessageBox.Show("Похоже что команда не пришла в Ревит");
+                                break;
+                        }
+                       
+                        
+                    }
+                };
+                getressultTimer.Start();
             }
+
+           
 
         }
         private void radGridView1_ContextMenuOpening_1(object sender, ContextMenuOpeningEventArgs e)
@@ -9579,6 +9725,16 @@ namespace AOVGEN
         {
             if (!(radGridView3.ActiveEditor is RadDropDownListEditor dropDownEditor)) return;
             if (dropDownEditor.EditorElement is RadDropDownListEditorElement dropDownEditorElement) dropDownEditorElement.DefaultItemsCountInDropDown = 30;
+        }
+
+        private void bunifuImageButton2_Click(object sender, EventArgs e)
+        {
+            AbotForm abotForm = new AbotForm();
+            DialogResult dr =  abotForm.ShowDialog();
+            if (dr == DialogResult.Cancel)
+            {
+                abotForm.Close();
+            }
         }
     }
     [DataContract]

@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Telerik.WinControls.UI;
 using WinFormAnimation;
 
@@ -556,7 +557,7 @@ namespace AOVGEN
                 SQLiteConnection connection = OpenDB(); //open DataBase
                 connection.Open();
                 
-                if (connection.State == ConnectionState.Open)
+                if (connection.State != ConnectionState.Open) return;
                 {
                     SQLiteCommand command = new SQLiteCommand
                     {
@@ -612,22 +613,11 @@ namespace AOVGEN
                                 UpdateConnectedCables(ventsystemnode.Name, pannelGUID, pannelname);
                                 UpdateConnectedPosNames(ventsystemnode.Name, ventcnt, ".");
                                 Pannel pannel = (Pannel)pannelnode.Tag;
-                                //UpdatePannelPower(VentSystem, pannel);
                                 UpdatePannelVoltage(pannel, pannelnode);
-                                
-                               
-
                             }
-
-
-
-
-
                         }
                         mainForm.UpdateBuildNode(buildNode);
-                        //SelectedNode.Name = ventSystem.GUID;
-                        //SelectedNode.Tag = ventSystem;
-
+                       
                     }
                     else
                     {
@@ -748,74 +738,87 @@ namespace AOVGEN
             return null;
 
         }
-  
+        
         private void DeleteVentSystem(string ventsystemGUID)
         {
-            SQLiteConnection connection = OpenDB();
-            connection.Open();
-            if (connection.State == ConnectionState.Open)
-            {
-                SQLiteCommand command = new SQLiteCommand
-                {
-                    Connection = connection
-                };
+            //generation query for delete from database//
 
-                List<string> DeleteQuery = new List<string>
-                {
-                    $"DELETE FROM VentSystems WHERE [GUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Ventilator WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Filter WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM SensPDS WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Cable WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Damper WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM WaterHeater WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM ElectroHeater WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Pump WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Valve WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM SensT WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Humidifier WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM SensHum WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Recuperator WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM Froster WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM KKB WHERE [SystemGUID] = '{ventsystemGUID}'",
-                    $"DELETE FROM FControl WHERE [SystemGUID] = '{ventsystemGUID}'"
-                };
-                
-                foreach (string query in DeleteQuery)
-                {
-                    command.CommandText = query;
-                    command.ExecuteNonQuery();
-                }
-                command.Dispose();
-                connection.Close();
-                
+            string[] tablesForDelete = {
+                "VentSystems",
+                "Ventilator",
+                "Filter",
+                "SensPDS",
+                "Cable",
+                "Damper",
+                "WaterHeater",
+                "ElectroHeater",
+                "Pump",
+                "Valve",
+                "SensT",
+                "Humidifier",
+                "SensHum",
+                "Recuperator",
+                "Froster",
+                "KKB",
+                "FControl"
+            };
+            string GenDeleteCommand(string tableName)
+            {
+                return tableName == "VentSystems" ?
+                    $"DELETE FROM VentSystems WHERE [GUID] = '{ventsystemGUID}'" :
+                    $"DELETE FROM {tableName} WHERE [SystemGUID] = '{ventsystemGUID}'";
             }
+
+            //connect to database//
+
+            SQLiteConnection connection = OpenDB();
+
+            if (connection == null) return;
+            connection.Open();
+            if (connection.State != ConnectionState.Open) return;
+
+            //execute delete query from databse//
+
+            using (SQLiteCommand command = new SQLiteCommand { Connection = connection })
+            {
+                List<string> DeleteQuery = tablesForDelete
+                    .Select(GenDeleteCommand)
+                    .ToList();
+
+                if (DeleteQuery.Count > 0)
+                {
+                    foreach (string query in DeleteQuery)
+                    {
+                        command.CommandText = query;
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            connection.Close();
         }
         private void UpdatePannel(string newventystemGUID, string pannelguid)
         {
-           
-            if (pannelguid != string.Empty)
-            {
-                using (SQLiteConnection connection = OpenDB())
-                {
-                    connection.Open();
-                    if (connection.State == ConnectionState.Open)
-                    {
-                        SQLiteCommand command = new SQLiteCommand
-                        {
-                            Connection = connection
-                        };
+            if (pannelguid == string.Empty) return;
 
-                        string updatepannelquery1 = $"UPDATE Pannel SET SystemGUID = '{newventystemGUID}' WHERE [GUID] = '{pannelguid}'";
+            using (SQLiteConnection connection = OpenDB())
+            {
+                connection.Open();
+                if (connection.State == ConnectionState.Open)
+                {
+                    SQLiteCommand command = new SQLiteCommand
+                    {
+                        Connection = connection
+                    };
+
+                    string updatepannelquery1 = $"UPDATE Pannel SET SystemGUID = '{newventystemGUID}' WHERE [GUID] = '{pannelguid}'";
                         
-                        command.CommandText = updatepannelquery1;
-                        command.ExecuteNonQuery();
-                        command.Dispose();
-                    }
-                    connection.Close();
+                    command.CommandText = updatepannelquery1;
+                    command.ExecuteNonQuery();
+                    command.Dispose();
                 }
+                connection.Close();
             }
-            
+
         }
         private void UpdateVentSystemQuery(string newventsystemGUID, string pannelguid, string pannelname)
         {

@@ -58,7 +58,7 @@ namespace AOVGEN
 					.Where(d => d.PozY != ExhaustYLine?.PozY)
 					.ToList();
 
-
+				
 				if (SupplyYLine != null) //если есть приточный вентилятор (то есть линия по Y для притока не равна Null
 				{
 					var supplyFiltrList = ventSystem.ComponentsV2
@@ -452,6 +452,7 @@ namespace AOVGEN
                                 spareSupplyVent.GUID = Spareventguid;
 								mainSupplyVent.GUID = Guid.NewGuid().ToString();
 								reserevedSupplyVent.GUID = Guid.NewGuid().ToString();
+                                
                                 Cable Cab5 = pressureContol?.Cable1;
 								if (Cab5 != null)
 								{
@@ -467,6 +468,7 @@ namespace AOVGEN
 									Cab5.cableGUID = sensguid1;
                                     pressureContol.GUID = sensguid1;
                                 }
+
                                 WriteVent(mainSupplyVent, item, Spareventguid);
 								WriteVent(reserevedSupplyVent, item, Spareventguid);
                                 WriteSpare<SpareSuplyVent>(spareSupplyVent, item);

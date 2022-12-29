@@ -83,7 +83,6 @@ namespace AOVGEN
             // 
             // bunifuImageButton10
             // 
-            
             this.bunifuImageButton10.ActiveImage = null;
             this.bunifuImageButton10.AllowAnimations = true;
             this.bunifuImageButton10.AllowBuffering = false;
@@ -295,7 +294,7 @@ namespace AOVGEN
             this.bunifuImageButton1.InitialImage = null;
             this.bunifuImageButton1.Location = new System.Drawing.Point(12, 278);
             this.bunifuImageButton1.Name = "bunifuImageButton1";
-            this.bunifuImageButton1.Rotation = 0;
+            this.bunifuImageButton1.Rotation = 360;
             this.bunifuImageButton1.ShowActiveImage = true;
             this.bunifuImageButton1.ShowCursorChanges = true;
             this.bunifuImageButton1.ShowImageBorders = true;
@@ -306,6 +305,7 @@ namespace AOVGEN
             this.bunifuImageButton1.WaitOnLoad = false;
             this.bunifuImageButton1.Zoom = 15;
             this.bunifuImageButton1.ZoomSpeed = 10;
+            this.bunifuImageButton1.MouseEnter += new System.EventHandler(this.bunifuImageButton1_MouseEnter);
             // 
             // bunifuImageButton2
             // 

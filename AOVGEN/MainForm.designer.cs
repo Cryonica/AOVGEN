@@ -11,10 +11,234 @@ namespace AOVGEN
 {
     partial class MainForm
     {
+        private BunifuImageButton bunifuImageButton1;
+
+        private ChamferedRectShape chamferedRectShape1;
+
+        private CircleShape circleShape1;
+
         /// <summary>
         /// Required designer variable.
         /// </summary>
         private IContainer components = null;
+
+        private CustomShape customShape1;
+
+        private DiamondShape diamondShape1;
+
+        private DonutShape donutShape1;
+
+        private EllipseShape ellipseShape1;
+
+        private FlowLayoutPanel flowLayoutPanel1;
+
+        private FlowLayoutPanel flowLayoutPanel2;
+
+        private Label label1;
+
+        private Label label2;
+
+        private Label label3;
+
+        private MediaShape mediaShape1;
+
+        private RootRadElement object_34cc611d_65cc_4954_a90c_4c2f0b9d335a;
+
+        private RootRadElement object_5f69bfee_7344_4cce_bbe1_3dbd405e4410;
+
+        private RootRadElement object_7ce56807_c935_4a35_b10c_632b1e7a3d80;
+
+        private RootRadElement object_b1f54696_96bb_4979_8c83_0b8c2be0bade;
+
+        private Office2007BlackTheme office2007BlackTheme1;
+
+        private OfficeShape officeShape1;
+
+        private Panel panel1;
+
+        private Panel panel2;
+
+        private PictureBox pictureBox1;
+
+        private PictureBox pictureBox2;
+
+        private QAShape qaShape1;
+
+        private RadButtonElement radButtonElement1;
+
+        private RadButtonElement radButtonElement10;
+
+        private RadButtonElement radButtonElement11;
+
+        private RadButtonElement radButtonElement12;
+
+        private RadButtonElement radButtonElement13;
+
+        private RadButtonElement radButtonElement14;
+
+        private RadButtonElement radButtonElement15;
+
+        private RadButtonElement radButtonElement16;
+
+        private RadButtonElement radButtonElement17;
+
+        private RadButtonElement radButtonElement18;
+
+        private RadButtonElement radButtonElement2;
+
+        private RadButtonElement radButtonElement21;
+
+        private RadButtonElement radButtonElement22;
+
+        private RadButtonElement radButtonElement24;
+
+        private RadButtonElement radButtonElement3;
+
+        private RadButtonElement radButtonElement4;
+
+        private RadButtonElement radButtonElement5;
+
+        private RadButtonElement radButtonElement6;
+
+        private RadButtonElement radButtonElement7;
+
+        private RadButtonElement radButtonElement8;
+
+        private RadButtonElement radButtonElement9;
+
+        private RadCollapsiblePanel radCollapsiblePanel1;
+
+        private RadContextMenu radContextMenu1;
+
+        private RadContextMenu radContextMenu2;
+
+        private RadContextMenu radContextMenu3;
+
+        private RadContextMenu radContextMenu4;
+
+        private RadContextMenu radContextMenu5;
+
+        private RadContextMenuManager radContextMenuManager1;
+
+        private RadDropDownList radDropDownList1;
+
+        private RadGridView radGridView1;
+
+        private RadGridView radGridView2;
+
+        private RadGridView radGridView3;
+
+        private RadGridView radGridView4;
+
+        private RadMenuItem radMenuItem1;
+
+        private RadMenuItem radMenuItem2;
+
+        private RadMenuItem radMenuItem3;
+
+        private RadMenuItem radMenuItem4;
+
+        private RadMenuItem radMenuItem5;
+
+        private RadPageView radPageView1;
+
+        private RadPageViewPage radPageViewPage1;
+
+        private RadPageViewPage radPageViewPage2;
+
+        private RadPageViewPage radPageViewPage3;
+
+        private RadPageViewPage radPageViewPage4;
+
+        private RadPropertyGrid radPropertyGrid1;
+
+        private RadRibbonBar radRibbonBar1;
+
+        private RadRibbonBarGroup radRibbonBarGroup1;
+
+        private RadRibbonBarGroup radRibbonBarGroup2;
+
+        private RadRibbonBarGroup radRibbonBarGroup3;
+
+        private RadRibbonBarGroup radRibbonBarGroup4;
+
+        private RadRibbonBarGroup radRibbonBarGroup5;
+
+        private RadRibbonBarGroup radRibbonBarGroup6;
+
+        private RadRibbonBarGroup radRibbonBarGroup7;
+
+        private RadRibbonBarGroup radRibbonBarGroup8;
+
+        private RadRibbonBarGroup radRibbonBarGroup9;
+
+        private RadSplitContainer radSplitContainer1;
+
+        private RadSplitContainer radSplitContainer2;
+
+        private RadSplitContainer radSplitContainer3;
+
+        private RadTreeView radTreeView1;
+
+        private RadTreeView radTreeView2;
+
+        private RadTreeView radTreeView3;
+
+        private RadTreeView radTreeView4;
+
+        private RadTreeView radTreeView5;
+
+        private RadTreeView radTreeView6;
+
+        private RadMenuItem radTreeViewMenuItem1;
+
+        private RadMenuItem radTreeViewMenuItem2;
+
+        private RadMenuItem radTreeViewMenuItem3;
+
+        private RadMenuItem radTreeViewMenuItem4;
+
+        private RibbonTab ribbonTab1;
+
+        private RibbonTab ribbonTab2;
+
+        private RibbonTab ribbonTab3;
+
+        private RibbonTab ribbonTab4;
+
+        private RibbonTab ribbonTab5;
+
+        private RibbonTab ribbonTab6;
+
+        private SplitPanel splitPanel1;
+
+        private SplitPanel splitPanel2;
+
+        private SplitPanel splitPanel3;
+
+        private SplitPanel splitPanel4;
+
+        private SplitPanel splitPanel5;
+
+        private SplitPanel splitPanel6;
+
+        private SplitPanel splitPanel7;
+
+        private SplitPanel splitPanel8;
+
+        private StarShape starShape1;
+
+        private TabEdgeShape tabEdgeShape1;
+
+        private TabItemShape tabItemShape1;
+
+        private TabOffice12Shape tabOffice12Shape1;
+
+        private Timer timer1;
+
+        private TrackBarDThumbShape trackBarDThumbShape1;
+
+        private TrackBarLThumbShape trackBarLThumbShape1;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -45,6 +269,7 @@ namespace AOVGEN
             Telerik.WinControls.UI.TableViewDefinition tableViewDefinition4 = new Telerik.WinControls.UI.TableViewDefinition();
             this.office2007BlackTheme1 = new Telerik.WinControls.Themes.Office2007BlackTheme();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.bunifuImageButton2 = new Bunifu.Framework.UI.BunifuImageButton();
             this.label3 = new System.Windows.Forms.Label();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -156,6 +381,7 @@ namespace AOVGEN
             this.radMenuItem3 = new Telerik.WinControls.UI.RadMenuItem();
             this.radMenuItem4 = new Telerik.WinControls.UI.RadMenuItem();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.bunifuImageButton2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bunifuImageButton1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.radPageView1)).BeginInit();
@@ -215,6 +441,7 @@ namespace AOVGEN
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Crimson;
+            this.panel1.Controls.Add(this.bunifuImageButton2);
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.pictureBox2);
             this.panel1.Controls.Add(this.label2);
@@ -228,6 +455,19 @@ namespace AOVGEN
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
             this.panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseMove);
             this.panel1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseUp);
+            // 
+            // bunifuImageButton2
+            // 
+            this.bunifuImageButton2.Image = ((System.Drawing.Image)(resources.GetObject("bunifuImageButton2.Image")));
+            this.bunifuImageButton2.ImageActive = null;
+            this.bunifuImageButton2.Location = new System.Drawing.Point(1618, 3);
+            this.bunifuImageButton2.Name = "bunifuImageButton2";
+            this.bunifuImageButton2.Size = new System.Drawing.Size(26, 26);
+            this.bunifuImageButton2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.bunifuImageButton2.TabIndex = 8;
+            this.bunifuImageButton2.TabStop = false;
+            this.bunifuImageButton2.Zoom = 10;
+            this.bunifuImageButton2.Click += new System.EventHandler(this.bunifuImageButton2_Click);
             // 
             // label3
             // 
@@ -251,7 +491,7 @@ namespace AOVGEN
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(1552, 10);
+            this.label2.Location = new System.Drawing.Point(1504, 10);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 13);
             this.label2.TabIndex = 4;
@@ -260,7 +500,7 @@ namespace AOVGEN
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(1438, 9);
+            this.label1.Location = new System.Drawing.Point(1390, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(114, 13);
             this.label1.TabIndex = 0;
@@ -1093,7 +1333,7 @@ namespace AOVGEN
             // 
             // ribbonTab6
             // 
-            this.ribbonTab6.IsSelected = false;
+            this.ribbonTab6.IsSelected = true;
             this.ribbonTab6.Items.AddRange(new Telerik.WinControls.RadItem[] {
             this.radRibbonBarGroup9});
             this.ribbonTab6.Name = "ribbonTab6";
@@ -1139,7 +1379,7 @@ namespace AOVGEN
             // 
             // ribbonTab5
             // 
-            this.ribbonTab5.IsSelected = true;
+            this.ribbonTab5.IsSelected = false;
             this.ribbonTab5.Items.AddRange(new Telerik.WinControls.RadItem[] {
             this.radRibbonBarGroup5,
             this.radRibbonBarGroup6});
@@ -1353,6 +1593,7 @@ namespace AOVGEN
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.bunifuImageButton2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.bunifuImageButton1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.radPageView1)).EndInit();
@@ -1412,121 +1653,9 @@ namespace AOVGEN
             this.PerformLayout();
 
         }
-        
+
 
         #endregion
-
-        private Office2007BlackTheme office2007BlackTheme1;
-        private Panel panel1;
-        private BunifuImageButton bunifuImageButton1;
-        private Timer timer1;
-        private RadPageView radPageView1;
-        private RadPageViewPage radPageViewPage1;
-        private RadPageViewPage radPageViewPage2;
-        private RadTreeView radTreeView1;
-        private RadGridView radGridView2;
-        private RadPropertyGrid radPropertyGrid1;
-        private RadGridView radGridView1;
-        private RadTreeView radTreeView2;
-        private RadContextMenu radContextMenu1;
-        private RadMenuItem radTreeViewMenuItem1;
-        private RadMenuItem radTreeViewMenuItem2;
-        private RadContextMenuManager radContextMenuManager1;
-        private RadMenuItem radTreeViewMenuItem3;
-        private RadMenuItem radTreeViewMenuItem4;
-        private RadPageViewPage radPageViewPage3;
-        private RadGridView radGridView3;
-        private RadContextMenu radContextMenu2;
-        private RadMenuItem radMenuItem1;
-        private EllipseShape ellipseShape1;
-        private QAShape qaShape1;
-        private DonutShape donutShape1;
-        private RootRadElement object_7ce56807_c935_4a35_b10c_632b1e7a3d80;
-        private ChamferedRectShape chamferedRectShape1;
-        private TabEdgeShape tabEdgeShape1;
-        private RadRibbonBar radRibbonBar1;
-        private RootRadElement object_5f69bfee_7344_4cce_bbe1_3dbd405e4410;
-        private RibbonTab ribbonTab1;
-        private RibbonTab ribbonTab2;
-        private RibbonTab ribbonTab3;
-        private RadRibbonBarGroup radRibbonBarGroup1;
-        private RadButtonElement radButtonElement1;
-        private RadButtonElement radButtonElement2;
-        private RadButtonElement radButtonElement3;
-        private RadRibbonBarGroup radRibbonBarGroup3;
-        private RadButtonElement radButtonElement5;
-        private RadButtonElement radButtonElement6;
-        private RadRibbonBarGroup radRibbonBarGroup4;
-        private RadButtonElement radButtonElement7;
-        private RadButtonElement radButtonElement8;
-        private RootRadElement object_b1f54696_96bb_4979_8c83_0b8c2be0bade;
-        private CustomShape customShape1;
-        private RootRadElement object_34cc611d_65cc_4954_a90c_4c2f0b9d335a;
-        private RadCollapsiblePanel radCollapsiblePanel1;
-        private FlowLayoutPanel flowLayoutPanel1;
-        private RadSplitContainer radSplitContainer1;
-        private RadSplitContainer radSplitContainer2;
-        private SplitPanel splitPanel3;
-        private SplitPanel splitPanel4;
-        private SplitPanel splitPanel1;
-        private SplitPanel splitPanel2;
-        private SplitPanel splitPanel5;
-        private RibbonTab ribbonTab4;
-        private CircleShape circleShape1;
-        private TrackBarDThumbShape trackBarDThumbShape1;
-        private TrackBarLThumbShape trackBarLThumbShape1;
-        private DiamondShape diamondShape1;
-        private StarShape starShape1;
-        private MediaShape mediaShape1;
-        private OfficeShape officeShape1;
-        private TabItemShape tabItemShape1;
-        private TabOffice12Shape tabOffice12Shape1;
-        private RibbonTab ribbonTab5;
-        private RadRibbonBarGroup radRibbonBarGroup5;
-        private RadRibbonBarGroup radRibbonBarGroup6;
-        private RadButtonElement radButtonElement10;
-        private RadButtonElement radButtonElement11;
-        private RadButtonElement radButtonElement12;
-        private RadButtonElement radButtonElement13;
-        private RadButtonElement radButtonElement14;
-        private RadButtonElement radButtonElement15;
-        private RadRibbonBarGroup radRibbonBarGroup7;
-        private RadButtonElement radButtonElement16;
-        private RadButtonElement radButtonElement17;
-        private RadButtonElement radButtonElement18;
-        private RadRibbonBarGroup radRibbonBarGroup8;
-        private RadButtonElement radButtonElement9;
-        private RadPageViewPage radPageViewPage4;
-        private RadTreeView radTreeView4;
-        private RadTreeView radTreeView3;
-        private RadTreeView radTreeView6;
-        private RadTreeView radTreeView5;
-        private PictureBox pictureBox1;
-        private RadContextMenu radContextMenu3;
-        private RadMenuItem radMenuItem2;
-        private RibbonTab ribbonTab6;
-        private RadRibbonBarGroup radRibbonBarGroup9;
-        private RadButtonElement radButtonElement21;
-        private RadButtonElement radButtonElement22;
-        private RadButtonElement radButtonElement24;
-        private RadSplitContainer radSplitContainer3;
-        private SplitPanel splitPanel6;
-        private SplitPanel splitPanel7;
-        private RadContextMenu radContextMenu4;
-        private RadMenuItem radMenuItem3;
-        private RadMenuItem radMenuItem4;
-        private SplitPanel splitPanel8;
-        private RadGridView radGridView4;
-        private RadDropDownList radDropDownList1;
-        private FlowLayoutPanel flowLayoutPanel2;
-        private Panel panel2;
-        private RadRibbonBarGroup radRibbonBarGroup2;
-        private RadButtonElement radButtonElement4;
-        private Label label1;
-        private Label label2;
-        private RadContextMenu radContextMenu5;
-        private RadMenuItem radMenuItem5;
-        private PictureBox pictureBox2;
-        private Label label3;
+        private BunifuImageButton bunifuImageButton2;
     }
 }

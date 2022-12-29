@@ -38,6 +38,7 @@ namespace AOVGEN
         private bool isDrag;
         private Rectangle theRectangle = new Rectangle(new Point(0, 0), new Size(0, 0));
         private Point startPoint;
+        
 
         private static readonly Dictionary<string, string> imageDictionary = new Dictionary<string, string>
         {
@@ -906,7 +907,7 @@ namespace AOVGEN
             /// <param name="objectToSerialize">Just an object</param>
             /// <returns>A byte - array representation of the object.</returns>
             /// <exception cref="SerializationException">Is thrown if something went wrong during serialization.</exception>
-            private static byte[] ObjectToByteArray(Object objectToSerialize)
+            internal static byte[] ObjectToByteArray(object objectToSerialize)
             {
                 MemoryStream fs = new MemoryStream();
                 BinaryFormatter formatter = new BinaryFormatter();
@@ -918,6 +919,7 @@ namespace AOVGEN
                     {
                         formatter.Serialize(fs, objectToSerialize);
                     }
+
                     return fs.ToArray();
                 }
                 catch (SerializationException se)
@@ -928,6 +930,32 @@ namespace AOVGEN
                 finally
                 {
                     fs.Close();
+                }
+
+
+            }
+
+            internal static object ByteArrayToObject(byte[] bytes)
+            {
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    BinaryFormatter bf = new BinaryFormatter();
+                    try
+                    {
+                        lock (locker)
+                        {
+                            ms.Write(bytes, 0, bytes.Length);
+                            ms.Position = 0;
+                        }
+
+                        return bf.Deserialize(ms);
+
+                    }
+                    catch (SerializationException se)
+                    {
+                        Console.WriteLine("Error occured during serialization. Message: " + se.Message);
+                        return null;
+                    }
                 }
             }
 
@@ -1073,7 +1101,8 @@ namespace AOVGEN
             }
         }
 
-        internal class PosInfo
+        [Serializable]
+        public class PosInfo
         {
             private readonly int[] _Pos;
 
