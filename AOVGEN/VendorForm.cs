@@ -38,8 +38,8 @@ namespace AOVGEN
         {
 			
 			if (connection.State == ConnectionState.Closed) connection = OpenDB();
-			SQLiteCommand sQLiteCommand = new SQLiteCommand
-			{
+			SQLiteCommand sQLiteCommand = new()
+            {
 				Connection = connection,
 				CommandText = "SELECT VendorName FROM Vendors"
 			};
@@ -48,7 +48,7 @@ namespace AOVGEN
 			{
 				while (reader.Read())
 				{
-                    RadListDataItem radListDataItem = new RadListDataItem
+                    RadListDataItem radListDataItem = new()
                     {
                         Text = reader[0].ToString()
                     };
@@ -78,8 +78,8 @@ namespace AOVGEN
         private void RadDropDownList1_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
         {
 			string selectedVendor = radDropDownList1.SelectedItem.Text;
-			List <RadListDataItemCollection> listclear = new List<RadListDataItemCollection>
-			{
+			List <RadListDataItemCollection> listclear = new()
+            {
 				radDropDownList2.Items,
 				radDropDownList3.Items,
 				radDropDownList4.Items,
@@ -95,8 +95,8 @@ namespace AOVGEN
 				radDropDownList14.Items,
 				radDropDownList15.Items
 			};
-			List<(string, RadDropDownList, string)> dropDownLists = new List<(string, RadDropDownList, string)>
-			{
+			List<(string, RadDropDownList, string)> dropDownLists = new()
+            {
 				("SensTE", radDropDownList2, "Sens1"),
 				("SensTE", radDropDownList3, "Sens2"),
 				("SensTE", radDropDownList4, "Sens3"),
@@ -113,8 +113,8 @@ namespace AOVGEN
 				("FControl", radDropDownList15, "Sens14"),
 			};
 			foreach (var itemForDel in listclear) itemForDel.Clear();
-			SQLiteCommand sQLiteCommand = new SQLiteCommand
-			{
+			SQLiteCommand sQLiteCommand = new()
+            {
 				Connection = connection,
 				//$"SELECT * FROM VendorPresets WHERE VendorName = '{selectedVendor}'"
 			};
@@ -146,7 +146,7 @@ namespace AOVGEN
 			//		}
 			//	}
 			//}
-			Dictionary<string, List<(string, string)>> dict = new Dictionary<string, List<(string, string)>>();
+			Dictionary<string, List<(string, string)>> dict = new();
 			string[] dbTables = { "SensTE", "SensTS", "SensPE", "SensPS", "SensHE", "SensHS", "FControl" };
 			foreach (string s in dbTables)
             {
@@ -206,8 +206,8 @@ namespace AOVGEN
 				{ "Sens14",radDropDownList15.Text}
 			};
 			vendorname = radDropDownList1.Text;
-			SQLiteCommand command = new SQLiteCommand
-			{
+			SQLiteCommand command = new()
+            {
 				Connection = connection,
 				CommandText = $"SELECT ID From VendorPresets WHERE VendorName = '{vendorname}'"
 			};
@@ -223,7 +223,7 @@ namespace AOVGEN
 		List<(string, string)> GetReaderColumnValues(SQLiteDataReader reader)
         {
             if (!reader.HasRows) return null;
-            DataTable dataTable = new DataTable();
+            DataTable dataTable = new();
             dataTable.Load(reader);
             return dataTable.AsEnumerable()
                 .Select(x => 
@@ -390,8 +390,8 @@ namespace AOVGEN
 			try
             {
 				
-				List<(RadListDataItemCollection, RadDropDownList)> rads = new List<(RadListDataItemCollection, RadDropDownList)>
-				{
+				List<(RadListDataItemCollection, RadDropDownList)> rads = new()
+                {
 					(radDropDownList2.Items,radDropDownList2),
 					(radDropDownList3.Items,radDropDownList3),
 					(radDropDownList4.Items,radDropDownList4),
@@ -422,8 +422,8 @@ namespace AOVGEN
 					$"Sens9 = '{newsens[8]}', Sens10 = '{newsens[9]}', Sens11 = '{newsens[10]}', Sens12 = '{newsens[11]}', Sens13 = '{newsens[12]}', " +
 					$"Sens14 = '{newsens[13]}' " +
 					$"WHERE VendorName = '{radDropDownList1.SelectedItem.Text}'";
-				SQLiteCommand sQLiteCommand = new SQLiteCommand
-				{
+				SQLiteCommand sQLiteCommand = new()
+                {
 					Connection = connection,
 					CommandText = updatepresetquery
 				};
@@ -439,7 +439,7 @@ namespace AOVGEN
         private void RadButton3_Click(object sender, EventArgs e)
         {
             if (radDropDownList1.SelectedItem == null) return;
-            AddSensorForm addSensorForm = new AddSensorForm(connection);
+            AddSensorForm addSensorForm = new(connection);
             DialogResult dialogResult =  addSensorForm.ShowDialog();
             if (dialogResult == DialogResult.OK || dialogResult == DialogResult.Cancel) addSensorForm.Close();
         }

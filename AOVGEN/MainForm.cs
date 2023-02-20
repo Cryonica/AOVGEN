@@ -28,7 +28,7 @@ using WinFormAnimation;
 using Path = WinFormAnimation.Path;
 using PositionChangedEventArgs = Telerik.WinControls.UI.Data.PositionChangedEventArgs;
 using Timer = System.Windows.Forms.Timer;
-using static AOVGEN.RunRevitCommand;
+using AOVGEN.Models;
 
 namespace AOVGEN
 {
@@ -91,7 +91,7 @@ namespace AOVGEN
             radRibbonBar1.RibbonBarElement.CaptionBorder.Visibility = ElementVisibility.Collapsed;
             //this.radRibbonBar1.RibbonBarElement.TabStripElement.ItemContainer.Margin = new Padding(5, 0, 76, 0);
             radRibbonBar1.RibbonBarElement.TabStripElement.ItemContainer.Padding = new Padding(5, 0, 76, 0);
-            RunRevitCommand revitCommand = new RunRevitCommand(Service);
+            RunRevitCommand revitCommand = new(Service);
             
             revitCommand.SetUIApp();
             Thread.Sleep(TimeSpan.FromMilliseconds(1));
@@ -122,21 +122,15 @@ namespace AOVGEN
             {
                 this.revitState = state;
             }
-
-
         }
-
         private void CheckRevitStaus()
         {
             try
             {
 
-                //var t = CheckStaus().Status;
-
-
                 var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
                 var token = cts.Token;
-                RunRevitCommand revitCommand = new RunRevitCommand(Service);
+                RunRevitCommand revitCommand = new(Service);
                 revitCommand.StatusChanged += (s, args) =>
                 {
 
@@ -146,18 +140,17 @@ namespace AOVGEN
                     {
                         pictureBox2.Image = Resources.green_light;
                         RevitConnectionState = RevitState.DocumentPresent;
-                       
+
                     }
                     else
                     {
                         pictureBox2.Image = Resources.red_light;
-                       
+
                         RevitConnectionState = RevitState.Close;
-                        
-                        
+
+
                     }
                 };
-
 
                 Task<RevitStatusArg>.Factory.StartNew(() =>
                 {
@@ -175,25 +168,18 @@ namespace AOVGEN
                         var docinfo = revitCommand.StateInfo().Item1;
                         if (string.IsNullOrEmpty(docinfo))
                         {
-                            RevitStatusArg arg = new RevitStatusArg(RevitState.Close);
-
-
-
+                            RevitStatusArg arg = new(RevitState.Close);
                             return arg;
                         }
                         else
                         {
                             RevitConnectionState = RevitState.DocumentPresent;
-                            RevitStatusArg arg = new RevitStatusArg(RevitState.DocumentPresent);
+                            RevitStatusArg arg = new(RevitState.DocumentPresent);
 
                             return arg;
                         }
-
-
-
-
                     }
-                    catch (Exception ex)
+                    catch 
                     {
                         return new RevitStatusArg(RevitState.Close);
                     }
@@ -201,20 +187,6 @@ namespace AOVGEN
                     return new RevitStatusArg(RevitState.Open);
 
                 }).ContinueWith((x) => RevitConnectionState, TaskScheduler.FromCurrentSynchronizationContext());
-
-
-                // Thread.Sleep(1000);
-                //if (t.Status == TaskStatus.Canceled)
-                //{
-                //    RevitConnectionState = RevitState.Close;
-                //}
-                //else
-                //{
-                //     var (docId, _) = revitCommand.StateInfo();
-                //    RevitConnectionState = string.IsNullOrEmpty(docId) ? RevitState.Open : RevitState.DocumentPresent;
-                // }
-
-
 
             }
             catch (Exception ex)
@@ -284,7 +256,7 @@ namespace AOVGEN
 
                 if (parent.Tag is Project project)
                 {
-                    EditorV2 editor = new EditorV2(this)
+                    EditorV2 editor = new(this)
                     {
                         Opacity = 0,
                         DBFilePath = DBFilePath,
@@ -294,7 +266,7 @@ namespace AOVGEN
                         VentSystem = ventSystem,
                         OpenForEdit = true,
                         SelectedNode = radTreeView2.SelectedNode,
-                        Joinedsystems = radTreeView4.Nodes,
+                        joinedSystems = radTreeView4.Nodes,
                         connection = connection
 
 
@@ -346,7 +318,7 @@ namespace AOVGEN
                     pannel = (Pannel)selectednode.Tag;
                     if (selectednode.Nodes.Count >0)
                     {
-                        List<VentSystem> ventlist = new List<VentSystem>();
+                        List<VentSystem> ventlist = new();
 
                         foreach(var ventnode in selectednode.Nodes)
                         {
@@ -405,12 +377,12 @@ namespace AOVGEN
                     //find maximumvoltage
 
                     string findventsGUID = $"Select GUID FROM VentSystems WHERE Pannel = '{pannel.GetGUID()}'";
-                    SQLiteCommand command = new SQLiteCommand
+                    SQLiteCommand command = new()
                     {
                         Connection = connection,
                         CommandText = findventsGUID
                     };
-                    List<string> VSGuids = new List<string>();
+                    List<string> VSGuids = new();
                     using (SQLiteDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -448,7 +420,7 @@ namespace AOVGEN
                     string sqldelete2 = $"UPDATE Cable SET FromPannel = '{string.Empty}', FromGUID = '{string.Empty}' WHERE [SystemGUID] = '{ventsystemGUID}'";
                     string setdefaultnames = $"Update Cable SET [To] = DefaultName WHERE SystemGUID = '{ventsystemGUID}'";
                     //string setpannelpower = $"Update Pannel SET Power = '{pannel.Power}' WHERE GUID = '{pannel.GetGUID()}'"; //записать в БД новую мощность шкафа управления
-                    SQLiteCommand command = new  SQLiteCommand(sqldelete1, connection);
+                    SQLiteCommand command = new(sqldelete1, connection);
                     try
                     {
                         command.ExecuteNonQuery();
@@ -485,7 +457,7 @@ namespace AOVGEN
                         string sqldelete1 = $"UPDATE VentSystems SET Pannel = '{string.Empty}', PannelName = '{string.Empty}' WHERE [GUID] = '{ventsystemGUID}'";
                         string sqldelete2 = $"UPDATE Cable SET FromPannel = '{string.Empty}', FromGUID = '{string.Empty}' WHERE [SystemGUID] = '{ventsystemGUID}'";
                         string setdefaultnames = $"Update Cable SET [To] = DefaultName WHERE SystemGUID = '{ventsystemGUID}'";
-                        SQLiteCommand command = new SQLiteCommand(sqldelete1, connection);
+                        SQLiteCommand command = new(sqldelete1, connection);
                         try
                         {
                             command.ExecuteNonQuery();
@@ -514,7 +486,7 @@ namespace AOVGEN
             if (selectednode.Nodes.Count>0)
             {
                 //несколько шкафов
-                List<RadTreeNode> DeleteNodeList = new List<RadTreeNode>();
+                List<RadTreeNode> DeleteNodeList = new();
                 selectednode.Nodes.AsParallel().ForAll(pannelnode =>
                 {
                     Pannel pannel = (Pannel)pannelnode.Tag;
@@ -526,7 +498,7 @@ namespace AOVGEN
                 DeleteNodeList.AsParallel().ForAll(radTreeNode =>
                 {
                     RadTreeNode clone = (RadTreeNode)radTreeNode.Clone();
-                    Font RegularFont = new Font(radTreeView6.Font, FontStyle.Regular);
+                    Font RegularFont = new(radTreeView6.Font, FontStyle.Regular);
                     clone.Font = RegularFont;
                     radTreeView6.Nodes.Add(clone);
                     selectednode.Nodes.Remove(radTreeNode);
@@ -539,7 +511,7 @@ namespace AOVGEN
                 //1 шкаф
                 Pannel pannel = (Pannel)selectednode.Tag;
                 RadTreeNode clone = (RadTreeNode)selectednode.Clone();
-                Font RegularFont = new Font(radTreeView6.Font, FontStyle.Regular);
+                Font RegularFont = new(radTreeView6.Font, FontStyle.Regular);
                 clone.Font = RegularFont;
                 radTreeView6.Nodes.Add(clone);
                 ClearPannelLevel(pannel);
@@ -550,7 +522,7 @@ namespace AOVGEN
             void ClearPannelLevel(Pannel pannel)
             {
                 string clearpannelqury = $"UPDATE Pannel SET [LevelGUID] = NULL, [RoomGUID] = NULL, RoomName = NULL, RoomNumber = NULL WHERE [GUID] = '{pannel.GetGUID()}'";
-                SQLiteCommand command = new SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = connection,
                     CommandText = clearpannelqury
@@ -793,7 +765,7 @@ namespace AOVGEN
         {
             timer1.Start();
             
-            Animator animator = new Animator
+            Animator animator = new()
             {
                 Paths = new Path(1, 0, 400, 100).ToArray()
             };
@@ -826,7 +798,7 @@ namespace AOVGEN
             connection.Open();
             connectionvendor = OpenDB(DBFilePath.Replace(DBFileName, string.Empty) + "VendorsDB.db");
             connectionvendor.Open();
-            VendorFill vendorFill = new VendorFill
+            VendorFill vendorFill = new()
             {
                 connection = connectionvendor
             };
@@ -865,14 +837,14 @@ namespace AOVGEN
                 if (!(ventnode.Tag is VentSystem ventSystem)) return;
                 string ventguid = ventSystem.GUID;
                 if (string.IsNullOrEmpty(ventguid)) return;
-                List<string> dbtables = new List<string>
+                List<string> dbtables = new()
                 {
                     "SensPDS",
                     "SensHUM",
                     "SensT",
                     "FControl"
                 };
-                SQLiteCommand clearvendorcommand = new SQLiteCommand
+                SQLiteCommand clearvendorcommand = new()
                 {
                     Connection = connection
                 };
@@ -909,7 +881,7 @@ namespace AOVGEN
         {
             try
             {
-                List<(dynamic, string)> ListForApplyVendorInfo = new List<(dynamic, string)>();
+                List<(dynamic, string)> ListForApplyVendorInfo = new();
                 var t = (from cell in radGridView1.SelectedRows
                          let obj = cell.Tag
                          where (obj != null)
@@ -1020,7 +992,7 @@ namespace AOVGEN
                 if (connectionvendor.State == ConnectionState.Closed) connectionvendor.Open();
                 string VendorDBPath = DBFilePath.Replace(DBFileName, string.Empty) + "VendorsDB.db";
                 Building building = (Building)radTreeView1.SelectedNode.Tag;
-                SQLiteCommand commandvendor = new SQLiteCommand
+                SQLiteCommand commandvendor = new()
                 {
                     Connection = connection,
                     CommandText = $"ATTACH '{VendorDBPath}' as DB1; " +
@@ -1106,9 +1078,9 @@ namespace AOVGEN
         private void MakeContextMenu1()
         {
             contextMenu = new RadContextMenu();
-            RadMenuItem menuItem1 = new RadMenuItem("Создаить по аналогии");
+            RadMenuItem menuItem1 = new("Создаить по аналогии");
             menuItem1.Click += MenuItem1_Click;
-            RadMenuItem menuItem2 = new RadMenuItem("Удалить")
+            RadMenuItem menuItem2 = new("Удалить")
             {
                 ForeColor = Color.Red
             };
@@ -1120,13 +1092,13 @@ namespace AOVGEN
         private void MakeContextMenu2()
         {
             cablecontextMenu = new RadContextMenu();
-            RadMenuItem cablesetnames = new RadMenuItem("Назначить имена");
+            RadMenuItem cablesetnames = new("Назначить имена");
             cablesetnames.Click += Cablesetnames_Click;
-            RadMenuItem cablesettypes = new RadMenuItem("Установить тип кабелей");
+            RadMenuItem cablesettypes = new("Установить тип кабелей");
             cablesettypes.Click += cablesettypes_Click;
-            RadMenuItem cablelenghtset = new RadMenuItem("Установить длину");
+            RadMenuItem cablelenghtset = new("Установить длину");
             cablelenghtset.Click += Cablelenghtset_Click;
-            RadMenuItem setcablelenghtinAcadDrawing = new RadMenuItem("Обновить длины у блоков в Autocad");
+            RadMenuItem setcablelenghtinAcadDrawing = new("Обновить длины у блоков в Autocad");
             setcablelenghtinAcadDrawing.Click += SetcablelenghtinAcadDrawing_Click;
             cablecontextMenu.Items.Add(cablesetnames);
             cablecontextMenu.Items.Add(cablesettypes);
@@ -1237,7 +1209,7 @@ namespace AOVGEN
         void MenuItem1_Click(object sender, EventArgs e)
         {
 
-            CreateAnalogue createAnalogue = new CreateAnalogue(connection)
+            CreateAnalogue createAnalogue = new(connection)
             {
                 PannelGUIDForCopy = radGridView2.CurrentRow.Cells[1].Value.ToString(),
                 DBFilePath = DBFilePath,
@@ -1280,7 +1252,7 @@ namespace AOVGEN
                 if (connection.State == ConnectionState.Open)
                 {
                     string query = $"Select CableName, Devider, WriteCableP, WritePumpCable, WriteValveCable FROM BuildSetting WHERE Place = '{building.BuildGUID}'";
-                    SQLiteCommand command = new SQLiteCommand
+                    SQLiteCommand command = new()
                     {
                         Connection = connection,
                         CommandText = query
@@ -1306,8 +1278,8 @@ namespace AOVGEN
 
             if (connection.State != ConnectionState.Open) return;
             {
-                SQLiteCommand command1 = new SQLiteCommand { Connection = connection };
-                SetCabName cabNameForm = new SetCabName
+                SQLiteCommand command1 = new() { Connection = connection };
+                SetCabName cabNameForm = new()
                 {
                     Cablename = cablename
                 };
@@ -1381,14 +1353,15 @@ namespace AOVGEN
 
         private void SetCableLenght()
         {
-            CableLenghtForm cableLenghtForm = new CableLenghtForm();
+            CableLenghtForm cableLenghtForm = new();
             DialogResult dialogResult = cableLenghtForm.ShowDialog();
 
             if (dialogResult != DialogResult.OK) return;
-            SetCableLenght setcablelenght = new SetCableLenght(radGridView3, connection);
+            SetCableLenght setcablelenght = new(radGridView3, connection);
             if (cableLenghtForm.ReadTranslationFie)
             {
-                setcablelenght.ExecuteExchange(@"C:\\ADV_Toolkit\\change.txt");
+                string exchangeFilePath = @"C:\ADV_Toolkit\change.txt";
+                setcablelenght.ExecuteExchange(exchangeFilePath);
 
 
             }
@@ -1409,18 +1382,11 @@ namespace AOVGEN
                         {
                             
                             AcadApplication acadApp = cadApp;
-
                             AcadDocument acadDoc = acadApp.ActiveDocument;
                             setcablelenght.ExcecuteAutocadFileName(acadDoc);
                             //SetForegroundWindow(hWnd);
 
                         }
-
-
-
-
-
-
                     }
                 }
                 catch (Exception ex)
@@ -1429,9 +1395,6 @@ namespace AOVGEN
                     MessageBox.Show(ex.Message);
                     MessageBox.Show(ex.StackTrace);
                 }
-
-
-
             }
             if (cableLenghtForm.SetRandom)
             {
@@ -1442,23 +1405,19 @@ namespace AOVGEN
         private void SetCabeTypes()
         {
             RadTreeNode radTreeNode = radTreeView1.SelectedNode;
-            Dictionary<string, Cable> cables = new Dictionary<string, Cable>();
-            Dictionary<string, Cable> cables2 = new Dictionary<string, Cable>();
+            Dictionary<string, Cable> cables = new();
+            Dictionary<string, Cable> cables2 = new();
             bool trouble = false;
             GridViewRowInfo troubleRow = null;
             if (radTreeNode.Tag is Building building)
             {
-
-
                 if (connection.State == ConnectionState.Open)
                 {
-                    //string query1 = $"SELECT CableA, CableD, CableP, CableC, CableACrossSection, CableDCrossSection, CablePCrossSection, CableCCrossSection FROM BuildSetting WHERE Place = '{building.BuildGUID}'";
                     string query1 = $"SELECT CableA, CableD, CableP, CableC, WriteCableP, WritePumpCable, WriteValveCable FROM BuildSetting WHERE Place = '{building.BuildGUID}'";
                     bool WritePumpCable, WriteValveCable;
                     var CableInEOM = WritePumpCable = WriteValveCable = false;
 
-                    SQLiteCommand command = new SQLiteCommand
-                    { Connection = connection, CommandText = query1 };
+                    SQLiteCommand command = new() { Connection = connection, CommandText = query1 };
                     
 
                     using (SQLiteDataReader reader = command.ExecuteReader())
@@ -1466,23 +1425,23 @@ namespace AOVGEN
 
                         while (reader.Read())
                         {
-                            Cable cableA = new Cable
+                            Cable cableA = new()
                             {
                                 Attrubute = Cable.CableAttribute.A,
                             };
-                            Cable cableD = new Cable
+                            Cable cableD = new()
                             {
                                 Attrubute = Cable.CableAttribute.D,
                             };
-                            Cable cableP = new Cable
+                            Cable cableP = new()
                             {
                                 Attrubute = Cable.CableAttribute.P,
                             };
-                            Cable cableC = new Cable
+                            Cable cableC = new()
                             {
                                 Attrubute = Cable.CableAttribute.C,
                             };
-                            Cable cablePL = new Cable
+                            Cable cablePL = new()
                             {
                                 Attrubute = Cable.CableAttribute.PL,
                             };
@@ -1512,8 +1471,6 @@ namespace AOVGEN
                         string cabguid = CableFromTag.cableGUID;// row.Cells[1].Value.ToString();
                         Cable cable = cables[attribute];
                         CableFromTag.CableType = cable.CableType;
-                        //cable.cableGUID = cabguid;
-                        //cable.WireNumbers = wirenumbers;
                         string SelectCabType = string.Empty;
                         bool IsHighPowerCable = CableFromTag.Attrubute == Cable.CableAttribute.P;
                         bool IsLowPowerCable = CableFromTag.Attrubute == Cable.CableAttribute.PL;
@@ -1525,7 +1482,7 @@ namespace AOVGEN
                                 SelectCabType = "SELECT CableFullName FROM" +
                                 $"(SELECT CableFullName, WireNumbers AS WN FROM CableTypes WHERE CableType = '{CableFromTag.CableType}')" +
                                 $" WHERE WN >='{wirenumbers}' LIMIT 1";
-                                SQLiteCommand SelectCabTypeCommand = new SQLiteCommand
+                                SQLiteCommand SelectCabTypeCommand = new()
                                 {
                                     CommandText = SelectCabType,
                                     Connection = connection
@@ -1572,67 +1529,32 @@ namespace AOVGEN
                             MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
                         }
                         CableFromTag.CableType = SelectCabType;
-
-                        //bool writeblock = Convert.ToBoolean(row.Cells[11].Value.ToString());
-                        //string cabname = row.Cells[2].Value.ToString();
-                        //string cabfrompos = row.Cells[3].Value.ToString();
-                        //string cabtopos = row.Cells[4].Value.ToString();
-                        //double.TryParse(row.Cells[6].Value.ToString(), out double lenght);
-                        //string description = row.Cells[7].Value.ToString();
-                        //string blockname = row.Cells[12].Value.ToString();
-
-                        //Cable cable1 = new Cable
-                        //{
-                        //    Attrubute = cable.Attrubute,
-                        //    WriteBlock = writeblock,
-                        //    cableGUID = cabguid,
-                        //    CableType = SelectCabType,//cable.CableType,
-                        //    CableName = cabname,
-                        //    FromPosName = cabfrompos,
-                        //    ToPosName = cabtopos,
-                        //    Lenght = lenght,
-                        //    Description = description,
-                        //    ToBlockName = blockname,
-                        //    WireNumbers = wirenumbers
-
-                        //};
-
-                        row.Cells[5].Value = CableFromTag.CableType;//cable1.CableType;
-                        //row.Tag = cable1;
-                        //cables2.Add(cabguid, cable1);
+                        row.Cells[5].Value = CableFromTag.CableType;
                         cables2.Add(cabguid, CableFromTag);
 
                     }
                 }
 
-
                 //update DataBase
-
-
                 if (connection.State == ConnectionState.Open)
                 {
-                    SQLiteCommand command = new SQLiteCommand { Connection = connection };
-                try
-                {
-                    foreach (var query in cables2.Select(keyValuePair => $"UPDATE Cable SET CableType= '{keyValuePair.Value.CableType}', " +
-                                                                         $"CableName = '{keyValuePair.Value.CableName}', " +
-                                                                         $"CableLenght = '{keyValuePair.Value.Lenght}' " +
-                                                                         $"WHERE GUID= '{keyValuePair.Key}'"))
+                    SQLiteCommand command = new() { Connection = connection };
+                    try
                     {
-                        command.CommandText = query;
-                        command.ExecuteNonQuery();
+                        foreach (var query in cables2.Select(keyValuePair => $"UPDATE Cable SET CableType= '{keyValuePair.Value.CableType}', " +
+                                                                             $"CableName = '{keyValuePair.Value.CableName}', " +
+                                                                             $"CableLenght = '{keyValuePair.Value.Lenght}' " +
+                                                                             $"WHERE GUID= '{keyValuePair.Key}'"))
+                        {
+                            command.CommandText = query;
+                            command.ExecuteNonQuery();
+                        }
                     }
-                }
                     catch
                     {
                         MessageBox.Show("Похоже выбран кабель не из базы данных");
                     }
-                    
-                
                 }
-
-
-
             }
             if (trouble)
             {
@@ -1655,7 +1577,7 @@ namespace AOVGEN
             {
                 if (connection.State != ConnectionState.Open) return;
                 string sqldelete = $"DELETE FROM Pannel WHERE [GUID] = '{pannelGUID}'";
-                SQLiteCommand command = new SQLiteCommand(sqldelete, connection);
+                SQLiteCommand command = new(sqldelete, connection);
                 command.ExecuteNonQuery();
                 command.Dispose();
 
@@ -1683,7 +1605,7 @@ namespace AOVGEN
                 string ProjectGUID = project.GetGUID();
                 string sqlprojectdelete = $"DELETE FROM Project WHERE [GUID] = '{ProjectGUID}'";
                 if (connection.State != ConnectionState.Open) return;
-                SQLiteCommand command1 = new SQLiteCommand
+                SQLiteCommand command1 = new()
                 {
                     Connection = connection
                 };
@@ -1702,16 +1624,13 @@ namespace AOVGEN
                 radTreeView1.TreeViewElement.Update(RadTreeViewElement.UpdateActions.Reset);
                 radTreeView1.AllowRemove = false;
                 
-                DataTable dataSource = new DataTable("fileSystem");
+                DataTable dataSource = new("fileSystem");
                 dataSource.Columns.Add("ProjectName", typeof(string));
                 dataSource.Columns.Add("DateofCreate", typeof(string));
                 dataSource.Columns.Add("Chiper", typeof(string));
                 dataSource.Columns.Add("CheefEngeneer", typeof(string));
 
                 radGridView2.DataSource = dataSource;
-                
-
-
             }
             catch
             {
@@ -1744,14 +1663,14 @@ namespace AOVGEN
                 string sqlbuildingdelete = $"DELETE FROM Buildings WHERE [GUID] = '{BuildGUID}'";
 
                 if (connection.State != ConnectionState.Open) return;
-                SQLiteCommand command = new SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = connection
                 };
                 #region Get ventsystems by Build GUID
                 command.CommandText = selectventsystems;
                 SQLiteDataReader reader = command.ExecuteReader();
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 dt.Load(reader);
                 reader.Close();
 
@@ -1795,7 +1714,7 @@ namespace AOVGEN
                 radTreeView1.Update();
                 #endregion
                 #region Set empty table
-                DataTable dataSource = new DataTable("fileSystem");
+                DataTable dataSource = new("fileSystem");
                 radGridView2.DataSource = dataSource;
                 #endregion
 
@@ -1811,7 +1730,7 @@ namespace AOVGEN
         private static Building CreateBuildingClass(string buildingname)
         {
 
-            Building building = new Building
+            Building building = new()
             {
                 Buildname = buildingname,
                 BuildNum = "01",
@@ -1831,14 +1750,14 @@ namespace AOVGEN
             cnt++;
             var guid = Guid.NewGuid().ToString();
             var date = DateTime.Now.ToString("dd-MM-yyyy");
-            Project NewProject = new Project
+            Project NewProject = new()
             {
                 ProjectName = "Новый проект" + cnt,
                 Chiper = "Шифр ххх",
                 CheefEngeneer = "Фамилия",
             };
             NewProject.SetGUID(guid);
-            RadTreeNode NodeProject = new RadTreeNode(NewProject.ProjectName)
+            RadTreeNode NodeProject = new(NewProject.ProjectName)
             {
                 Value = NewProject.ProjectName,
                 Tag = NewProject,
@@ -1860,7 +1779,7 @@ namespace AOVGEN
                 if (connection.State != ConnectionState.Open) return;
                 string InsertQuery = $"INSERT INTO Project ([GUID], ProjectName, Chiper, CheefEngeneer, DateofCreate) VALUES('{guid}','{NewProject.ProjectName}','{NewProject.Chiper}','{NewProject.CheefEngeneer}','{date}')";
                    
-                SQLiteCommand command = new  SQLiteCommand(InsertQuery, connection);
+                SQLiteCommand command = new(InsertQuery, connection);
                 command.ExecuteNonQuery();
                 command.Dispose();
                 //connection.Close();
@@ -1882,7 +1801,7 @@ namespace AOVGEN
                 if (connection.State == ConnectionState.Open)
                 {
                     const string tableselect = "SELECT Project.ProjectName, Project.Chiper, Project.CheefEngeneer, Project.GUID, Buildings.Buildname, Buildings.GUID FROM Project INNER JOIN Buildings ON Project.GUID = Buildings.Project ;";
-                    SQLiteCommand command = new SQLiteCommand(tableselect, connection);
+                    SQLiteCommand command = new(tableselect, connection);
                     SQLiteDataReader reader = command.ExecuteReader();
                     
                     while (reader.Read())
@@ -1893,8 +1812,8 @@ namespace AOVGEN
                         
                         if (foundNode == null)
                         {
-                            RadTreeNode parent = new RadTreeNode(reader[0].ToString());
-                            Project project = new Project
+                            RadTreeNode parent = new(reader[0].ToString());
+                            Project project = new()
                             {
                                 ProjectName = reader[0].ToString(),
                                 Chiper = reader[1].ToString(),
@@ -1910,7 +1829,7 @@ namespace AOVGEN
                             Building building = CreateBuildingClass(reader[4].ToString());
                             building.BuildGUID = (reader[5].ToString());
 
-                            RadTreeNode childNode = new RadTreeNode(reader[4].ToString())
+                            RadTreeNode childNode = new(reader[4].ToString())
                             {
                                 Value = reader[4].ToString(),
                                 Name=  building.BuildGUID,
@@ -1923,7 +1842,7 @@ namespace AOVGEN
                         {
                             Building building = CreateBuildingClass(reader[4].ToString());
                             building.BuildGUID = reader[5].ToString();
-                            RadTreeNode childNode = new RadTreeNode(reader[4].ToString())
+                            RadTreeNode childNode = new(reader[4].ToString())
                             {
                                 Value = reader[4].ToString(),
                                 Tag = building
@@ -1937,19 +1856,19 @@ namespace AOVGEN
                     }
                     reader.Close();
                     const string tableselectemty = "SELECT ProjectName, Project.GUID, Chiper, CheefEngeneer FROM Project ;";
-                    SQLiteCommand command1 = new SQLiteCommand(tableselectemty, connection);
+                    SQLiteCommand command1 = new(tableselectemty, connection);
                     SQLiteDataReader reader1 = command1.ExecuteReader();
                     while (reader1.Read())
                     {
                         
                         RadTreeNode foundNode = FindNodeByValue(reader1[0].ToString(), radTreeView1.Nodes);
                         if (foundNode != null) continue;
-                        RadTreeNode parent = new RadTreeNode(reader1[0].ToString())
+                        RadTreeNode parent = new(reader1[0].ToString())
                         {
                             Value = reader1[0].ToString()
                                 
                         };
-                        Project project = new Project
+                        Project project = new()
                         {
                             ProjectName = reader1[0].ToString(),
                             Chiper = reader1[2].ToString(),
@@ -2068,7 +1987,7 @@ namespace AOVGEN
                     break;
             }
             
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection
             };
@@ -2082,7 +2001,7 @@ namespace AOVGEN
                         
                         command.CommandText = tableselect;
                         SQLiteDataReader dataReader = command.ExecuteReader(); // чтение записей проекта из БД
-                        DataTable dt = new DataTable(); //создание промежуточной таблицы (чтобы не заполнять radGridView по строчкам, а сразу скопом
+                        DataTable dt = new(); //создание промежуточной таблицы (чтобы не заполнять radGridView по строчкам, а сразу скопом
                         dt.Load(dataReader); //назначение таблице всего того что лежит в dataReader, то есть поcле чтения БД
                         dataReader.Close();
                         radGridView2.DataSource = dt;
@@ -2112,7 +2031,7 @@ namespace AOVGEN
                        // this.radTreeView2.Nodes.Clear();
                         //this.radTreeView3.Nodes.Clear();
                         command.CommandText = ventsystemselect;
-                        DataTable dt = new DataTable();
+                        DataTable dt = new();
                         using (SQLiteDataReader dataReader = command.ExecuteReader())
                         {
                             dt.Load(dataReader);
@@ -2120,7 +2039,7 @@ namespace AOVGEN
 
                         foreach (DataRow row in dt.Rows)
                         {
-                            RadTreeNode node = new RadTreeNode
+                            RadTreeNode node = new()
                             {
                                 //Text = "Systemname"].ToString(),
                                 //Value = row["GUID"].ToString()
@@ -2129,7 +2048,7 @@ namespace AOVGEN
                                 Name = row["GUID"].ToString()
 
                             };
-                            VentSystem ventSystem = new VentSystem();
+                            VentSystem ventSystem = new();
                             string ventsystemguid = row["GUID"].ToString();
                             ventSystem.GUID = ventsystemguid;
                             ventSystem.SystemName = row["Systemname"].ToString();
@@ -2396,12 +2315,12 @@ namespace AOVGEN
                 {
                     if (connection.State == ConnectionState.Closed) connection.Open();
                     command.CommandText = levelselect;
-                    List<(string, string, string, string)> PannelList = new List<(string, string, string, string)>();
-                    List<Pannel> PannelClassList = new List<Pannel>();
+                    List<(string, string, string, string)> PannelList = new();
+                    List<Pannel> PannelClassList = new();
                     
                     using (SQLiteDataReader dataReader = command.ExecuteReader())
                     {
-                        List<(string, string, string, double)> LevelList = new List<(string, string, string, double)>();
+                        List<(string, string, string, double)> LevelList = new();
                         //add levels to list
                         while (dataReader.Read())
                         {
@@ -2419,7 +2338,7 @@ namespace AOVGEN
                         //add pannels to common list
 
                         var pannelselect = $"SELECT PannelName, GUID, LevelGUID, RoomGUID FROM Pannel WHERE Place = '{building.BuildGUID}'";
-                        SQLiteCommand getpannelscommand = new SQLiteCommand
+                        SQLiteCommand getpannelscommand = new()
                         {
                             CommandText = pannelselect,
                             Connection = connection
@@ -2453,20 +2372,20 @@ namespace AOVGEN
                             foreach ((string levelid, string levelguid, string levelname, _) in SortedLevelList)
                             {
                                 //create level Node
-                                RadTreeNode LevelNode = new RadTreeNode
+                                RadTreeNode LevelNode = new()
                                 {
                                     Text = levelname,
                                     Name = levelguid, 
                                     Tag = levelid
                                 };
                                 string GetRoomsQuery = $"SELECT [RoomGUID], RoomID, RoomName, RoomNumber FROM Rooms WHERE LevelGUID = '{levelguid}'";
-                                SQLiteCommand sQLiteCommand = new SQLiteCommand
+                                SQLiteCommand sQLiteCommand = new()
                                 {
                                     Connection = connection,
                                     CommandText = GetRoomsQuery
                                 };
                                 
-                                List<(string, string, string, string)> RoomList = new List<(string, string, string, string)>();
+                                List<(string, string, string, string)> RoomList = new();
                                 using (SQLiteDataReader reader = sQLiteCommand.ExecuteReader())
                                 {
                                     //add rooms to list by levelGuid
@@ -2498,7 +2417,7 @@ namespace AOVGEN
                                     roominfo.Item1 = RoomNumber;
                                     roominfo.Item2 = RoomName;
                                     roominfo.Item3 = RoomID;
-                                    RadTreeNode roomnode = new RadTreeNode
+                                    RadTreeNode roomnode = new()
                                     {
                                         Text = $"({RoomNumber}) {RoomName}",
                                         Name = RoomGUID,
@@ -2522,13 +2441,13 @@ namespace AOVGEN
                                                              where o.GetGUID() == pannel.Item2
                                                              select o)
                                                              .FirstOrDefault();
-                                        RadTreeNode pannelnode = new RadTreeNode
+                                        RadTreeNode pannelnode = new()
                                         {
                                             Text = pannel.Item1,
                                             Name = pannel.Item2,
                                             Tag = findpannel
                                         };
-                                        Font BoldFont = new Font(radTreeView6.Font, FontStyle.Bold);
+                                        Font BoldFont = new(radTreeView6.Font, FontStyle.Bold);
                                         pannelnode.Font = BoldFont;
 
 
@@ -2663,7 +2582,7 @@ namespace AOVGEN
                 
                 connection.Open();
                 if (connection.State != ConnectionState.Open) return;
-                SQLiteCommand command = new  SQLiteCommand(queryString, connection);
+                SQLiteCommand command = new(queryString, connection);
                 command.Parameters.AddWithValue("@newpannelname", newpannelname);
                 command.Parameters.AddWithValue("@GUID", GUID);
                 command.ExecuteNonQuery();
@@ -2699,7 +2618,7 @@ namespace AOVGEN
                     int version = Convert.ToInt32(Row.Cells[5].Value.ToString());
 
 
-                    Pannel pannel = new Pannel
+                    Pannel pannel = new()
                     {
                         PannelName = pannelname,
                         Power = power,
@@ -2791,7 +2710,7 @@ namespace AOVGEN
                     if (Row.Tag != null) return;
                     //Project.ID, Project.GUID, Project.ProjectName, Project.DateofCreate, Project.Chiper, Project.CheefEngeneer
 
-                    Project project = new Project();
+                    Project project = new();
                     project.SetGUID(Row.Cells[1].Value.ToString());
                     project.ProjectName = Row.Cells[2].Value.ToString(); //[0]
 
@@ -2893,7 +2812,7 @@ namespace AOVGEN
                             if (pannel != null)
                             {
                                 string queryString = $"UPDATE Pannel SET PannelName= '{gridItem.Value}' WHERE GUID= '{pannel.GetGUID()}'";
-                                SQLiteCommand command = new SQLiteCommand
+                                SQLiteCommand command = new()
                                 {
                                     Connection = connection,
                                     CommandText = queryString
@@ -2916,7 +2835,7 @@ namespace AOVGEN
         {
             Pannel pannel = (Pannel)sender;
             string queryString = $"UPDATE Pannel SET Protocol= '{pannel.Protocol}' WHERE GUID= '{pannel.GetGUID()}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = queryString
@@ -2941,7 +2860,7 @@ namespace AOVGEN
                 
             }
             string queryString = $"UPDATE Pannel SET Dispatching= '{e}' WHERE GUID= '{pannel.GetGUID()}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = queryString
@@ -3022,7 +2941,7 @@ namespace AOVGEN
             string GUID = building.BuildGUID;
             
             string queryString = $"UPDATE Buildings SET {current.Name}= @newval WHERE GUID= @GUID";
-            SQLiteCommand command = new  SQLiteCommand(queryString, connection);
+            SQLiteCommand command = new(queryString, connection);
             command.Parameters.AddWithValue("@newval", newval);
             command.Parameters.AddWithValue("@GUID", GUID);
 
@@ -3086,7 +3005,7 @@ namespace AOVGEN
             if (query == string.Empty) return;
             bool connectionopen = connection.State == ConnectionState.Open;
             if (!connectionopen) return;
-            SQLiteCommand command = new  SQLiteCommand { CommandText = query, Connection = connection };
+            SQLiteCommand command = new() { CommandText = query, Connection = connection };
                        
             command.ExecuteNonQuery();
             command.Dispose();
@@ -3105,7 +3024,7 @@ namespace AOVGEN
                 string GUID = string.Empty;
                 string newval = e.Value.ToString();
                 string column = e.Column.HeaderText;
-                 SQLiteCommand command = new  SQLiteCommand();
+                 SQLiteCommand command = new();
                 
 
                 switch (objtype)
@@ -3221,8 +3140,8 @@ namespace AOVGEN
             }
 
             GridViewRowInfo row = radGridView3.CurrentRow;
-            SQLiteCommand command = new  SQLiteCommand { Connection = connection };
-            Cable cable = new Cable
+            SQLiteCommand command = new() { Connection = connection };
+            Cable cable = new()
             {
                 WriteBlock = Convert.ToBoolean(writeblock),
                 cableGUID = cableGUID,
@@ -3293,7 +3212,7 @@ namespace AOVGEN
         }
         private void CreateHeader()
         {
-            DataTable dataSource = new DataTable("fileSystem");
+            DataTable dataSource = new("fileSystem");
             dataSource.Columns.Add("ID", typeof(string));
             dataSource.Columns.Add("GUID", typeof(string));
             dataSource.Columns.Add("Тип элемента", typeof(string));
@@ -3316,8 +3235,8 @@ namespace AOVGEN
         private void CreateCableHeader()
         {
             radGridView3.Columns.Clear();
-            List<string> list = new List<string>();
-            DataTable dataSource = new DataTable("Cables");
+            List<string> list = new();
+            DataTable dataSource = new("Cables");
             dataSource.Columns.Add("ID", typeof(string));
             dataSource.Columns.Add("GUID", typeof(string));
             dataSource.Columns.Add("Имя", typeof(string));
@@ -3337,7 +3256,7 @@ namespace AOVGEN
             if (connection.State == ConnectionState.Open)
             {
                 string query = "SELECT CableFullName FROM CableTypes";
-                SQLiteCommand command = new  SQLiteCommand { Connection = connection, CommandText = query };
+                SQLiteCommand command = new() { Connection = connection, CommandText = query };
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
@@ -3350,7 +3269,7 @@ namespace AOVGEN
             }
                 
            
-            GridViewComboBoxColumn comboCol = new GridViewComboBoxColumn("Тип")
+            GridViewComboBoxColumn comboCol = new("Тип")
             {
                 DataSource = list.ToArray(),
                 FieldName = "Тип",
@@ -3410,7 +3329,7 @@ namespace AOVGEN
                 string sensDBTable = vendoInfo.GetVendorInfo().DBTable;
                 if (!string.IsNullOrEmpty(sensDBTable))
                 {
-                    SQLiteCommand command = new SQLiteCommand
+                    SQLiteCommand command = new()
                     {
                         Connection = connectionvendor,
                         CommandText = $"SELECT VendorName, BlockName, Assignment, Description FROM {sensDBTable} WHERE VendorCode = '{vendoInfo.GetVendorInfo().ID}'"
@@ -3433,7 +3352,7 @@ namespace AOVGEN
             
             if (!string.IsNullOrEmpty(PosInfoGUID))
             {
-                SQLiteCommand PosInfoCommand = new SQLiteCommand
+                SQLiteCommand PosInfoCommand = new()
                 {
                     Connection = connection,
                     CommandText = $"SELECT Pos, Size, Image FROM PosInfo WHERE [GUID] = '{PosInfoGUID}'"
@@ -3442,7 +3361,7 @@ namespace AOVGEN
                 using (SQLiteDataReader readerPosInfo = PosInfoCommand.ExecuteReader())
                 {
 
-                    EditorV2.PosInfo posInfo = new EditorV2.PosInfo();
+                    EditorV2.PosInfo posInfo = new();
                     while (readerPosInfo.Read())
                     {
                         posInfo.ImageName = readerPosInfo[2].ToString();
@@ -3478,7 +3397,7 @@ namespace AOVGEN
             string sensVendorCode = string.Empty;
             string FControlVendorcode = string.Empty;
             string FControlDescription = string.Empty;
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posinfosList = new();
             using (SQLiteDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())
@@ -3496,7 +3415,7 @@ namespace AOVGEN
                     var attributeSpare= reader[12].ToString();
                     if (!string.IsNullOrEmpty(senspds))
                     {
-                        SQLiteCommand sensCommand = new SQLiteCommand
+                        SQLiteCommand sensCommand = new()
                         {
                             CommandText = sensPQery(senspds),
                             Connection = connection
@@ -3514,7 +3433,7 @@ namespace AOVGEN
                     }
                     if (!string.IsNullOrEmpty(FControlGUID))
                     {
-                        SQLiteCommand FCCommand = new SQLiteCommand
+                        SQLiteCommand FCCommand = new()
                         {
                             CommandText = $"SELECT VendorCode, Description FROM FControl WHERE [GUID] = '{FControlGUID}'",
                             Connection = connection
@@ -3755,7 +3674,7 @@ namespace AOVGEN
             SupplyVent reservedSupplyVent = null;
             ExtVent mainExtVent = null;
             ExtVent reserverdExtVent = null;
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posinfosList = new();
             using (SQLiteDataReader reader = command.ExecuteReader())
             {
                 if (!reader.HasRows) return posinfosList;
@@ -3775,7 +3694,7 @@ namespace AOVGEN
 
                     if (!string.IsNullOrEmpty(senspds))
                     {
-                        SQLiteCommand sensCommand = new SQLiteCommand
+                        SQLiteCommand sensCommand = new()
                         {
                             CommandText = sensPQery(senspds),
                             Connection = connection
@@ -3794,7 +3713,7 @@ namespace AOVGEN
 
                     if (!string.IsNullOrEmpty(mainVentID))
                     {
-                        SQLiteCommand readMainVentCommand = new SQLiteCommand
+                        SQLiteCommand readMainVentCommand = new()
                         {
                             Connection = connection
                         };
@@ -3817,7 +3736,7 @@ namespace AOVGEN
                     }
                     if (!string.IsNullOrEmpty(reservedVentID))
                     {
-                        SQLiteCommand readReservrdVentCommand = new SQLiteCommand
+                        SQLiteCommand readReservrdVentCommand = new()
                         {
                             Connection = connection
                         };
@@ -3894,7 +3813,7 @@ namespace AOVGEN
                                 }
                                 else
                                 {
-                                    spareSuplyVent._PressureContol.SensorType = Sensor.SensorType.No;//s.PressureProtect = Vent._PressureProtect.None;
+                                    spareSuplyVent._PressureContol._SensorType= Sensor.SensorType.No;//s.PressureProtect = Vent._PressureProtect.None;
                                 }
                                 EditorV2.PosInfo SupplyVentPosInfo = GetPosInfo(PosInfoGUID, spareSuplyVent);
                                 if (SupplyVentPosInfo != null)
@@ -3991,7 +3910,7 @@ namespace AOVGEN
                                 }
                                 else
                                 {
-                                    spareExtVent._PressureContol.SensorType = Sensor.SensorType.No;//s.PressureProtect = Vent._PressureProtect.None;
+                                    spareExtVent._PressureContol._SensorType = Sensor.SensorType.No;//s.PressureProtect = Vent._PressureProtect.None;
                                 }
                                 EditorV2.PosInfo ExtVentPosinfo = GetPosInfo(PosInfoGUID, spareExtVent);
                                 if (ExtVentPosinfo != null)
@@ -4057,7 +3976,7 @@ namespace AOVGEN
             string PosInfoGUID;
             string SensDescription = string.Empty;
             PropertyInfo pinfo;
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posinfosList = new();
             using (SQLiteDataReader reader1 = command.ExecuteReader())
             {
                 while (reader1.Read())
@@ -4069,7 +3988,7 @@ namespace AOVGEN
                     var location = reader1[5].ToString();
                     if (!string.IsNullOrEmpty(senspds))
                     {
-                        SQLiteCommand sensCommand = new SQLiteCommand
+                        SQLiteCommand sensCommand = new()
                         {
                             CommandText = sensPQery(senspds),
                             Connection = connection
@@ -4089,21 +4008,21 @@ namespace AOVGEN
                     switch (location)
                     {
                         case "Exhaust":
-                            ExtFiltr extFiltr = new ExtFiltr
+                            ExtFiltr extFiltr = new()
                             {
                                 GUID = compguid
                             };
                             SetProp(extFiltr);
                             break;
                         case "Supply":
-                            SupplyFiltr supplyFiltr = new SupplyFiltr
+                            SupplyFiltr supplyFiltr = new()
                             {
                                 GUID = compguid
                             };
                             SetProp(supplyFiltr);
                             break;
                         default:
-                            Filtr filtr = new Filtr
+                            Filtr filtr = new()
                             {
                                 GUID = compguid
                             };
@@ -4143,7 +4062,7 @@ namespace AOVGEN
             string tableselect = $"SELECT GUID, Position, Image, SensT, SensH, SensP, PosInfoGUID FROM CrossConnection WHERE {WHEREQuery} = '{guid}'";
             command.CommandText = tableselect;
 
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posinfosList = new();
             using (SQLiteDataReader reader1 = command.ExecuteReader())
             {
                 while (reader1.Read())
@@ -4154,7 +4073,7 @@ namespace AOVGEN
                     var sensH = reader1[4].ToString();
                     var posInfoGUID = reader1[6].ToString();
                     if (string.IsNullOrEmpty(crossConnectionGUID)) continue;
-                    CrossSection crossSection = new CrossSection(!string.IsNullOrEmpty(sensT), !string.IsNullOrEmpty(sensH), image)
+                    CrossSection crossSection = new(!string.IsNullOrEmpty(sensT), !string.IsNullOrEmpty(sensH), image)
                     {
                         GUID = crossConnectionGUID
                     };
@@ -4162,14 +4081,14 @@ namespace AOVGEN
                     if (!string.IsNullOrEmpty(sensT))
                     {
                         crossSection._SensorT = ReadSensor<SensorT>(sensT, new SQLiteCommand { Connection = connection }, "GUID");
-                        crossSection.sensorTType = crossSection._SensorT._SensorType;
+                        crossSection.SensorTType = crossSection._SensorT._SensorType;
                             
                     }
                     if (!string.IsNullOrEmpty(sensH))
                     {
                         //процедура чтения датчика влажности в канале
-                        crossSection._SensorH = ReadSensor<Humidifier.HumiditySens>(sensH, new SQLiteCommand { Connection = connection }, "GUID");
-                        crossSection.sensorHType = crossSection._SensorH._SensorType;
+                        crossSection._SensorH = ReadSensor<HumiditySens>(sensH, new SQLiteCommand { Connection = connection }, "GUID");
+                        crossSection.SensorHType = crossSection._SensorH._SensorType;
                         crossSection._SensorH.SensorInsideCrossSection =true;
 
                     }
@@ -4185,7 +4104,7 @@ namespace AOVGEN
             string tableselect = $"SELECT GUID, Position, Image, SensT, SensH, PosInfoGUID FROM Room WHERE {WHEREQuery} = '{guid}'";
             command.CommandText = tableselect;
 
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posinfosList = new();
             using (SQLiteDataReader reader1 = command.ExecuteReader())
             {
                 while (reader1.Read())
@@ -4195,7 +4114,7 @@ namespace AOVGEN
                     var sensT = reader1[3].ToString();
                     var sensH = reader1[4].ToString();
                     var posInfoGUID = reader1[5].ToString();
-                    Room room = new Room(!string.IsNullOrEmpty(sensT), !string.IsNullOrEmpty(sensH), image)
+                    Room room = new(!string.IsNullOrEmpty(sensT), !string.IsNullOrEmpty(sensH), image)
                     {
                         GUID = roomGUID
                     };
@@ -4205,14 +4124,14 @@ namespace AOVGEN
                     {
 
                         room._SensorT = ReadSensor<IndoorTemp>(sensT, new SQLiteCommand { Connection = connection }, "GUID");
-                        room.sensorTType = room._SensorT._SensorType;
+                        room.SensorTType = room._SensorT._SensorType;
                         
                     }
                     if (!string.IsNullOrEmpty(sensH))
                     {
                         //процедура чтения датчика влажности в канале
-                        room._SensorH = ReadSensor<Humidifier.HumiditySens>(sensH, new SQLiteCommand { Connection = connection }, "GUID");
-                        room.sensorHType = room._SensorH._SensorType;
+                        room._SensorH = ReadSensor<HumiditySens>(sensH, new SQLiteCommand { Connection = connection }, "GUID");
+                        room.SensorHType = room._SensorH._SensorType;
                         room._SensorH.SensorInsideCrossSection = false;
                     }
                     EditorV2.PosInfo roomPos = GetPosInfo(posInfoGUID, room);
@@ -4239,7 +4158,7 @@ namespace AOVGEN
             string senstype = string.Empty;
             string sensVendorCode = string.Empty;
             string sensLocation = string.Empty;
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posinfosList = new();
             using (SQLiteDataReader reader1 = command.ExecuteReader())
             {
                 while (reader1.Read())
@@ -4255,7 +4174,7 @@ namespace AOVGEN
 
                     if (!string.IsNullOrEmpty(senstGUID))
                     {
-                        SQLiteCommand sensCommand = new SQLiteCommand
+                        SQLiteCommand sensCommand = new()
                         {
                             CommandText = sensTQery(senstGUID),
                             Connection = connection
@@ -4275,7 +4194,7 @@ namespace AOVGEN
                     switch (location)
                     {
                         case "Exhaust":
-                            ExtDamper extDamper = new ExtDamper
+                            ExtDamper extDamper = new()
                             {
                                 GUID = compguid,
                                 Description = description
@@ -4291,7 +4210,7 @@ namespace AOVGEN
                             posinfosList.Add(extDamperPos);
                             break;
                         case "Supply":
-                            SupplyDamper supplyDamper = new SupplyDamper
+                            SupplyDamper supplyDamper = new()
                             {
                                 GUID = compguid,
                                 Description = description
@@ -4331,9 +4250,9 @@ namespace AOVGEN
             var valvetype = hastk = sensVendorCode1 = sensVendorCode2 = string.Empty;
             SensorT PS1 = null;
             SensorT PS2 = null;
-            WaterHeater.Valve Valve = null;
-            WaterHeater.Pump Pump = null;
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            Valve Valve = null;
+            Pump Pump = null;
+            List<EditorV2.PosInfo> posinfosList = new();
             command.CommandText = "SELECT SensT1, SensT2, Pump, Valve, ControlType, GUID, PosInfoGUID " +
                 "FROM WaterHeater " +
                 $"WHERE {WHEREQuery} = '{guid}'";
@@ -4349,7 +4268,7 @@ namespace AOVGEN
                     var watreheaterguid = reader1[5].ToString();
                     var PosInfoGUID = reader1[6].ToString();
 
-                    WaterHeater waterHeater = new WaterHeater
+                    WaterHeater waterHeater = new()
                     {
                         GUID = watreheaterguid
                     };
@@ -4358,7 +4277,7 @@ namespace AOVGEN
 
                     if (sensT1 != string.Empty)
                     {
-                        SQLiteCommand command1 = new SQLiteCommand
+                        SQLiteCommand command1 = new()
                         {
                             Connection = connection,
                             CommandText = sensTQery(sensT1)
@@ -4382,7 +4301,7 @@ namespace AOVGEN
                     }
                     if (sensT2 != string.Empty)
                     {
-                        SQLiteCommand command2 = new SQLiteCommand
+                        SQLiteCommand command2 = new()
                         {
                             Connection = connection,
                             CommandText = sensTQery(sensT2)
@@ -4405,7 +4324,7 @@ namespace AOVGEN
                     }
                     if (valve != string.Empty)
                     {
-                        SQLiteCommand command3 = new SQLiteCommand
+                        SQLiteCommand command3 = new()
                         { 
                             Connection = connection,
                             CommandText = "SELECT Valve.GUID, ValveType " +
@@ -4417,7 +4336,7 @@ namespace AOVGEN
                             while (reader4.Read())
                             {
                                 valvetype = reader4[1].ToString();
-                                Valve = new WaterHeater.Valve
+                                Valve = new Valve
                                 {
                                     GUID = reader4[0].ToString()
                                 };
@@ -4426,7 +4345,7 @@ namespace AOVGEN
                     }
                     if (pump != string.Empty)
                     {
-                        SQLiteCommand command4 = new SQLiteCommand
+                        SQLiteCommand command4 = new()
                         {
                             Connection = connection,
                             CommandText = "SELECT Pump.GUID, HasTK " +
@@ -4438,7 +4357,7 @@ namespace AOVGEN
                             while (reader5.Read())
                             {
                                 hastk = reader5[1].ToString();
-                                Pump = new WaterHeater.Pump
+                                Pump = new Pump
                                 {
                                     GUID = reader5[0].ToString()
                                 };
@@ -4476,7 +4395,7 @@ namespace AOVGEN
             string valvetype;
             string stairs;
             var KKBcontroltype = valvetype = stairs = string.Empty;
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posinfosList = new();
             
             command.CommandText = "SELECT SensT1, SensT2, KKB, Valve, ControlType, Power, Voltage, GUID, FrosterSensor, PosInfoGUID " +
                 "FROM Froster " +
@@ -4495,7 +4414,7 @@ namespace AOVGEN
                     var frosterguid = reader1[7].ToString();
                     var PosInfoGUID = reader1[9].ToString();
                     const bool minrequest = true;
-                    Froster froster = new Froster(minrequest)
+                    Froster froster = new(minrequest)
                     {
                         Power = power,
                         GUID = frosterguid
@@ -4506,7 +4425,7 @@ namespace AOVGEN
                     froster._FrosterType = frosterType;
                     if (sensT1 != string.Empty)
                     {
-                        SQLiteCommand sQLiteCommand = new SQLiteCommand
+                        SQLiteCommand sQLiteCommand = new()
                         {
                             CommandText = sensTQery(sensT1),
                             Connection = connection
@@ -4536,7 +4455,7 @@ namespace AOVGEN
                     }
                     if (sensT2 != string.Empty)
                     {
-                        SQLiteCommand sQLiteCommand = new SQLiteCommand
+                        SQLiteCommand sQLiteCommand = new()
                         {
                             CommandText = sensTQery(sensT2),
                             Connection = connection
@@ -4564,7 +4483,7 @@ namespace AOVGEN
                     }
                     if (valve != string.Empty)
                     {
-                        SQLiteCommand sQLiteCommand = new SQLiteCommand
+                        SQLiteCommand sQLiteCommand = new()
                         {
                             Connection = connection,
                             CommandText = "SELECT Valve.GUID, ValveType " +
@@ -4599,7 +4518,7 @@ namespace AOVGEN
                     }
                     if (kkb != string.Empty)
                     {
-                        SQLiteCommand kkbCommand = new SQLiteCommand
+                        SQLiteCommand kkbCommand = new()
                         {
                             Connection = connection,
                             CommandText = "SELECT KKB.GUID, KKBType, Stairs " +
@@ -4618,7 +4537,7 @@ namespace AOVGEN
                             }
                         }
                         
-                        Enum.TryParse(KKBcontroltype, out Froster.KKB.KKBControlType KKBControltype);
+                        Enum.TryParse(KKBcontroltype, out KKB.KKBControlType KKBControltype);
                         froster.KKBControlType = KKBControltype;
                         PropertyInfo pinfoKKBSt = froster.GetType().GetProperty("Stairs");
                         pinfoKKBSt?.SetValue(froster, Enum.Parse(pinfoKKBSt.PropertyType, stairs));
@@ -4631,7 +4550,7 @@ namespace AOVGEN
         }
         private List<EditorV2.PosInfo> ReadElectroHeater(string guid, SQLiteCommand command, string WHEREQuery)
         {
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posinfosList = new();
             string tableselect1 = "SELECT Stairs, Voltage, Power, ElectroHeater.GUID, PosInfoGUID " +
                 "FROM ElectroHeater " +
                 $"WHERE {WHEREQuery} = '{guid}'; ";
@@ -4639,7 +4558,7 @@ namespace AOVGEN
             SQLiteDataReader reader1 = command.ExecuteReader();
             while (reader1.Read())
             {
-                ElectroHeater electroHeater = new ElectroHeater();
+                ElectroHeater electroHeater = new();
                 PropertyInfo pinfo = electroHeater.GetType().GetProperty("Voltage");
                 pinfo.SetValue(electroHeater, Enum.Parse(pinfo.PropertyType, reader1[1].ToString()));
                                 pinfo = electroHeater.GetType().GetProperty("Stairs");
@@ -4656,7 +4575,7 @@ namespace AOVGEN
         private List<EditorV2.PosInfo> ReadHumidifier (string guid, SQLiteCommand command, string WHEREQuery)
         {
             
-            List<EditorV2.PosInfo> posinfosList = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posinfosList = new();
 
             string tableselect1 = "SELECT Type, Voltage, Power, HumSensPresent, Humidifier.GUID, SensHum, PosInfoGUID " +
                                   "FROM Humidifier " +
@@ -4665,7 +4584,7 @@ namespace AOVGEN
             SQLiteDataReader reader1 = command.ExecuteReader();
             while (reader1.Read())
             {
-                Humidifier humidifier = new Humidifier();
+                Humidifier humidifier = new();
                 var pinfo = humidifier.GetType().GetProperty("HumType");
                 pinfo?.SetValue(humidifier, Enum.Parse(pinfo.PropertyType, reader1[0].ToString()));
                 pinfo = humidifier.GetType().GetProperty("Voltage");
@@ -4678,7 +4597,7 @@ namespace AOVGEN
                 var PosInfoGUID = reader1[6].ToString();
                 if (humidifier.HumSensPresent)
                 {
-                    SQLiteCommand command2 = new SQLiteCommand
+                    SQLiteCommand command2 = new()
                     {
                         Connection = connection,
                         CommandText = "SELECT SensType, VendorCode " +
@@ -4715,7 +4634,7 @@ namespace AOVGEN
         private List<EditorV2.PosInfo> ReadRecuperator (string guid, SQLiteCommand command, string WHEREQuery)
         {
             
-            List<EditorV2.PosInfo> posInfos = new List<EditorV2.PosInfo>();
+            List<EditorV2.PosInfo> posInfos = new();
 
             command.CommandText = "SELECT Type, PS1, PS2, Drive1, Drive2, Drive3, PosInfoGUID, Recuperator.GUID " +
                                   "FROM Recuperator " +
@@ -4723,12 +4642,12 @@ namespace AOVGEN
             SQLiteDataReader reader1 = command.ExecuteReader();
             while (reader1.Read())
             {
-                Recuperator recuperator = new Recuperator();
+                Recuperator recuperator = new();
                 SensorT PS1 = recuperator.protectSensor1;
                 PressureContol PS2 = recuperator.protectSensor2;
-                Recuperator.Drive Drive1 = recuperator.Drive1;
-                Recuperator.Drive Drive2 = recuperator.Drive2;
-                Recuperator.Drive Drive3 = recuperator.Drive3;
+                Drive Drive1 = recuperator.Drive1;
+                Drive Drive2 = recuperator.Drive2;
+                Drive Drive3 = recuperator.Drive3;
                 PropertyInfo pinfo = recuperator.GetType().GetProperty("_RecuperatorType");
                 pinfo.SetValue(recuperator, Enum.Parse(pinfo.PropertyType, reader1[0].ToString()));
                 var PS1guid = reader1[1].ToString();
@@ -4756,7 +4675,7 @@ namespace AOVGEN
                 if (PS1 != null && PS1guid != string.Empty)
                 {
                     string sensarticle = string.Empty;
-                    SQLiteCommand PS1Command = new SQLiteCommand
+                    SQLiteCommand PS1Command = new()
                     {
                         Connection = connection,
                         CommandText = sensTQery(PS1guid)// $"SELECT SensType FROM SensT WHERE GUID = '{PS1guid}'";
@@ -4788,7 +4707,7 @@ namespace AOVGEN
                 }
                 if (PS2 != null && PS2guid != string.Empty)
                 {
-                    SQLiteCommand PS2command = new SQLiteCommand
+                    SQLiteCommand PS2command = new()
                     {
                         Connection = connection,
                         CommandText = "SELECT SensType, GUID, Description, VendorCode, Vendor " +
@@ -4846,7 +4765,7 @@ namespace AOVGEN
                          "FROM SensT " +
                           $"WHERE {WHEREQuery} = '{guid}';";
                     break;
-                case nameof(Humidifier.HumiditySens):
+                case nameof(HumiditySens):
                     tableselect2 = "SELECT SensHum.GUID, SensType, Description, VendorCode, Location " +
                          "FROM SensHum " +
                           $"WHERE {WHEREQuery} = '{guid}';";
@@ -4878,7 +4797,7 @@ namespace AOVGEN
                     switch (senslocation)
                     {
                         case "Exhaust":
-                            ExhaustTemp exhaustTemp = new ExhaustTemp
+                            ExhaustTemp exhaustTemp = new()
                             {
                                 GUID = sensguid,
                                 Location = senslocation,
@@ -4894,7 +4813,7 @@ namespace AOVGEN
                             return exhaustTemp;
 
                         case "Supply":
-                            SupplyTemp supplyTemp = new SupplyTemp
+                            SupplyTemp supplyTemp = new()
                             {
                                 GUID = sensguid,
                                 Location = senslocation,
@@ -4909,7 +4828,7 @@ namespace AOVGEN
                             SetSensorVendorInfo(vendoInfo, sensarticle);
                             return supplyTemp;
                         case "Outdoor":
-                            OutdoorTemp outdoorTemp = new OutdoorTemp
+                            OutdoorTemp outdoorTemp = new()
                             {
                                 GUID = sensguid,
                                 Location = senslocation,
@@ -4923,7 +4842,7 @@ namespace AOVGEN
                             SetSensorVendorInfo(vendoInfo, sensarticle);
                             return outdoorTemp;
                         case "Indoor":
-                            IndoorTemp indoorTemp = new IndoorTemp
+                            IndoorTemp indoorTemp = new()
                             {
                                 GUID = sensguid,
                                 Location = senslocation,
@@ -4937,7 +4856,7 @@ namespace AOVGEN
                             SetSensorVendorInfo(vendoInfo, sensarticle);
                             return indoorTemp;
                         default:
-                            SensorT sensorT = new SensorT
+                            SensorT sensorT = new()
                             {
                                 GUID = sensguid,
                                 Location = senslocation,
@@ -4954,8 +4873,8 @@ namespace AOVGEN
 
 
                     }
-                case nameof(Humidifier.HumiditySens):
-                    Humidifier.HumiditySens humiditySens = new Humidifier.HumiditySens
+                case nameof(HumiditySens):
+                    HumiditySens humiditySens = new()
                     {
                         GUID = sensguid,
                         Location = senslocation,
@@ -4972,7 +4891,7 @@ namespace AOVGEN
 
             if (typeof(T) == typeof(SupplyTemp))
             {
-                SupplyTemp supplyTemp = new SupplyTemp
+                SupplyTemp supplyTemp = new()
                 {
                     GUID = sensguid,
                     Location = senslocation
@@ -4988,7 +4907,7 @@ namespace AOVGEN
             }
             if (typeof(T) == typeof(ExhaustTemp))
             {
-                ExhaustTemp exhaustTemp = new ExhaustTemp
+                ExhaustTemp exhaustTemp = new()
                 {
                     GUID = sensguid,
                     Location = senslocation
@@ -5003,7 +4922,7 @@ namespace AOVGEN
             }
             if (typeof(T) == typeof(OutdoorTemp))
             {
-                OutdoorTemp outdoorTemp = new OutdoorTemp
+                OutdoorTemp outdoorTemp = new()
                 {
                     GUID = sensguid,
                     Location = senslocation
@@ -5018,7 +4937,7 @@ namespace AOVGEN
             }
             if (typeof(T) == typeof(IndoorTemp))
             {
-                IndoorTemp indoorTemp = new IndoorTemp
+                IndoorTemp indoorTemp = new()
                 {
                     GUID = sensguid,
                     Location = senslocation
@@ -5033,7 +4952,7 @@ namespace AOVGEN
             }
             if (typeof(T) != typeof(SensorT)) return null;
             {
-                SensorT sensorT = new SensorT
+                SensorT sensorT = new()
                 {
                     GUID = sensguid,
                     Location = senslocation,
@@ -5114,10 +5033,10 @@ namespace AOVGEN
                     case nameof(SpareExtVent):
                         FillSensCompRows(component);
                         break;
-                    case nameof(Humidifier.HumiditySens):
+                    case nameof(HumiditySens):
                         var (_, ID, VendorDescription, _, _, _, _) = ((IVendoInfo)component).GetVendorInfo();
-                        Humidifier.HumiditySens humiditySens = (Humidifier.HumiditySens)component;
-                        GridViewDataRowInfo rowInfo = new GridViewDataRowInfo(radGridView4.MasterView);
+                        HumiditySens humiditySens = (HumiditySens)component;
+                        GridViewDataRowInfo rowInfo = new(radGridView4.MasterView);
                         rowInfo.Cells[0].Value = 1;
                         rowInfo.Cells["Тип датчика"].Value = humiditySens.Description;
                         rowInfo.Cells["Описание"].Value = VendorDescription;
@@ -5158,13 +5077,13 @@ namespace AOVGEN
                                 GridViewDataRowInfo row2 = CreateRow(sensorT.Description, VendorDescription, ID);
                                 row2.Tag = sensorT;
                                 break;
-                            case (nameof(Humidifier.HumiditySens)):
-                                Humidifier.HumiditySens humiditySens = (Humidifier.HumiditySens)sens;
+                            case (nameof(HumiditySens)):
+                                HumiditySens humiditySens = (HumiditySens)sens;
                                 GridViewDataRowInfo row3 = CreateRow(humiditySens.Description, VendorDescription, ID);
                                 row3.Tag = humiditySens;
                                 break;
-                            case (nameof(Vent.FControl)):
-                                Vent.FControl fcontrol = (Vent.FControl)sens;
+                            case (nameof(FControl)):
+                                FControl fcontrol = (FControl)sens;
                                 GridViewDataRowInfo row4 = CreateRow(fcontrol.Description, VendorDescription, ID);
                                 row4.Tag = fcontrol;
                                 break;
@@ -5176,7 +5095,7 @@ namespace AOVGEN
                     }
                     GridViewDataRowInfo CreateRow(string s1, string s2, string s3)
                     {
-                        GridViewDataRowInfo rowInfo = new GridViewDataRowInfo(radGridView4.MasterView);
+                        GridViewDataRowInfo rowInfo = new(radGridView4.MasterView);
                         rowInfo.Cells[0].Value = cnt;
                         rowInfo.Cells["Тип датчика"].Value = s1;
                         rowInfo.Cells["Описание"].Value = s2;
@@ -5235,7 +5154,7 @@ namespace AOVGEN
                 {
                     if (connection.State == ConnectionState.Open)
                     {
-                         SQLiteCommand command = new  SQLiteCommand() //создание команды на зпись в БД
+                         SQLiteCommand command = new() //создание команды на зпись в БД
                         {
                             Connection = connection //с параметром соединения
                         };
@@ -5303,7 +5222,7 @@ namespace AOVGEN
                 #region Create Command variable
 
                 if (connection.State != ConnectionState.Open) return;
-                SQLiteCommand command = new  SQLiteCommand() //создание команды на зпись в БД
+                SQLiteCommand command = new() //создание команды на зпись в БД
                 {
                     Connection = connection //с параметром соединения
                 };
@@ -5362,7 +5281,7 @@ namespace AOVGEN
                 }
             }
 
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection
             };
@@ -5530,14 +5449,14 @@ namespace AOVGEN
                 string updatvenystemquery = $"UPDATE VentSystems SET Pannel= '{panel.GetGUID()}', PannelName= '{panel.PannelName}' WHERE GUID= '{e.Node.Name}'";
                 string InsertPannelToCableQuery = $"UPDATE Cable SET FromPannel = '{panel.PannelName}', FromGUID = '{panel.GetGUID()}' WHERE SystemGUID = '{e.Node.Name}'";
                 if (connection.State != ConnectionState.Open) return;
-                SQLiteCommand command = new  SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = connection
                 };
 
                 int cnt = 1;
                 command.CommandText = $"SELECT [To] FROM Cable WHERE FromGUID = '{e.Node.Parent.Name}'"; //получение всех устройств, подключенных к шкафу
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
                   dt.Load(reader);  
@@ -5677,16 +5596,16 @@ namespace AOVGEN
             string setdefaultnames = $"Update Cable SET [To] = DefaultName WHERE SystemGUID = '{systemguid}'";
             string Numbering = $"SELECT [To], COUNT(*) AS ToCount FROM Cable WHERE SystemGUID = '{systemguid}' GROUP BY [To]";
             SQLiteConnection commandConnection = command.Connection;
-             SQLiteCommand command1 = new  SQLiteCommand
-            {
+             SQLiteCommand command1 = new()
+             {
                 Connection = commandConnection
             };
-             SQLiteCommand command2 = new  SQLiteCommand
-            {
+             SQLiteCommand command2 = new()
+             {
                 Connection = commandConnection
             };
-             SQLiteCommand command3 = new  SQLiteCommand
-            {
+             SQLiteCommand command3 = new()
+             {
                 Connection = commandConnection
             };            
             command.CommandText = setdefaultnames;
@@ -5708,7 +5627,7 @@ namespace AOVGEN
                         int cnt = 1;
                         while (readerchild1.Read())
                         {
-                            Posnames posnames = new Posnames();
+                            Posnames posnames = new();
                             bool writeblock = bool.Parse(readerchild1[4].ToString());
                             string hosttable = readerchild1[5].ToString();
                             string posguid = readerchild1[1].ToString();
@@ -5775,7 +5694,7 @@ namespace AOVGEN
                 string InsertPannelToCableQuery = $"UPDATE Cable SET FromPannel = '{panelname}', FromGUID = '{pannelguid}' WHERE SystemGUID = '{e.Node.Name}'";
                 string setdefaultnames = $"Update Cable SET [To] = DefaultName WHERE SystemGUID = '{ventSystem.GUID}'";
                 if (connection.State != ConnectionState.Open) return;
-                SQLiteCommand command = new  SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = connection
                 };                    
@@ -5808,7 +5727,7 @@ namespace AOVGEN
             CreateCableHeader();            
             if (childcnt>0)
             {                
-                GroupDescriptor descriptor = new GroupDescriptor();
+                GroupDescriptor descriptor = new();
                 descriptor.GroupNames.Add("Система", ListSortDirection.Ascending);
                 descriptor.Aggregates.Add("Count(Система)");
                 descriptor.Format = "{0}: {1} имеет {2} кабеля(ей)";
@@ -5840,11 +5759,11 @@ namespace AOVGEN
             bool writepumpcable = false;
             bool writevalvecable = false;
             string SelectCablesQuery = $"Select Cable.GUID, CableName, FromPannel, [To], CableType, CableLenght, SortPriority, TableForSearch, ToGUID, SystemName, Description, CableAttribute, WriteBlock, BlockName, WireNumbers, FromGUID FROM Cable WHERE SystemGUID = '{ventsystemnode.Name}' ORDER BY [SortPriority], [TO] ASC";
-            SQLiteCommand command = new  SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection
             };
-             SQLiteCommand command1 = new  SQLiteCommand
+             SQLiteCommand command1 = new()
              {
                 Connection = connection
             };           
@@ -5928,7 +5847,7 @@ namespace AOVGEN
 
                     void CreateRow<T>(dynamic obj)
                     {
-                        Dictionary<string, string[]> dict = new Dictionary<string, string[]>
+                        Dictionary<string, string[]> dict = new()
                         {
                             {nameof(ElectroHeater), new[] { "Электрический нагреватель", "Приток" }},
                             {nameof(WaterHeater), new[]{ "Водяной нагреватель", "Приток" } },
@@ -5943,7 +5862,7 @@ namespace AOVGEN
                             {nameof(ExtDamper), new[]{ "Вытяжная заслонка", "Вытяжка" } },
                             {nameof(Recuperator), new[]{ "Рекуператор", "Приток/Вытяжка" } },
                             {nameof(SensorT), new[]{ "Датчик температуры", "Без расположения"} },
-                            {nameof(Humidifier.HumiditySens), new[]{"Датчик влажности", "Без расположения"} },
+                            {nameof(HumiditySens), new[]{"Датчик влажности", "Без расположения"} },
                             {nameof(SupplyTemp), new[]{"Датчик температуры в приточном канале", "Приток"} },
                             {nameof(ExhaustTemp), new[]{"Датчик температуры в выятжном канале", "Вытяжка"} },
                             {nameof(Filtr), new[]{"Фильтр", "Без расположения"} },
@@ -6028,7 +5947,7 @@ namespace AOVGEN
                                     .Select(v => v._SensorT)
                                     .ToList();
                                 sensorTs.RemoveAll(item => item == null);
-                                List<Humidifier.HumiditySens> HumiditySens = ventSystem.ComponentsV2
+                                List<HumiditySens> HumiditySens = ventSystem.ComponentsV2
                                     .Where(v => v.Tag.GetType().Name == nameof(CrossSection))
                                     .Select(v => v.Tag)
                                     .Cast<CrossSection>()
@@ -6066,7 +5985,7 @@ namespace AOVGEN
                                 if (HumiditySens.Count > 0)
                                 {
                                         
-                                    foreach (Humidifier.HumiditySens humiditySens in HumiditySens)
+                                    foreach (HumiditySens humiditySens in HumiditySens)
                                     {
                                         GridViewRowInfo row33 = null;
                                         switch (humiditySens.Location)
@@ -6097,7 +6016,7 @@ namespace AOVGEN
                                     .Select(v => v._SensorT)
                                     .Cast<IndoorTemp>()
                                     .ToList();
-                                List<Humidifier.HumiditySens> indoorHumiditySens = ventSystem.ComponentsV2
+                                List<HumiditySens> indoorHumiditySens = ventSystem.ComponentsV2
                                     .Where(v => v.Tag is Room)
                                     .Select(v => v.Tag)
                                     .Cast<Room>()
@@ -6114,7 +6033,7 @@ namespace AOVGEN
                                 }
                                 if (indoorHumiditySens.Count>0)
                                 {
-                                    foreach(Humidifier.HumiditySens humiditySens in indoorHumiditySens)
+                                    foreach(HumiditySens humiditySens in indoorHumiditySens)
                                     {
                                         var row42 = CreateVentSystemsRows(humiditySens.GUID, "Датчик влажности в помещении", "Помещение");
                                         row42.Tag = humiditySens;
@@ -6155,7 +6074,7 @@ namespace AOVGEN
                                 .Select(v => v._SensorT)
                                 .ToList();
                             sensorTs.RemoveAll(item => item == null);
-                            List<Humidifier.HumiditySens> HumiditySens = ventSystem.ComponentsV2
+                            List<HumiditySens> HumiditySens = ventSystem.ComponentsV2
                                 .Where(v => v.Tag.GetType().Name == nameof(CrossSection))
                                 .Select(v => v.Tag)
                                 .Cast<CrossSection>()
@@ -6193,7 +6112,7 @@ namespace AOVGEN
                             if (HumiditySens.Count > 0)
                             {
 
-                                foreach (Humidifier.HumiditySens humiditySens in HumiditySens)
+                                foreach (HumiditySens humiditySens in HumiditySens)
                                 {
                                     GridViewRowInfo row33 = null;
                                     switch (humiditySens.Location)
@@ -6221,7 +6140,7 @@ namespace AOVGEN
                     string tableselect = "SELECT SupplyVent, SupplyFilter, SupplyDamper, WaterHeater, ElectroHeat, Froster, Humidifier, ExtVent, ExtFilter, ExtDamper, Recuperator, SensTOutdoor, SensTIndoor, SensHSupply, Modyfied, Version, Author, Place, SensTExhaust, SensTSupply, SensHIndoor, CrossConnection, Room, Filter, SensTNoLocation, SpareSupplyVent, SpareExtVent " +
                                          "FROM VentSystems " +
                                          $"WHERE GUID = '{ventsystemguid}'";
-                    SQLiteCommand command = new SQLiteCommand();
+                    SQLiteCommand command = new();
                     if (connection.State == ConnectionState.Closed) connection.Open();
                     if (connection.State == ConnectionState.Open)
                     {
@@ -6506,15 +6425,15 @@ namespace AOVGEN
             {
                 string Numbering = $"SELECT [To], COUNT(*) AS ToCount FROM Cable WHERE SystemGUID = '{systemguid}' GROUP BY [To]";
                 if (connection.State != ConnectionState.Open) return;
-                SQLiteCommand command = new SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = connection
                 };
-                SQLiteCommand command1 = new SQLiteCommand
+                SQLiteCommand command1 = new()
                 {
                     Connection = connection
                 };
-                SQLiteCommand command2 = new SQLiteCommand
+                SQLiteCommand command2 = new()
                 {
                     Connection = connection
                 };
@@ -6533,7 +6452,7 @@ namespace AOVGEN
                     SQLiteDataReader readerchild1 = command1.ExecuteReader();
                     while (readerchild1.Read())
                     {
-                        Posnames posnames = new Posnames();
+                        Posnames posnames = new();
                         string newposname = AllConnectedSumm + devider + readerchild1[0] + cnt;
                         posnames.Oldposname = readerchild1[0].ToString();
                         posnames.Newposname = newposname;
@@ -6558,8 +6477,8 @@ namespace AOVGEN
         }
         private void radGridView3_ViewCellFormatting(object sender, CellFormattingEventArgs e)
         {
-            Font normalFont = new Font("Segoe UI", 8, FontStyle.Regular);
-            Font bigFont = new Font("Segoe UI", 8, FontStyle.Bold);
+            Font normalFont = new("Segoe UI", 8, FontStyle.Regular);
+            Font bigFont = new("Segoe UI", 8, FontStyle.Bold);
             if (e.CellElement is GridGroupContentCellElement)
             {
                 e.CellElement.Font = bigFont;
@@ -6622,7 +6541,7 @@ namespace AOVGEN
             {
                 if (connection.State == ConnectionState.Open)
                 {
-                    SQLiteCommand command = new SQLiteCommand { Connection = connection, CommandText = query };
+                    SQLiteCommand command = new() { Connection = connection, CommandText = query };
                     command.ExecuteNonQuery();
                     command.Dispose();
                 }
@@ -6709,7 +6628,7 @@ namespace AOVGEN
         {
             string retval = string.Empty;
             string guery = $"SELECT PosName FROM {from} WHERE GUID = '{guid}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = guery
@@ -6730,7 +6649,7 @@ namespace AOVGEN
         {
             string retval = string.Empty;
             string guery = $"SELECT PosName FROM {from} WHERE ElementGUID = '{guid}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = guery
@@ -6751,7 +6670,7 @@ namespace AOVGEN
             string posname = string.Empty;
             string elementGUID = string.Empty;
             string guery = $"SELECT PosName, GUID FROM {from} WHERE ElementGUID = '{guid}' AND Description = '{Description}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = guery
@@ -6816,12 +6735,12 @@ namespace AOVGEN
             List<RadTreeNode> selectednodes = radTreeView4.Nodes
                 .Where(selnode => selnode.Level == 0 && selnode.Nodes.Count > 0)
                 .ToList();
-            SelectPannelForm selectPannelForm = new SelectPannelForm(selectednodes, connection, DBFilePath);
+            SelectPannelForm selectPannelForm = new(selectednodes, connection, DBFilePath);
             DialogResult dialogResult = selectPannelForm.ShowDialog();
             if (dialogResult != DialogResult.OK) return;
             if (selectPannelForm.CheckedItems.Count <= 0) return;
             Dictionary<string, Pannel> CheckedPannels = selectPannelForm.CheckedItems; //забираем словарь со шкафами из формы
-            Dictionary<Pannel, List<(string, VentSystem)>> VentSystemS = new Dictionary<Pannel, List<(string, VentSystem)>>();
+            Dictionary<Pannel, List<(string, VentSystem)>> VentSystemS = new();
 
             foreach (RadTreeNode radTreeNode in radTreeView4.Nodes)//перебираем ноды со шкафами
             {
@@ -6829,7 +6748,7 @@ namespace AOVGEN
                 if (!CheckedPannels.ContainsKey(pannel.PannelName)) continue;
                 RadTreeNodeCollection VentSystemArr = radTreeNode.Nodes;
                 if (VentSystemArr.Count <= 0) continue;
-                List<(string, VentSystem)> systemList = new List<(string, VentSystem)>();
+                List<(string, VentSystem)> systemList = new();
                 foreach (var item in VentSystemArr)
                 {
                     VentSystem ventSystem = (VentSystem)item.Tag;
@@ -7049,7 +6968,7 @@ namespace AOVGEN
                                     if (humidifier.HumSensPresent)
                                     {
 
-                                        Humidifier.HumiditySens humiditySens = humidifier.HumiditySensor;
+                                        HumiditySens humiditySens = humidifier.HumiditySensor;
                                         humidifier.SensPosName = getPosNameSlave(humidifier.GUID, "SensHum");
                                         //humiditySens.PosName = getPosNameSlave(humidifier.GUID, "SensHum");
 
@@ -7082,7 +7001,7 @@ namespace AOVGEN
                     VentSystemS.Add(pannel, systemList);
                 }
             }
-            ShemaASUTP shema = new ShemaASUTP
+            ShemaASUTP shema = new()
             {
                 VentSystemS = VentSystemS,
                 Author = Author
@@ -7093,19 +7012,19 @@ namespace AOVGEN
         }
         private void radButtonElement10_Click(object sender, EventArgs e)
         {
-            List<RadTreeNode> selectednodes = new List<RadTreeNode>();
+            List<RadTreeNode> selectednodes = new();
             radTreeView4.Nodes.AsParallel().ForAll(selnode =>
             {
                 if (selnode.Level == 0 && selnode.Nodes.Count > 0) selectednodes.Add(selnode);
             });
-            SelectPannelForm selectPannelForm = new SelectPannelForm(selectednodes, connection, DBFilePath);
+            SelectPannelForm selectPannelForm = new(selectednodes, connection, DBFilePath);
             DialogResult dialogResult = selectPannelForm.ShowDialog();
             if (dialogResult != DialogResult.OK) return;
             if (selectPannelForm.CheckedItems.Count > 0) //если выбрны шкафы
             {
                 Dictionary<string, Pannel> CheckedPannels = selectPannelForm.CheckedItems; //забираем словарь со шкафами из формы
-                Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> level3 = new Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>>();
-                Dictionary<string, VentSystem> ventsystemDict = new Dictionary<string, VentSystem>(); //создаем словарь для вент.систем
+                Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> level3 = new();
+                Dictionary<string, VentSystem> ventsystemDict = new(); //создаем словарь для вент.систем
                 bool writepumpcable, writevalvecable;
                 var writecabeP = writepumpcable = writevalvecable = false;
                 bool[] cabsettings = new bool[3];
@@ -7121,10 +7040,10 @@ namespace AOVGEN
                         {
                             Pannel pannel = (Pannel)radTreeNode.Tag;
                             if (!CheckedPannels.ContainsKey(pannel.PannelName)) continue;
-                            SQLiteCommand command = new SQLiteCommand { Connection = connection };
-                            Dictionary<string, Dictionary<string, List<Cable>>> level2 = new Dictionary<string, Dictionary<string, List<Cable>>>();
+                            SQLiteCommand command = new() { Connection = connection };
+                            Dictionary<string, Dictionary<string, List<Cable>>> level2 = new();
                             string querySelectvents = $"SELECT VentSystems.GUID, VentSystems.SystemName FROM VentSystems WHERE VentSystems.Pannel = '{pannel.GetGUID()}'";
-                            Dictionary<string, string> ventinpannel = new Dictionary<string, string>();
+                            Dictionary<string, string> ventinpannel = new();
                             command.CommandText = querySelectvents;
                             using (SQLiteDataReader selectventsReader = command.ExecuteReader())
                             {
@@ -7146,7 +7065,7 @@ namespace AOVGEN
                                                    "GROUP BY Cable.ToGUID, Cable.TableForSearch, [To] " +
                                                    "ORDER BY Cable.SortPriority ASC, [To] ASC";
                                     command.CommandText = Query;
-                                    Dictionary<string, List<Cable>> level1 = new Dictionary<string, List<Cable>>();
+                                    Dictionary<string, List<Cable>> level1 = new();
                                     using (SQLiteDataReader reader = command.ExecuteReader())
                                     {
                                         while (reader.Read())
@@ -7154,9 +7073,9 @@ namespace AOVGEN
                                             string ToGUID = reader[1].ToString();
                                             string to = reader[3].ToString();
                                             //string comptable = reader[2].ToString();
-                                            List<Cable> level0 = new List<Cable>();
+                                            List<Cable> level0 = new();
                                             string Query2 = $"SELECT [To], Cable.ToGUID, Cable.CableType, Cable.BlockName, Cable.Description, Cable.WriteBlock, Cable.CableLenght, Cable.CableName, Cable.CableType, Cable.CableAttribute, Cable.SortPriority, Cable.GUID, WireNumbers, Cable.TableForSearch FROM Cable WHERE(((Cable.ToGUID) = '{ToGUID}')); ";
-                                            SQLiteCommand command1 = new SQLiteCommand { CommandText = Query2, Connection = connection };
+                                            SQLiteCommand command1 = new() { CommandText = Query2, Connection = connection };
                                             command1.CommandText = Query2;
                                             try
                                             {
@@ -7207,7 +7126,7 @@ namespace AOVGEN
                         Building building = radTreeView1.SelectedNode.Tag as Building;
                         Project project = radTreeView1.SelectedNode.Parent.Tag as Project;
                         string readwritecableP = $"SELECT WriteCableP, WritePumpCable, WriteValveCable FROM BuildSetting WHERE Place = '{building?.BuildGUID}'";
-                        SQLiteCommand command0 = new SQLiteCommand { Connection = connection, CommandText = readwritecableP };
+                        SQLiteCommand command0 = new() { Connection = connection, CommandText = readwritecableP };
                         using (SQLiteDataReader reader2 = command0.ExecuteReader())
                         {
                             while (reader2.Read())
@@ -7241,7 +7160,7 @@ namespace AOVGEN
                         //    }
                         //}
                         var SortedDict = level3.OrderBy(obj => obj.Key).ToDictionary(obj => obj.Key, obj => obj.Value);
-                        TableExternalConnections table = new TableExternalConnections(SortedDict, ventsystemDict, cabsettings, CheckedPannels, tableExtDocName) 
+                        TableExternalConnections table = new(SortedDict, ventsystemDict, cabsettings, CheckedPannels, tableExtDocName) 
                         {
                             Author = Author, 
                             BuildingName = building.Buildname, 
@@ -7292,7 +7211,7 @@ namespace AOVGEN
                             
                     DeleVentSystemFromDB(ventSystem);
 
-                    SQLiteCommand command = new SQLiteCommand
+                    SQLiteCommand command = new()
                     {
                         Connection = connection
                     };
@@ -7336,7 +7255,7 @@ namespace AOVGEN
         internal void DeleVentSystemFromDB(VentSystem ventSystem)
         {
             if (connection.State == ConnectionState.Closed) connection.Open();
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection
             };
@@ -7365,7 +7284,7 @@ namespace AOVGEN
                 RadTreeNode buildnode = radTreeView1.SelectedNode;
                 Building building = buildnode.Tag as Building;
                 DataTable dataSource = radGridView2.DataSource as DataTable;
-                CreatePannel pannelform = new CreatePannel(this, buildnode, Author)
+                CreatePannel pannelform = new(this, buildnode, Author)
                 {
                     BUILDGUID = building?.BuildGUID,
                     DBFilePath = DBFilePath,
@@ -7400,7 +7319,7 @@ namespace AOVGEN
             {
                 RadTreeNode parent = radTreeNode.Parent;
                 if (!(parent.Tag is Project project)) return;
-                EditorV2 editor = new EditorV2(this)
+                EditorV2 editor = new(this)
                 {
                     Opacity = 0,
                     DBFilePath = DBFilePath,
@@ -7443,7 +7362,7 @@ namespace AOVGEN
                 cnt++;
                 string buildingname = $"Здание {cnt}";
                 var guid = Guid.NewGuid().ToString();
-                RadTreeNode buildingnode = new RadTreeNode(buildingname)
+                RadTreeNode buildingnode = new(buildingname)
                 {
                     Value = buildingname
                 };
@@ -7462,13 +7381,13 @@ namespace AOVGEN
                         string InsertQuery = "INSERT INTO Buildings ([GUID], BuildName, [Project], Buildnum, Address) " +
                                              $"VALUES('{guid}','{buildingname}','{ProjectGUID}','{building.BuildNum}','{building.Address}')";
 
-                        SQLiteCommand command = new SQLiteCommand(InsertQuery, connection);
+                        SQLiteCommand command = new(InsertQuery, connection);
                         command.ExecuteNonQuery();
                         command.Dispose();
                     }
 
 
-                    CableSettings cableSettings = new CableSettings
+                    CableSettings cableSettings = new()
                     {
                         DBFilePath = DBFilePath,
                         Project = project,
@@ -7508,12 +7427,12 @@ namespace AOVGEN
                 bool UseEOMCable = result == DialogResult.Yes;
                 string SelectPannelGUIDs = $"SELECT GUID, PannelName FROM Pannel WHERE Place = '{building.BuildGUID}' ORDER BY PannelName ASC";
                 string UsePowerCables = $"SELECT WriteCableP, WritePumpCable, WriteValveCable FROM BuildSetting WHERE Place = '{building.BuildGUID}'";
-                SQLiteCommand getpannelGUIDsCommand = new SQLiteCommand
+                SQLiteCommand getpannelGUIDsCommand = new()
                 {
                     CommandText = SelectPannelGUIDs,
                     Connection = connection
                 };
-                List<(string, string)> PannelList = new List<(string, string)>();
+                List<(string, string)> PannelList = new();
                 using (SQLiteDataReader PannelReader = getpannelGUIDsCommand.ExecuteReader())
                 {
                     while (PannelReader.Read())
@@ -7539,7 +7458,7 @@ namespace AOVGEN
                 }
 
                 getpannelGUIDsCommand.Dispose();
-                DataTable dataTable = new DataTable();
+                DataTable dataTable = new();
                 dataTable.Columns.Add("Имя");
                 dataTable.Columns.Add("Откуда");
                 dataTable.Columns.Add("Куда");
@@ -7549,7 +7468,7 @@ namespace AOVGEN
                 dataTable.Columns.Add("Описание");
                 dataTable.Columns.Add("Примечание");
 
-                Dictionary<string, int> uniqueCable = new Dictionary<string, int>();
+                Dictionary<string, int> uniqueCable = new();
                 foreach (var GetCablesCommand in from (string, string) PannelGUID in PannelList
                     select
                         $"Select Cable.GUID, CableName, FromPannel, [To], CableType, CableLenght, SortPriority, TableForSearch, ToGUID, SystemName, Description, CableAttribute, WriteBlock, BlockName, WireNumbers FROM Cable WHERE FromGUID = '{PannelGUID.Item1}' ORDER BY SystemName, [SortPriority], [TO] ASC"
@@ -7667,18 +7586,13 @@ namespace AOVGEN
                     cablesumrow["Длина"] = keyValuePair.Value;
                     dataTable.Rows.Add(cablesumrow);
                 }
-
-
                 var workbook = new XLWorkbook();
-
                 const string sheetname = "Кабельный журнал";
-                //var ws =  workbook.Worksheets.Add(sheetname);
                 var ws = workbook.Worksheets.Add(dataTable, sheetname);
                 for (int t = 1; t < 9; t++)
                 {
                     ws.Column(t).AdjustToContents();
                 }
-
                 IXLCells cells5 = ws.Column(5).Cells();
                 //set columt5 cells format as number
                 foreach (var cell in cells5)
@@ -7710,21 +7624,9 @@ namespace AOVGEN
                 MessageBox.Show(@"Следует выбрать здание");
             }
 
-            //int row = 1;
-            //foreach(string s in strlist)
-            //{
-            //    ws.Cell(row, 1).Value = s;
-            //    row++;
-            //}
-            //workbook.SaveAs(sheetname + ".xlsx");
-
-            //workbook.AddWorksheet(yourDataset) 
-            // workbook.AddWorksheet(yourDataTable)
         }
         private static void ColumnAlignment(IXLWorksheet ws, int column, XLAlignmentHorizontalValues val)
         {
-           
-            
             IXLCells cells = ws.Column(column).Cells();
             foreach (var cell in cells)
             {
@@ -7732,7 +7634,6 @@ namespace AOVGEN
             }
             
         }
-
         private static void ColumnAlignment(XLWorkbook workbook, string docname, int column, XLAlignmentHorizontalValues val)
         {
             IXLWorksheet ws = workbook.Worksheet(docname);
@@ -7758,15 +7659,11 @@ namespace AOVGEN
         }
         private void radButtonElement9_Click(object sender, EventArgs e)
         {
-            
-            
-            
-            
             RadTreeNode radTreeNode = radTreeView1.SelectedNode;
             if (!(radTreeNode?.Tag is Building building)) return;
             RadTreeNode parent = radTreeNode.Parent;
             if (!(parent.Tag is Project project)) return;
-            CableSettings cableSettings = new CableSettings
+            CableSettings cableSettings = new()
             {
                 DBFilePath = DBFilePath,
                 Project = project,
@@ -7851,12 +7748,11 @@ namespace AOVGEN
             }
             if (PowerQuery != string.Empty)
             {
-                SQLiteCommand SearchPowerCommand = new SQLiteCommand
+                SQLiteCommand SearchPowerCommand = new()
                 {
                     CommandText = PowerQuery,
                     Connection = connection
                 };
-                    
                 using (SQLiteDataReader PowerReader = SearchPowerCommand.ExecuteReader())
                 {
                     while (PowerReader.Read())
@@ -7867,7 +7763,7 @@ namespace AOVGEN
             }
             if (VoltageQuery != string.Empty)
             {
-                SQLiteCommand VoltageCommand = new SQLiteCommand
+                SQLiteCommand VoltageCommand = new()
                 {
                     CommandText = VoltageQuery,
                     Connection = connection
@@ -7880,76 +7776,68 @@ namespace AOVGEN
                         voltagestring = PowerReader[0].ToString();
                     }
                 }
-                    
-
             }
-
             if (voltagestring == string.Empty) return result;
+            int Power = Convert.ToInt32(power);
+            Enum.TryParse(voltagestring, out ElectroDevice._Voltage Voltage);
+            double Current = 0;
+            if (Power != 0) Current = Math.Ceiling(CurrentCalc(Power, Voltage));
+            string GetCableByCurrentAndWires = string.Empty;
+            switch (Voltage)
             {
-                int Power = Convert.ToInt32(power);
-                Enum.TryParse(voltagestring, out ElectroDevice._Voltage Voltage);
-                double Current = 0;
-                if (Power != 0) Current = Math.Ceiling(CurrentCalc(Power, Voltage));
-                string GetCableByCurrentAndWires = string.Empty;
-                switch (Voltage)
+                case ElectroDevice._Voltage.AC380:
+                    GetCableByCurrentAndWires = "SELECT CableFullName FROM CableTypes " +
+                                                $"WHERE MaxCurrent380 >= {Current} " +
+                                                $"AND WireNumbers >= {wirenumbers} " +
+                                                $"AND CableType = '{CableType}' " +
+                                                "LIMIT 1";
+                    break;
+                case ElectroDevice._Voltage.AC220:
+                case ElectroDevice._Voltage.AC24:
+                case ElectroDevice._Voltage.DC24:
+                    GetCableByCurrentAndWires = "SELECT CableFullName FROM CableTypes " +
+                                                $"WHERE MaxCurrent220 >= {Current} " +
+                                                $"AND WireNumbers >= {wirenumbers} " +
+                                                $"AND CableType = '{CableType}' " +
+                                                "LIMIT 1";
+                    break;
+            }
+            if (GetCableByCurrentAndWires == string.Empty) return result;
+            SQLiteCommand resultCommand = new()
+            {
+                CommandText = GetCableByCurrentAndWires,
+                Connection = connection
+            };
+            using (SQLiteDataReader PowerReader = resultCommand.ExecuteReader())
+            {
+                while (PowerReader.Read())
                 {
-                    case ElectroDevice._Voltage.AC380:
-                        GetCableByCurrentAndWires = "SELECT CableFullName FROM CableTypes " +
-                                                    $"WHERE MaxCurrent380 >= {Current} " +
-                                                    $"AND WireNumbers >= {wirenumbers} " +
-                                                    $"AND CableType = '{CableType}' " +
-                                                    "LIMIT 1";
-                        break;
-                    case ElectroDevice._Voltage.AC220:
-                    case ElectroDevice._Voltage.AC24:
-                    case ElectroDevice._Voltage.DC24:
-                        GetCableByCurrentAndWires = "SELECT CableFullName FROM CableTypes " +
-                                                    $"WHERE MaxCurrent220 >= {Current} " +
-                                                    $"AND WireNumbers >= {wirenumbers} " +
-                                                    $"AND CableType = '{CableType}' " +
-                                                    "LIMIT 1";
-                        break;
-                }
-
-                if (GetCableByCurrentAndWires == string.Empty) return result;
-                SQLiteCommand resultCommand = new SQLiteCommand
-                {
-                    CommandText = GetCableByCurrentAndWires,
-                    Connection = connection
-                };
-                        
-                using (SQLiteDataReader PowerReader = resultCommand.ExecuteReader())
-                {
-                    while (PowerReader.Read())
-                    {
-                        result = PowerReader[0].ToString();
-                    }
+                    result = PowerReader[0].ToString();
                 }
             }
             return result;
         }
-
         private void radButtonElement15_Click(object sender, EventArgs e)
         {
             if (radTreeView1.SelectedNode.Tag is Building building)
             {
                 string SelectPannelGUIDs = $"SELECT GUID, PannelName FROM Pannel WHERE Place = '{building.BuildGUID}' ORDER BY PannelName ASC";
 
-                SQLiteCommand getpannelGUIDsCommand = new SQLiteCommand
+                SQLiteCommand getpannelGUIDsCommand = new()
                 {
                     CommandText = SelectPannelGUIDs,
                     Connection = connection
                 };
 
-                Dictionary<string, List<VentSystem>> JoinedSystems = new Dictionary<string, List<VentSystem>>();
-                Dictionary<string, (int, int, int, int)> result = new Dictionary<string, (int, int, int, int)>();
+                Dictionary<string, List<VentSystem>> JoinedSystems = new();
+                Dictionary<string, (int, int, int, int)> result = new();
                 using (SQLiteDataReader PannelReader = getpannelGUIDsCommand.ExecuteReader())
                 {
                     while (PannelReader.Read())
                     {
                         string PannelID = PannelReader[0].ToString();
                         if (JoinedSystems.ContainsKey(PannelID)) continue;
-                        List<VentSystem> ventSystems = new List<VentSystem>();
+                        List<VentSystem> ventSystems = new();
                         JoinedSystems.Add(PannelID, ventSystems);
 
                     }
@@ -7961,14 +7849,12 @@ namespace AOVGEN
                     MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.RightAlign);
                     return;
                 }
-
-
                 foreach (string key in JoinedSystems.Keys)
                 {
                     var SelectVentSystemsByPannel = string.Empty;
 
                     SelectVentSystemsByPannel = $"SELECT GUID FROM VentSystems WHERE Pannel = '{key}'";
-                    SQLiteCommand VentSystemComand = new SQLiteCommand
+                    SQLiteCommand VentSystemComand = new()
                     {
                         CommandText = SelectVentSystemsByPannel,
                         Connection = connection
@@ -8036,9 +7922,8 @@ namespace AOVGEN
 
                         message += PannelID + ": " + $"DI-{DI}; DO-{DO}; AI-{AI}; AO-{AO}\r\n";
                     }
-                    IO_Summ iO_SummForm = new IO_Summ(message);
+                    IO_Summ iO_SummForm = new(message);
                     iO_SummForm.ShowDialog();
-                    //MessageBox.Show(message);
                 }
 
             }
@@ -8047,9 +7932,7 @@ namespace AOVGEN
                 const string message = "Выберите здание, для которого нужна таблица IO";
                 const string caption = "Выбор здания";
                 MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.RightAlign);
-                //Process process = Process.GetCurrentProcess();
-                //IntPtr hWnd = process.MainWindowHandle;
-                //TableExternalConnections.SetForegroundWindow(hWnd);
+                
             }
         }
         private static (int, int, int, int) CalcIO(VentSystem ventSystem)
@@ -8240,7 +8123,7 @@ namespace AOVGEN
                         if (humidifier.HumSensPresent)
                         {
 
-                            //Humidifier.HumiditySens humiditySens = humidifier.HumiditySensor;
+                            //HumiditySens humiditySens = humidifier.HumiditySensor;
                             shemaASU = humidifier.HumiditySensor.ShemaASU;
                             calc(shemaASU);
                         }
@@ -8400,8 +8283,6 @@ namespace AOVGEN
             const string versioninfofile = @"W:\Группа автоматизации\Revit Plugins\Плагины собственной разработки\GKSASU\AOVGen\buildinfo.xml";
             AutoUpdater.Start(versioninfofile);
         }
-
-        
         private bool ReadLevelsAndRooms(RunRevitCommand revitCommand, Building building, Project project)
         {
             bool result = false;
@@ -8411,20 +8292,17 @@ namespace AOVGEN
             {
                 //try to update variable in loader class via WCF
                 Dictionary<(string, string, double), List<(string, string, string)>> rooms =
-                    new Dictionary<(string, string, double), List<(string, string, string)>>();
+                    new();
                 for (int i = 0; i <= 3; i++)
                 {
-                    //Task task = Task.Factory.StartNew(revitCommand.GetRooms);
-                    //task.Wait();
                     revitCommand.GetRooms();
-                    System.Threading.Thread.Sleep(1);
+                    Thread.Sleep(1);
                     rooms = revitCommand.GetRooms(); 
                     if (rooms.Count> 0) break;
                 }
                 
                 //try to get dictioanery with rooms via WCF
 
-                //Dictionary<(string, string, double), List<(string, string, string)>> rooms = revitCommand.GetRooms();
                 if (rooms.Count > 0)
                 {
                     radTreeView5.Nodes.Clear();
@@ -8440,15 +8318,13 @@ namespace AOVGEN
                         string levelGUID = CreateLevel(levelID, levelname, level.Item3, building.BuildGUID,
                             project.GetGUID(), levelpresent);
                         //make level node
-                        RadTreeNode LevelNode = new RadTreeNode
+                        RadTreeNode LevelNode = new()
                         {
                             Name = levelGUID,
                             Text = levelname
                         };
                         //get Rooms from room dictionary by level as key and sorting by room number
                         List<(string, string, string)> levelrooms = rooms[level]
-                            //.OrderBy(o => GetOnlyLetters(o.Item2))
-                            //.ThenBy(o => Convert.ToInt32(GetOnlyNumbers(o.Item2)))
                             .OrderBy(o => o.Item2)
                             .ThenBy(o => o.Item1)
                             .ToList();
@@ -8462,9 +8338,19 @@ namespace AOVGEN
 
                             //make room node
                             bool RoomPresent = CheckRoomPresent(roomID, levelGUID);
-                            CreateRoom(roomname, roomnum, roomID, levelGUID, levelname, building.BuildGUID,
-                                project.GetGUID(), RoomPresent);
-                            RadTreeNode RoomNode = new RadTreeNode
+                            RoomFunc roomFunc = new()
+                            {
+                                roomname = roomname,
+                                roomnum = roomnum,
+                                roomID = roomID,
+                                levelGUID = levelGUID,
+                                levelname = levelname,
+                                BuildGUID = building.BuildGUID,
+                                projectGUID = project.GetGUID(),
+                                RoomPresent = RoomPresent
+                            };
+                            CreateRoom(roomFunc);
+                            RadTreeNode RoomNode = new()
                             {
                                 Name = roomID,
                                 Text = $"({roomnum}) " + roomname,
@@ -8483,14 +8369,11 @@ namespace AOVGEN
                     //radTreeView5.Update();                        
                     result = true;
                 }
-                
-
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
             }
-
             WindowState = FormWindowState.Normal;
             return result;
         }
@@ -8510,7 +8393,7 @@ namespace AOVGEN
                 InsertLevelQuery = "INSERT INTO Levels ([LevelID], [LevelGUID], Name, Elevation, [Place], [Project]) " +
                                                         $"VALUES('{levelID}','{mylevelID}','{levelName}','{Elevation}','{BuildGUID}', '{ProjectGUID}')";
             }
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = InsertLevelQuery
@@ -8532,7 +8415,7 @@ namespace AOVGEN
         {
             bool result = false;
             string DeleteQuery = $"DELETE FROM Levels WHERE Place = '{PlaceGuid}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = DeleteQuery
@@ -8549,7 +8432,7 @@ namespace AOVGEN
         {
             bool result = false;
             string DeleteQuery = $"DELETE FROM Rooms WHERE Place = '{PlaceGuid}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = DeleteQuery
@@ -8566,7 +8449,7 @@ namespace AOVGEN
         {
             bool result = false;
             string clearpannelqury = $"UPDATE Pannel SET [LevelGUID] = '', [RoomGUID] = '', RoomName = '', RoomNumber = '' WHERE Place = '{PlaceGUID}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = clearpannelqury
@@ -8582,7 +8465,7 @@ namespace AOVGEN
         private void WriteLevelToPannel(Pannel pannel, string LevelGUID, string RoomGUID, string RoomName,string RoomNumber)
         {
             string UpdatePannelQuery = $"UPDATE Pannel SET [LevelGUID] = '{LevelGUID}', [RoomGUID] = '{RoomGUID}', RoomName = '{RoomName}', RoomNumber = '{RoomNumber}' WHERE [GUID] = '{pannel.GetGUID()}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = UpdatePannelQuery
@@ -8594,23 +8477,22 @@ namespace AOVGEN
             catch
             { }
         }
-        private void CreateRoom(string roomname, string roomnum, string roomID, string levelGUID, string levelname,
-            string BuildGUID, string projectGUID, bool RoomPresent)
+        private void CreateRoom(RoomFunc roomFunc)
         {
             string InsertRoomQuery;
             string getRoomID = string.Empty;
-            if (RoomPresent)
+            if (roomFunc.RoomPresent)
             {
-                InsertRoomQuery = $"UPDATE Rooms SET [RoomID] = '{roomID}', RoomName = '{roomname}', RoomNumber = '{roomnum}', [Place] = '{BuildGUID}', [Project] = '{projectGUID}' WHERE [LevelGUID] = '{levelGUID}' AND RoomID = '{roomID}'";
-                getRoomID = $"SELECT [RoomGUID] FROM Rooms WHERE [RoomID] = '{roomID}'";
+                InsertRoomQuery = $"UPDATE Rooms SET [RoomID] = '{roomFunc.roomID}', RoomName = '{roomFunc.roomname}', RoomNumber = '{roomFunc.roomnum}', [Place] = '{roomFunc.BuildGUID}', [Project] = '{roomFunc.projectGUID}' WHERE [LevelGUID] = '{roomFunc.levelGUID}' AND RoomID = '{roomFunc.roomID}'";
+                getRoomID = $"SELECT [RoomGUID] FROM Rooms WHERE [RoomID] = '{roomFunc.roomID}'";
             }
             else
             {
                 var myRoomID = Guid.NewGuid().ToString();
                 InsertRoomQuery = "INSERT INTO Rooms (RoomID, [RoomGUID], RoomName, RoomNumber, [Place], [Project], [LevelGUID], LevelName) " +
-                                  $"VALUES('{roomID}','{myRoomID}','{roomname}','{roomnum}','{BuildGUID}', '{projectGUID}', '{levelGUID}', '{levelname}')";
+                                  $"VALUES('{roomFunc.roomID}','{myRoomID}','{roomFunc.roomname}','{roomFunc.roomnum}','{roomFunc.BuildGUID}', '{roomFunc.projectGUID}', '{roomFunc.levelGUID}', '{roomFunc.levelname}')";
             }
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = InsertRoomQuery
@@ -8623,7 +8505,7 @@ namespace AOVGEN
         private bool СheckLevelPresent(string levelID )
         {
             string CheckLevelQuery = $"SELECT [LevelGUID] FROM Levels WHERE LevelID = '{levelID}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = CheckLevelQuery
@@ -8641,7 +8523,7 @@ namespace AOVGEN
         private bool CheckRoomPresent (string roomID,  string LevelGUID)
         {
             string CheckRoomQuery = $"SELECT [RoomGUID] FROM Rooms WHERE RoomID = '{roomID}' AND LevelGUID = '{LevelGUID}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = CheckRoomQuery
@@ -8656,15 +8538,14 @@ namespace AOVGEN
             }
             return false;
         }
-
         private void radButtonElement14_Click(object sender, EventArgs e)
         {
             Specification();
         }
         private void Specification()
         {
-            Dictionary<Pannel, List<VentSystem>> VentDict = new Dictionary<Pannel, List<VentSystem>>();
-            Dictionary<string, int> uniquecables = new Dictionary<string, int>();
+            Dictionary<Pannel, List<VentSystem>> VentDict = new();
+            Dictionary<string, int> uniquecables = new();
             if (radTreeView4 != null)
             {
                 //List<Pannel> PannelList = new List<Pannel>();
@@ -8672,7 +8553,7 @@ namespace AOVGEN
                 foreach (RadTreeNode radTreeNode in radTreeView4.Nodes)
                 {
                     Pannel pannel = (Pannel)radTreeNode.Tag;
-                    SQLiteCommand getcablescommand = new SQLiteCommand
+                    SQLiteCommand getcablescommand = new()
                     {
                         Connection = connection,
                         CommandText = $"Select CableType, sum(CableLenght) FROM Cable WHERE FromGUID = '{pannel.GetGUID()}' GROUP BY CableType"
@@ -8702,7 +8583,7 @@ namespace AOVGEN
                         //listkip = listkip.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList(); //remove list null entry
                         if (!VentDict.ContainsKey(pannel))
                         {
-                            List<VentSystem> ventSystems = new List<VentSystem>
+                            List<VentSystem> ventSystems = new()
                             {
                                 ventSystem
                             };
@@ -8718,7 +8599,7 @@ namespace AOVGEN
                     }
                 }
             }
-            DataTable dt = new DataTable();
+            DataTable dt = new();
             dt.Columns.Add("Поз.");
             dt.Columns.Add("Наименование и техническая характеристика");
             dt.Columns.Add("Тип, марка, обозначение опросного листа");
@@ -8755,7 +8636,7 @@ namespace AOVGEN
                         {
                             List<dynamic> ListKip = vent.GetKIP(); //в вентсистеме реализована функция которая возвращает все датчики
                             //созадем словарь. в качестве ключа будет строка (артикул), зачение - коретеж из IvendorInfo и числа (отвечает за количество)
-                            Dictionary<string, (IVendoInfo, int)> compdict = new Dictionary<string, (IVendoInfo, int)>();
+                            Dictionary<string, (IVendoInfo, int)> compdict = new();
                             int abstractIDcnt = 1;
                             
                             foreach (dynamic kipcom in ListKip) //перебираем список с датчиками
@@ -8778,7 +8659,7 @@ namespace AOVGEN
                                 }
                                 else //если акртикула вообще нет
                                 {
-                                    if (vendoInfo is Vent.FControl) //то проверяем, можно ли интерфейс привести к частостнику
+                                    if (vendoInfo is FControl) //то проверяем, можно ли интерфейс привести к частостнику
                                     {
                                         if (!compdict.ContainsKey(abstractID)) //проверяем есть ли такой артикул в словаре
                                         {
@@ -8959,7 +8840,7 @@ namespace AOVGEN
         }
         private static XLWorkbook CreateXLSWorkBook(DataTable dt, string DocName)
         {
-            XLWorkbook workbook = new XLWorkbook();
+            XLWorkbook workbook = new();
             workbook.Worksheets.Add(dt, DocName);
             return workbook;
         }
@@ -8987,7 +8868,7 @@ namespace AOVGEN
         {
             try
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog
+                SaveFileDialog saveFileDialog = new()
                 {
                     Filter = @"Excel workbook|*.xlsx",
                     Title = title,
@@ -9005,7 +8886,6 @@ namespace AOVGEN
             }
             
         }
-
         private void radTreeView6_NodeMouseClick(object sender, RadTreeViewEventArgs e)
         {
             radPropertyGrid1.SelectedObject = e.Node.Tag as Pannel;
@@ -9013,11 +8893,15 @@ namespace AOVGEN
         }
         private void radTreeView6_DragOverNode(object sender, RadTreeViewDragCancelEventArgs e)
         {
-
+            e.Cancel = true;
             Point p = radTreeView5.PointToClient(new Point(Cursor.Position.X, Cursor.Position.Y));
             RadTreeNode targetNode = radTreeView5.GetNodeAt(p);
+            if (targetNode == null) return;
+            if (e.DropPosition != DropPosition.AsChildNode) return;
+            if (e.TargetNode.Level != 1) return;
+
             if (e.DropPosition == DropPosition.BeforeNode || e.DropPosition == DropPosition.AfterNode || e.TargetNode.Level ==0 || e.TargetNode.Tag != null) e.Cancel = true;
-            if (targetNode == null || e.TargetNode.Level != 1 || e.DropPosition != DropPosition.AsChildNode) return;
+            //if (targetNode == null || e.TargetNode.Level != 1 || e.DropPosition != DropPosition.AsChildNode) return;
             e.TargetNode.Selected = true;
             e.Cancel = false;                
             radTreeView5.Update();
@@ -9043,7 +8927,6 @@ namespace AOVGEN
                 e.Cancel = true;
             }            
         }
-
         private void radTreeView5_DragDrop(object sender, DragEventArgs e)
         {
             Point targetPoint = radTreeView5.PointToClient(new Point(Cursor.Position.X, Cursor.Position.Y));            
@@ -9066,14 +8949,12 @@ namespace AOVGEN
                 targetNode.Expand();
             }
         }
-        
-
         private void radTreeView6_DragEnded(object sender, RadTreeViewDragEventArgs e)
         {
             try
             {
                 RadTreeNode selectedNode = e.Node;
-                Font boldFont = new Font(radTreeView6.Font, FontStyle.Bold);
+                Font boldFont = new(radTreeView6.Font, FontStyle.Bold);
                 selectedNode.Font = boldFont;
                 Pannel pannel = (Pannel)selectedNode.Tag;
                 RadTreeNode targetNode = radTreeView5.SelectedNode;
@@ -9085,7 +8966,7 @@ namespace AOVGEN
                 
                 pictureBox1.Image = Resources.I7gj;
                 pictureBox1.Update();
-                Timer t = new Timer
+                Timer t = new()
                 {
                     Interval = 9100 // specify interval time as you want
                 };
@@ -9099,7 +8980,6 @@ namespace AOVGEN
             }
            
         }
-
         private void timer_Tick(object sender, EventArgs e)
         {
             Timer timer = (Timer)sender;
@@ -9109,7 +8989,6 @@ namespace AOVGEN
             pictureBox1.Update();
             
         }
-        
         private void radTreeView5_DragEnded(object sender, RadTreeViewDragEventArgs e)
         {
             Pannel pannel = (Pannel)e.Node.Tag;
@@ -9119,7 +8998,6 @@ namespace AOVGEN
             WriteLevelToPannel(pannel, LevelGUID, RoomGUID, roomName, roomNumber);
 
         }
-
         private void radTreeView5_ContextMenuOpening(object sender, TreeViewContextMenuOpeningEventArgs e)
         {
             RadTreeNode selectednode = radTreeView5.SelectedNode;
@@ -9148,7 +9026,6 @@ namespace AOVGEN
             }
             
         }
-
         private struct PannelInfo
         {
             public string GUID { get; set; }
@@ -9164,9 +9041,9 @@ namespace AOVGEN
         private void radButtonElement13_Click(object sender, EventArgs e)
         {
             Building building = radTreeView1.SelectedNode.Tag as Building;
-            List<PannelInfo> PanneInfoList = new List<PannelInfo>();
+            List<PannelInfo> PanneInfoList = new();
             string SelectPannelInfo = $"SELECT GUID, PannelName, Power, Voltage, Category, [LevelGUID], RoomName, RoomNumber FROM Pannel WHERE Place = '{building?.BuildGUID}' ORDER BY PannelName ASC";
-            SQLiteCommand getpannelGUIDsCommand = new SQLiteCommand
+            SQLiteCommand getpannelGUIDsCommand = new()
             {
                 CommandText = SelectPannelInfo,
                 Connection = connection
@@ -9175,7 +9052,7 @@ namespace AOVGEN
             {
                 while (reader.Read())
                 {
-                    PannelInfo pannelInfo = new PannelInfo
+                    PannelInfo pannelInfo = new()
                     {
                         GUID = reader[0].ToString(),
                         PannelName = reader[1].ToString(),
@@ -9186,7 +9063,7 @@ namespace AOVGEN
                         RoomName = reader[6].ToString(),
                         RoomNumber = reader[7].ToString()
                     };
-                    SQLiteCommand levelnamecommand = new SQLiteCommand
+                    SQLiteCommand levelnamecommand = new()
                     {
                         Connection = connection,
                         CommandText = $"SELECT Name FROM Levels WHERE [LevelGUID] = '{pannelInfo.LevelGUID}'"
@@ -9201,7 +9078,7 @@ namespace AOVGEN
                     PanneInfoList.Add(pannelInfo);
                 }                
             }
-            DataTable datatable = new DataTable();
+            DataTable datatable = new();
             datatable.Columns.Add("Имя щита");
             datatable.Columns.Add("Мощность (Вт)");
             datatable.Columns.Add("Напряжение");
@@ -9291,7 +9168,7 @@ namespace AOVGEN
                         Project project = buildnode.Parent.Tag as Project;
                         (string DocID, string DocTitle) StateInfo;
                         StateInfo.DocID = string.Empty;
-                        RunRevitCommand revitCommand = new RunRevitCommand(Service);
+                        RunRevitCommand revitCommand = new(Service);
                         //try
                         //{
 
@@ -9324,7 +9201,7 @@ namespace AOVGEN
                                         {
                                             try
                                             {
-                                                Thread thread = new Thread(() =>
+                                                Thread thread = new(() =>
                                                 {
                                                     var attempform = new Attempt { Num = t };
                                                     Application.Run(attempform);
@@ -9415,7 +9292,7 @@ namespace AOVGEN
                 bool result2 = DeleteRooms(building.BuildGUID);
                 bool result3 = ClearPannelInfo(building.BuildGUID);
                 //read pannels and add it to treeview6
-                List<Pannel> PannelClassList = new List<Pannel>();
+                List<Pannel> PannelClassList = new();
                 PannelClassList = (from gridrow in radGridView2.Rows
                         select gridrow.Tag as Pannel)
                     .ToList();
@@ -9457,19 +9334,18 @@ namespace AOVGEN
             radPropertyGrid1.Enabled = false;
             radRibbonBarGroup9.Enabled = RevitConnectionState == RevitState.DocumentPresent && radTreeView1.SelectedNode.Level == 1;                      
         }
-
         private async void radButtonElement24_Click(object sender, EventArgs e)
         {
             //List<RadTreeNode> allnodes =  radTreeView5.TreeViewElement.GetNodes().ToList();
-            RunRevitCommand revitCommand = new RunRevitCommand(Service);
+            RunRevitCommand revitCommand = new(Service);
             Dictionary<string, List<string>> famdict = revitCommand.FamilyTypes();
-            PlacePannelsForm placePannelsForm = new PlacePannelsForm(radTreeView5, famdict);
+            PlacePannelsForm placePannelsForm = new(radTreeView5, famdict);
             //System.Threading.Thread.Sleep(1000);
             DialogResult dialogResult = placePannelsForm.ShowDialog();
             
             var ListInfo = placePannelsForm.listinfo;
             placePannelsForm.Close();
-            RunRevitCommand revitCommand1 = new RunRevitCommand(Service);//создаем запрос в ревит
+            RunRevitCommand revitCommand1 = new(Service);//создаем запрос в ревит
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             var token = cts.Token;
             int returninfo = -1;
@@ -9479,7 +9355,7 @@ namespace AOVGEN
                 try
                 {
                     token.ThrowIfCancellationRequested();
-                    Stopwatch sw = new Stopwatch();
+                    Stopwatch sw = new();
                    
                     returninfo =  revitCommand1.LoadPannels(ListInfo); //говорим что нужно сделать. если команда прошла в dll, то вернётся 1
                     Thread.Sleep(10);
@@ -9507,9 +9383,9 @@ namespace AOVGEN
             if (returninfo == 1)
             {
 
-                Timer getressultTimer = new Timer();
+                Timer getressultTimer = new();
                 getressultTimer.Interval = 2000;
-                RunRevitCommand reveitCommanr2 = new RunRevitCommand(Service);
+                RunRevitCommand reveitCommanr2 = new(Service);
                 getressultTimer.Tick += (s, a) =>
                 {
                     var retinfo2 = reveitCommanr2.GetPlaceResult();
@@ -9520,7 +9396,7 @@ namespace AOVGEN
                         switch (retinfo2)
                         {
                             case 2:
-                                RunRevitCommand revitCommand3 = new RunRevitCommand(Service); //создаем еще один запрос в ревит
+                                RunRevitCommand revitCommand3 = new(Service); //создаем еще один запрос в ревит
                                 var PennelIDS = revitCommand3.GetFamilyListID();
                                 MessageBox.Show($"Готово, расставил {PennelIDS.Count} шкафов");
                                 break;
@@ -9554,14 +9430,14 @@ namespace AOVGEN
             if (!(e.Row.Tag is IVendoInfo vendoInfo) || selectedvendor == null) return;
             string dbtable = vendoInfo.GetVendorInfo().DBTable;
             string vendorname = selectedvendor.Text;
-            SQLiteCommand sQLiteCommand = new SQLiteCommand
+            SQLiteCommand sQLiteCommand = new()
             {
                 Connection = connectionvendor,
                 CommandText = $"SELECT Description, VendorCode FROM {dbtable} WHERE VendorName = '{vendorname}'"
             };
             using (SQLiteDataReader reader = sQLiteCommand.ExecuteReader())
             {
-                List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
+                List<KeyValuePair<string, string>> list = new();
 
                 while (reader.Read())
                 {
@@ -9642,7 +9518,7 @@ namespace AOVGEN
         {
             Building building = (Building)radTreeView1.SelectedNode.Tag;
             string VendorDBPath = DBFilePath.Replace(DBFileName, string.Empty) + "VendorsDB.db";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = $"ATTACH '{VendorDBPath}' as DB1; " +
@@ -9659,7 +9535,7 @@ namespace AOVGEN
             }
             command.CommandText = "DETACH DB1";
             command.ExecuteNonQuery();
-            VendorForm vendorForm = new VendorForm(VendorDBPath, vendorname);
+            VendorForm vendorForm = new(VendorDBPath, vendorname);
             DialogResult dialogResult = vendorForm.ShowDialog();
             switch (dialogResult)
             {
@@ -9678,7 +9554,6 @@ namespace AOVGEN
                 }
             }
         }
-
         private void radGridView4_CellEndEdit(object sender, GridViewCellEventArgs e)
         {
             
@@ -9698,7 +9573,7 @@ namespace AOVGEN
             if (vendoInfo == null || !(e.Row.Tag is ICompGUID compGUID)) return;
             string guid = compGUID.GUID;
             string SensTable = vendoInfo.GetVendorInfo().MainDBTable;
-            SQLiteCommand sQLiteCommand = new SQLiteCommand
+            SQLiteCommand sQLiteCommand = new()
             {
                 Connection = connection,
                 CommandText = $"UPDATE {SensTable} SET Vendor = '{vendorname}', VendorTable = '{vendoInfo.GetVendorInfo().DBTable}', VendorCode ='{vendorcode}' WHERE [GUID] = '{guid}'"
@@ -9706,30 +9581,25 @@ namespace AOVGEN
             sQLiteCommand.ExecuteNonQuery();
             vendoInfo.SetVendorInfo(vendorname, vendorcode, vendordescription, null, null);
         }
-        
         private void radTreeView1_MouseDown(object sender, MouseEventArgs e)
         {
             
         }
-
         private void radTreeView2_MouseClick(object sender, MouseEventArgs e)
         {
         }
-
         private void radGridView4_ContextMenuOpening(object sender, ContextMenuOpeningEventArgs e)
         {
             e.ContextMenu = radContextMenu5.DropDown;
         }
-
         private void radGridView3_CellBeginEdit(object sender, GridViewCellCancelEventArgs e)
         {
             if (!(radGridView3.ActiveEditor is RadDropDownListEditor dropDownEditor)) return;
             if (dropDownEditor.EditorElement is RadDropDownListEditorElement dropDownEditorElement) dropDownEditorElement.DefaultItemsCountInDropDown = 30;
         }
-
         private void bunifuImageButton2_Click(object sender, EventArgs e)
         {
-            AbotForm abotForm = new AbotForm();
+            AbotForm abotForm = new();
             DialogResult dr =  abotForm.ShowDialog();
             if (dr == DialogResult.Cancel)
             {
@@ -9772,7 +9642,7 @@ namespace AOVGEN
         internal void FillVendorList(RadDropDownList radDropDownList)
         {
             if (connection.State != ConnectionState.Open) return;
-            SQLiteCommand sQLiteCommand = new SQLiteCommand
+            SQLiteCommand sQLiteCommand = new()
             {
                 Connection = connection,
                 CommandText = "SELECT VendorName FROM Vendors"
@@ -9781,7 +9651,7 @@ namespace AOVGEN
             {
                 while (reader.Read())
                 {
-                    RadListDataItem radListDataItem = new RadListDataItem
+                    RadListDataItem radListDataItem = new()
                     {
                         Text = reader[0].ToString()
                     };
@@ -9800,7 +9670,7 @@ namespace AOVGEN
             }
             
             radGridView.MasterTemplate.AutoGenerateColumns = false;
-            GridViewComboBoxColumn comboCol = new GridViewComboBoxColumn("Описание")
+            GridViewComboBoxColumn comboCol = new("Описание")
             {
               FieldName = "Описание"
                 
@@ -9822,14 +9692,19 @@ namespace AOVGEN
             radGridView.Columns["Описание"].Width = 70;
             radGridView.Columns["Артикул"].Width = 30;
 
-            //radGridView.DataSource = dataSource;
-            //return dataSource;
-
-
-
         }
+       
     }
-    
-
+    internal struct RoomFunc
+    {
+        internal string roomname;
+        internal string roomnum;
+        internal string roomID;
+        internal string levelGUID;
+        internal string levelname;
+        internal string BuildGUID;
+        internal string projectGUID;
+        internal bool RoomPresent;
+    }
 }
 

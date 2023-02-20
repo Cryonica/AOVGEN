@@ -24,7 +24,7 @@ namespace AOVGEN
            
             InitializeComponent();
            
-            SQLiteCommand sQLiteCommand = new SQLiteCommand
+            SQLiteCommand sQLiteCommand = new()
             {
                 Connection = connection,
                 CommandText = "SELECT VendorName FROM Vendors"
@@ -41,11 +41,11 @@ namespace AOVGEN
 
             
             radGridView1.MasterTemplate.AutoGenerateColumns = false;
-            List<string> DBTable = new List<string>
+            List<string> DBTable = new()
             {
                "SensTE", "SensTS", "SensPE", "SensPS", "SensHE", "SensHS"
             };
-            GridViewComboBoxColumn comboCol = new GridViewComboBoxColumn("Тип датчика(*)")
+            GridViewComboBoxColumn comboCol = new("Тип датчика(*)")
             {
                 DataSource = DBTable.ToArray(),
                 FieldName = "Тип датчика(*)"
@@ -53,7 +53,7 @@ namespace AOVGEN
             
             var vendorsarr = VendorsDataTable.AsEnumerable()
                 .Select(r => r.ItemArray[0].ToString());
-            GridViewComboBoxColumn selectvendor = new GridViewComboBoxColumn("Имя вендора(*)")
+            GridViewComboBoxColumn selectvendor = new("Имя вендора(*)")
             {
                 DataSource = vendorsarr,
                 FieldName = "Имя вендора(*)"
@@ -157,14 +157,14 @@ namespace AOVGEN
             radGridView1.RowsChanged -= radGridView1_RowsChanged;
             radGridView1.Rows.Clear();
 
-            List<string> DBTable = new List<string>
+            List<string> DBTable = new()
             {
                "SensTE", "SensTS", "SensPE", "SensPS", "SensHE", "SensHS"
             };
             List<string> vendorsList = VendorsDataTable.AsEnumerable()
                 .Select(r => r.ItemArray[0].ToString())
                 .ToList();
-            List<(string SenstDB, string Vendor)> Listforquery = new List<(string, string)>();
+            List<(string SenstDB, string Vendor)> Listforquery = new();
             foreach (string vendor in vendorsList)
             {
                 foreach (string sens in DBTable)
@@ -172,7 +172,7 @@ namespace AOVGEN
                     Listforquery.Add((vendor, sens));
                 }
             }
-            SQLiteCommand sQLiteCommand = new SQLiteCommand
+            SQLiteCommand sQLiteCommand = new()
             {
                 Connection = connection
             };
@@ -189,7 +189,7 @@ namespace AOVGEN
                     
                     while (reader1.Read())
                     {
-                        GridViewDataRowInfo rowInfo = new GridViewDataRowInfo(radGridView1.MasterView);
+                        GridViewDataRowInfo rowInfo = new(radGridView1.MasterView);
                         rowInfo.Cells[0].Value = cnt;
                         
                         rowInfo.Cells[1].Value = reader1[0].ToString();
@@ -222,7 +222,7 @@ namespace AOVGEN
                     if (dbtable != null && vendorcode != null)
                     {
                         string query = $"SELECT * FROM {dbtable} WHERE VendorCode = '{vendorcode}'";
-                        SQLiteCommand sQLiteCommand = new SQLiteCommand
+                        SQLiteCommand sQLiteCommand = new()
                         {
                             Connection = connection,
                             CommandText = query
@@ -285,7 +285,7 @@ namespace AOVGEN
                         }
                         if (!string.IsNullOrEmpty(columnname))
                         {
-                            SQLiteCommand command = new SQLiteCommand
+                            SQLiteCommand command = new()
                             {
                                 Connection = connection,
                                 CommandText = $"UPDATE {e.Row.Cells[6].Value} SET {columnname}  = '{e.Row.Cells[e.Column.Index].Value}' WHERE VendorCode = '{e.Row.Cells[3].Value}'"
@@ -329,7 +329,7 @@ namespace AOVGEN
                     {
                         if (!isupdated)
                         {
-                            SQLiteCommand command = new SQLiteCommand
+                            SQLiteCommand command = new()
                             {
                                 Connection = connection,
                                 CommandText = $"INSERT INTO {u1[6]} (VendorName, BlockName, VendorCode, Assignment, Description) " +

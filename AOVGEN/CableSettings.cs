@@ -34,7 +34,7 @@ namespace AOVGEN
         {
 
             Bitmap bmp = ReadBitmap(radDropDownList1.Text);
-            CableImage cableImage = new CableImage
+            CableImage cableImage = new()
             {
                 Bitmap = bmp
             };
@@ -45,7 +45,7 @@ namespace AOVGEN
         private void bunifuImageButton3_Click(object sender, EventArgs e)
         {
             Bitmap bmp = ReadBitmap(radDropDownList3.Text);
-            CableImage cableImage = new CableImage
+            CableImage cableImage = new()
             {
                 Bitmap = bmp
             };
@@ -55,7 +55,7 @@ namespace AOVGEN
         private void bunifuImageButton4_Click(object sender, EventArgs e)
         {
             Bitmap bmp = ReadBitmap(radDropDownList5.Text);
-            CableImage cableImage = new CableImage
+            CableImage cableImage = new()
             {
                 Bitmap = bmp
             };
@@ -65,7 +65,7 @@ namespace AOVGEN
         private void bunifuImageButton5_Click(object sender, EventArgs e)
         {
             Bitmap bmp = ReadBitmap(radDropDownList7.Text);
-            CableImage cableImage = new CableImage
+            CableImage cableImage = new()
             {
                 Bitmap = bmp
             };
@@ -83,7 +83,7 @@ namespace AOVGEN
                 if (connection.State == ConnectionState.Open)
                 {
                     string querycabletypes = "SELECT DISTINCT CableType FROM CableTypes";
-                    SQLiteCommand command = new SQLiteCommand
+                    SQLiteCommand command = new()
                     {
                         Connection = connection,
                         CommandText = querycabletypes
@@ -176,7 +176,7 @@ namespace AOVGEN
             connection.Open();
             if (connection.State == ConnectionState.Open)
             {
-                SQLiteCommand command = new SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = connection,
                     CommandText = query
@@ -201,8 +201,7 @@ namespace AOVGEN
             {
                 using (SQLiteConnection connection = OpenDB())
                 {
-                    SQLiteCommand command = new SQLiteCommand
-                    { Connection = connection };
+                    SQLiteCommand command = new() { Connection = connection };
                     var query = $"SELECT CrossSection FROM CableTypes WHERE CableType = '{cablename}'";
                     command.CommandText = query;
                     connection.Open();
@@ -232,7 +231,7 @@ namespace AOVGEN
         private DataTable GetPresetCables(string building, string signaltype)
         {
             string query = string.Empty;
-            DataTable dataTable = new DataTable();
+            DataTable dataTable = new();
             switch (signaltype)
             {
                 case "A":
@@ -255,7 +254,7 @@ namespace AOVGEN
                 connection.Open();
                 if (connection.State == ConnectionState.Open)
                 {
-                    SQLiteCommand command = new SQLiteCommand { Connection = connection, CommandText = query };
+                    SQLiteCommand command = new() { Connection = connection, CommandText = query };
 
                     using (SQLiteDataReader reader = command.ExecuteReader())
                     {
@@ -282,7 +281,7 @@ namespace AOVGEN
 
             try
             {
-                SQLiteConnection connection = new SQLiteConnection(connectionstr);
+                SQLiteConnection connection = new(connectionstr);
                 return connection;
             }
             catch
@@ -361,7 +360,7 @@ namespace AOVGEN
                         connection.Open();
                         if (connection.State == ConnectionState.Open)
                         {
-                            SQLiteCommand command = new SQLiteCommand
+                            SQLiteCommand command = new()
                             {
                                 Connection = connection,
                                 CommandText = query
@@ -417,7 +416,7 @@ namespace AOVGEN
                 SQLiteConnection connection = OpenDB();
                 connection.Open();
 
-                SQLiteCommand command = new SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = connection,
                     CommandText = query
@@ -492,10 +491,10 @@ namespace AOVGEN
                 $"SELECT CablePresets.CableP FROM CablePresets WHERE CablePresets.BuildingType = '{SelectedPreset}' ";
             SQLiteConnection connection = OpenDB();
             connection.Open();
-            SQLiteCommand command = new SQLiteCommand { Connection = connection, CommandText = query };
+            SQLiteCommand command = new() { Connection = connection, CommandText = query };
             using (SQLiteDataReader reader = command.ExecuteReader())
             {
-                DataTable dataTable = new DataTable();
+                DataTable dataTable = new();
                 dataTable.Load(reader);
                 reader.Close();
                 List<string> cabs = (from row in dataTable.AsEnumerable()
@@ -553,7 +552,7 @@ namespace AOVGEN
                 connection.Open();
                 if (connection.State == ConnectionState.Open)
                 {
-                    SQLiteCommand command = new SQLiteCommand { Connection = connection, CommandText = query };
+                    SQLiteCommand command = new() { Connection = connection, CommandText = query };
                     using (SQLiteDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -573,13 +572,13 @@ namespace AOVGEN
             }
             if (imagepath != string.Empty)
             {
-                using (WebClient wc = new WebClient())
+                using (WebClient wc = new())
                 {
                     try
                     {
                         wc.DownloadData(imagepath);
                         byte[] bytes = wc.DownloadData(imagepath);
-                        MemoryStream ms = new MemoryStream(bytes);
+                        MemoryStream ms = new(bytes);
                         Image pic = Image.FromStream(ms);
                         bitmap = (Bitmap)pic;
                         return bitmap;

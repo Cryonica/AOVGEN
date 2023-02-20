@@ -1,9 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using GKS_ASU_Loader;
-using  System.ServiceModel;
+using System.ServiceModel;
 using System.ServiceModel.Description;
 
 namespace AOVGEN
@@ -16,7 +15,7 @@ namespace AOVGEN
         {
             //Service = externalService;
             string uri = "net.tcp://localhost:6565/";
-            NetTcpBinding binding = new NetTcpBinding(SecurityMode.None)
+            NetTcpBinding binding = new(SecurityMode.None)
             {
                 MaxBufferPoolSize = 2147483647,
                 MaxBufferSize = 2147483647,

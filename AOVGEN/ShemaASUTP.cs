@@ -3,17 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AOVGEN.Models;
 using AutoCAD; //using Autodesk.AutoCAD.Runtime;
 
 namespace AOVGEN
 {
 #pragma warning disable IDE1006
-     class ShemaASUTP
+    class ShemaASUTP
     {
         #region Set Autocad windw to front
         [DllImport("user32.dll")]
@@ -43,9 +45,9 @@ namespace AOVGEN
         internal VentSystem curVentSystem;
 
         AcadDocument acadDoc;
-        
-        delegate AcadAttributeReference GetAttrib (AcadBlockReference acadBlock, string attrname);
-        delegate AcadDynamicBlockReferenceProperty GetProperty (AcadBlockReference acadBlock, string propertyName);
+
+        delegate AcadAttributeReference GetAttrib(AcadBlockReference acadBlock, string attrname);
+        delegate AcadDynamicBlockReferenceProperty GetProperty(AcadBlockReference acadBlock, string propertyName);
         #endregion
         #region Set user classes
         protected class BlockTroubleException : Exception
@@ -65,7 +67,7 @@ namespace AOVGEN
             public BlockTroubleException(string message, Exception innerException)
                 : base(message, innerException)
             { }
-            
+
 
         }
         #endregion
@@ -88,8 +90,8 @@ namespace AOVGEN
             Rot.EnumRunning(out var monikerEnumerator);
             if (monikerEnumerator == null) return null;
             monikerEnumerator.Reset();
-            List<object> instances = new List<object>();
-            IntPtr pNumFetched = new IntPtr();
+            List<object> instances = new();
+            IntPtr pNumFetched = new();
             IMoniker[] monikers = new IMoniker[1];
             // go through all entries and identifies app instances
             while (monikerEnumerator.Next(1, monikers, pNumFetched) == 0)
@@ -139,10 +141,10 @@ namespace AOVGEN
                     .Cast<dynamic>()
                     .FirstOrDefault(e => ((string)e.Version).Contains("23"));
             }
-            
+
             (string path, string progID) Acad2019;
             Acad2019.progID = "AutoCAD.Application";
-            Acad2019.path = @"\Autodesk\AutoCAD 2019\acad.exe";
+            Acad2019.path = @"\Autodesk\AutoCAD 2020\acad.exe";
             dynamic Acad2019COM = null;
             Task<dynamic> StartAcadTask = null;
             try
@@ -160,7 +162,9 @@ namespace AOVGEN
             catch
             {
                 //cadApp = StartAutocad(Acad2019); //MessageBox.Show("Не нашел акад");
+
             }
+
 
             StartAcadTask?.Wait();
             if (Acad2019COM == null)
@@ -169,11 +173,11 @@ namespace AOVGEN
                 Acad2019COM = Marshal.GetActiveObject(Acad2019.progID);
                 if (Acad2019COM == null) return result;
             }
-            
+
             try
             {
                 AcadApplication acadApp = Acad2019COM;
-                IntPtr hWnd = new IntPtr(Acad2019COM.HWND);
+                IntPtr hWnd = new(Acad2019COM.HWND);
                 if (hWnd != IntPtr.Zero)
                 {
                     SetForegroundWindow(hWnd);
@@ -196,8 +200,8 @@ namespace AOVGEN
                         AcadBlocks blocks = acadDocument.Blocks;
                         if (blocks.Count <= 0) continue;
                         AcadBlock podval = (from AcadBlock block in blocks
-                            where block.Name == "Подвал1"
-                            select block).FirstOrDefault();
+                                            where block.Name == "Подвал1"
+                                            select block).FirstOrDefault();
                         if (podval == null) continue;
                         acadDoc = acadDocument;
                         acadDoc.Activate();
@@ -208,9 +212,9 @@ namespace AOVGEN
 
                 if (acadDoc == null)
                 {
-                        
-                        
-                    string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\ShchemaASU.dwt";
+
+
+                    string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Autodesk\Revit\Addins\2022\ASU\AOVGen\ShchemaASU.dwt";
                     acadDoc = acadApp.Documents.Add(docpath);
                     acadDoc.Activate();
                 }
@@ -229,7 +233,7 @@ namespace AOVGEN
                     const string caption = "Ошибка!";
                     MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 }
-                    
+
 
                 return 0;
                 //MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
@@ -250,7 +254,7 @@ namespace AOVGEN
             //startPnt[0] += size;
 
             AcadBlockReference acadBlock = blockObj1;
-            ArrayList list = new ArrayList
+            ArrayList list = new()
             {
                 acadBlock,
                 size
@@ -259,7 +263,7 @@ namespace AOVGEN
             return list;
 
         }
-        internal  T KeyByValue<T, W>(Dictionary<T, W> dict, W val)
+        internal T KeyByValue<T, W>(Dictionary<T, W> dict, W val)
         {
             T key = default;
             foreach (KeyValuePair<T, W> pair in dict)
@@ -272,125 +276,29 @@ namespace AOVGEN
             }
             return key;
         }
-
-        [Serializable] //обязательный атрибут, без него нельзя получить hash от класса/структуры. Этот атрибут говорит что поля можно представить в виде структуры, которую можно выгрузить, например, в xml или json. Но мне это нужно для того чтобы получить из структуры поток байтов, которые я и буду прогонять через md5 hash
-        private struct SignificantInfo
-        {
-
-            internal string md5hashSens; //в ней, собственно, хранить буду имена блоков для схемы автоматизации
-            internal string md5hashFiltr;
-            internal string md5hashVent;
-            internal string md5hashDamp;
-            internal string md5hashSupplyVent;
-            internal string md5hashExtVentPressure;
-            internal string md5hashSupplyVentControl;
-            internal string md5hashExtVentControl;
-            internal string md5hashSupplyVentPressure;
-
-
-        }
-        
         private List<(Pannel, Dictionary<string, List<VentSystem>>)> CheckEqual()
         {
 
             List<(Pannel, Dictionary<string, List<VentSystem>>)> ssList =
-                new List<(Pannel, Dictionary<string, List<VentSystem>>)>(); //созадем список из кортежа вида (шкаф, словарь(md5Hash, список систм))
+                new(); //созадем список из кортежа вида (шкаф, словарь(md5Hash, список систм))
             foreach (var keyvalues in VentSystemS)
             {
                 var equalDictionary = new Dictionary<string, List<VentSystem>>();//инициализируем пустой словарь
                 var ventsystems = keyvalues.Value;//
+                
                 foreach (var (_, ventSystem) in ventsystems)//начинаем перебор вент.систем
                 {
-                    var Posinfos = ventSystem.ComponentsV2; //захватываем компоненты вент.системы
-                    bool SupplyVentPresent = Posinfos //вычисляем, есть ли в вент.системе приточный вентилятор
-                        .FirstOrDefault(e => e.Tag is SupplyVent || e.Tag is SpareSuplyVent) != null;
-                    bool ExtVentPresent = Posinfos //вычисляем, есть ли вытяжной вентилятор
-                        .FirstOrDefault(e => e.Tag is ExtVent || e.Tag is SpareExtVent) != null;
-                    if (true) //если вент.система содержит и приточный и вытяжной вентилятор
+                    var MD5Hash = ventSystem.GetHashCode();
+
+                    if (!equalDictionary.ContainsKey(MD5Hash)) //проверяем словарь. если нет такого хэша в словаре
                     {
-                        SignificantInfo significantInfo = new SignificantInfo();//создаем экземпляр структуры
-                        foreach (var component in from posInfo in Posinfos where (posInfo.Tag != null) select posInfo.Tag) //начинаем перебирать Posinfo в компонентах
-                        {
-                            switch (component.GetType().Name) //прыгаем по условиям в зависимости от имени компонента. Я проверяю только вот эти элементы
-                            {
-                                case nameof(ExtVent): //вытяжной вентилятор
-                                    ExtVent extVent = (ExtVent)component;
-                                    significantInfo.md5hashVent = extVent.ShemaASU.ShemaUp; //и  в структуру со значимой инфой кладу названия блоков для схемы автоматизации
-                                    if (extVent._PressureContol != null)
-                                    {
-                                        significantInfo.md5hashExtVentPressure =extVent._PressureContol.ShemaASU.ShemaUp;
-                                    }
-
-                                    significantInfo.md5hashExtVentControl = extVent.ControlType.ToString();
-                                    break;
-                                case nameof(SpareExtVent): //сдвоенный вытяжной
-                                    ExtVent mainExtVent = ((SpareExtVent)component).MainExtVent; //у сдвоенного я забираю инфу у основного вытяжного вентилятора, тк у резервного тоже самое
-                                    significantInfo.md5hashVent =mainExtVent.ShemaASU.ShemaUp;
-                                    if (mainExtVent._PressureContol != null)
-                                    {
-                                        significantInfo.md5hashExtVentPressure =mainExtVent._PressureContol.ShemaASU.ShemaUp; //если есть датчик перепада то забираю его название
-                                    }
-                                    significantInfo.md5hashExtVentControl = mainExtVent.ControlType.ToString();
-                                    break;
-                                case nameof(SupplyVent): //приточный вентилятор
-                                    SupplyVent supplyVent = (SupplyVent)component;
-                                    significantInfo.md5hashSupplyVent = supplyVent.ShemaASU.ShemaUp; //и  в структуру со значимой инфой кладу названия блоков для схемы автоматизации
-                                    if (supplyVent._PressureContol != null)
-                                    {
-                                        significantInfo.md5hashSupplyVentPressure = supplyVent._PressureContol.ShemaASU.ShemaUp;
-                                    }
-
-                                    significantInfo.md5hashSupplyVentControl = supplyVent.ControlType.ToString();
-                                    break;
-                                case nameof(SpareSuplyVent): //сдвоенный приточный
-                                    SupplyVent mainSupplyVent = ((SpareSuplyVent)component).MainSupplyVent; //у сдвоенного я забираю инфу у основного вытяжного вентилятора, тк у резервного тоже самое
-                                    significantInfo.md5hashVent = mainSupplyVent.ShemaASU.ShemaUp;
-                                    if (mainSupplyVent._PressureContol != null)
-                                    {
-                                        significantInfo.md5hashSupplyVentPressure = mainSupplyVent._PressureContol.ShemaASU.ShemaUp; //если есть датчик перепада то забираю его название
-                                    }
-                                    significantInfo.md5hashSupplyVentControl = mainSupplyVent.ControlType.ToString();
-                                    break;
-                                case nameof(CrossSection): //воздуховод
-                                    CrossSection crossSection = (CrossSection)component;
-                                    if (crossSection._SensorT != null)//там есть датчик Т
-                                    {
-                                        significantInfo.md5hashSens = crossSection._SensorT.ShemaASU.ShemaUp;
-                                    }
-
-                                    break;
-                                case nameof(ExtDamper): //вытяжную заслонку
-                                    significantInfo.md5hashDamp = ((ExtDamper)component).ShemaASU.ShemaUp;
-                                    break;
-                                case nameof(Filtr): //фильр, вытяжной фильтр
-                                case nameof(ExtFiltr):
-                                    significantInfo.md5hashFiltr = ((Filtr)component).ShemaASU.ShemaUp;
-                                    break;
-                            }
-
-                        } //в общем, в результате я получаю структуру со значимой информацией, а именно 5 полей
-
-                        string MD5Hash = EditorV2.MD5HashGenerator.GenerateKey(significantInfo); //генерирую хэш для этой структуры
-                        if (!equalDictionary.ContainsKey(MD5Hash)) //проверяем словарь. если нет такого хэша в словаре
-                        {
-                            equalDictionary.Add(MD5Hash, new List<VentSystem> { ventSystem });//создаем ключ = хэшу и список, куда кладем нашу вент.систему
-
-                        }
-                        else
-                        {
-                            var ventSystems = equalDictionary[MD5Hash]; //а если есть такой ключ, то вынимаем список по ключу
-                            ventSystems.Add(ventSystem); //и добавляем в этот список нашу вент.систему
-                        }
+                        equalDictionary.Add(MD5Hash, new List<VentSystem> { ventSystem });//создаем ключ = хэшу и список, куда кладем нашу вент.систему
                     }
-                    else //а если есть приточный вентилятор в вент.системе
+                    else
                     {
-                        string MD5Hash = EditorV2.MD5HashGenerator.GenerateKey(ventSystem.GUID); //то я тупо генерирую хэш от GUID вент.системы 
-                        if (!equalDictionary.ContainsKey(MD5Hash))
-                        {
-                            equalDictionary.Add(MD5Hash, new List<VentSystem> {ventSystem});//и кладу в словарь список с вент.системой. в результате приточки всегда будут считаться уникальными и у них всегда будет список из 1 вент.агрегата
-                        }
-                    } //таким образом, алгоритм нацелен на выявление отдельных вент.систем, которые не содержат приточных вентиляторов, то есть только вытяжки обычные
-                    
+                        var ventSystems = equalDictionary[MD5Hash]; //а если есть такой ключ, то вынимаем список по ключу
+                        ventSystems.Add(ventSystem); //и добавляем в этот список нашу вент.систему
+                    }
                 }
                 (Pannel, Dictionary<string, List<VentSystem>>) myTuple; //создаем кортеж, в который кладем щит и наш словарь
                 myTuple.Item1 = keyvalues.Key;
@@ -437,14 +345,15 @@ namespace AOVGEN
                 int maxYline = 0;
                 int maxXline = 0;
 
-
                 nonUniqueSystems = null;
+                nonUniqueSystemsNames = null;
+
                 var ConnectedVents = SplitList.Item2;
 
                 cnt = 1;
                 //AI = DI = AO = DO = 0;
                 double XOffsetForNextSystem = 0;
-                nonUniqueSystemsNames = null;
+                
 
                 foreach (var keyValues in ConnectedVents)
                 {
@@ -458,7 +367,6 @@ namespace AOVGEN
                     nonUniqueSystemsNames = VentSystems
                         .Select(e => e.SystemName)
                         .ToList();
-                    
 
                     curVentSystem = VentSystems[0]; //и вот еще, я всегда из списка забираю 1 элемент, вне зависимости от того, уникальный он или нет. если он уникальный, то он и так будет всего 1 в списке. а если не уникальный, то я забираю первый из них. ибо вторые и дальше мне как бы не нужны. единственное чего не реализовано, так это подсчет DI/DO
 
@@ -1212,692 +1120,7 @@ namespace AOVGEN
             }
             
             
-            //foreach (var systemlist in VentSystemS.Values)
-            //{
-            //    cnt = 1;
-            //    AI = DI = AO = DO = 0;
-            //    double XOffsetForNextSystem = 0;
-                
-            //    //look over array with ventsystems
-            //    foreach (var tuple in systemlist)
-            //    {
-            //        VentSystem ventSystem = tuple.Item2;
-
-
-            //        int maxYline = ventSystem.ComponentsV2
-            //            .Max(e => e.PozY);
-            //        double YOffsetByCompLine = maxYline > 1 ? 197 : 74;
-            //        ventcompcnt = 0;
-            //        startPnt[0] = xi + XOffsetForNextSystem; //смещение по Х для следующей вент.системы
-            //        startPnt[1] = yi + YOffsetForNextPannel; //смещение по Y если новый шкаф
-            //        shapkaPnt = new double[3] { startPnt[0], basementPnt[1]+ YOffsetForNextPannel - YOffsetByCompLine, basementPnt[2] };
-            //        var basement = acadDoc.ModelSpace.InsertBlock(shapkaPnt, "Подвал1", 1, 1, 1, 0, Type.Missing);
-
-
-            //        pannel = GetKeyFromValue(VentSystemS, systemlist);
-                    
-
-            //        ventSystem.ComponentsV2 = ventSystem.ComponentsV2
-            //            .OrderBy(x => x.PozX)
-            //            .ToList()
-            //            .OrderBy(y => y.PozY)
-            //            .ToList();
-
-
-                    
-
-            //        #region NewVers
-                   
-            //        {
-            //            AcadBlockReference acadBlock = null;
-            //            GetAttrib posname = GetAttrFromBlock;
-            //            GetAttrib link = GetAttrFromBlock;
-            //            if (ventSystem.ComponentsV2.Count==0) return;
-                        
-            //            foreach (EditorV2.PosInfo posInfo in ventSystem.ComponentsV2)
-            //            {
-            //                object component = posInfo.Tag;
-            //                shemaASU = null;
-            //                switch (component.GetType().Name)
-            //                {
-            //                    case nameof(CrossSection):
-            //                    case nameof(Room):
-            //                        {
-            //                            dynamic comp = component;
-            //                            shemaASU = comp.ShemaASU;
-            //                            if (shemaASU != null)
-            //                            {
-            //                                acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                                shemaASU = null;
-            //                            }
-            //                            shemaASU = comp._SensorT?.ShemaASU;
-            //                            if (shemaASU != null)
-            //                            {
-            //                                if (comp._SensorH == null)
-            //                                {
-            //                                    switch(component.GetType().Name)
-            //                                    {
-            //                                        case nameof(Room):
-            //                                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo, new double[] { 25, 33 });
-            //                                            break;
-            //                                        case nameof(CrossSection):
-            //                                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo, new double[] { 25, 33 });
-            //                                            break;
-            //                                    }
-                                                
-            //                                }
-            //                                else
-            //                                {
-            //                                    switch (component.GetType().Name)
-            //                                    {
-            //                                        case nameof(Room):
-            //                                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo, new double[] { 12.5, 33 });
-            //                                            break;
-            //                                        case nameof(CrossSection):
-            //                                            SetCrossSectionShemaASUName();
-            //                                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo, new double[] { 12.5, 33 });
-            //                                            break;
-            //                                    }
-            //                                    void SetCrossSectionShemaASUName()
-            //                                    {
-
-            //                                       // "cross1", "cross1T", "cross1TH", "cross2", "cross3", "cross4", "cross5", "cross6", "cross7", "cross8", "cross9", "cross10", "cross11"
-
-
-                                                    
-
-            //                                    }
-                                                
-            //                                }
-                                            
-            //                                posname(acadBlock, "POSNAME").TextString = comp._SensorT.PosName;
-            //                                link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                                shemaASU.ShemaLink1 = cnt;
-            //                                shemaASU.Description1 = comp._SensorT.Description;
-            //                                cnt++;
-            //                                shemaASU = null;
-            //                            }
-            //                            shemaASU = comp._SensorH?.ShemaASU;
-            //                            if (shemaASU != null)
-            //                            {
-            //                                acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo, new double[] { 37.5, 33 });
-            //                                posname(acadBlock, "POSNAME").TextString = comp._SensorH.PosName;
-            //                                link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                                shemaASU.ShemaLink1 = cnt;
-            //                                shemaASU.Description1 = comp._SensorH.Description;
-            //                                cnt++;
-            //                                shemaASU = null;
-                                            
-                                            
-            //                            }
-            //                        }
-            //                        break;
-            //                    case nameof(OutdoorTemp):
-            //                        OutdoorTemp outdoorTemp = (OutdoorTemp)component;
-            //                        shemaASU = outdoorTemp.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        posname(acadBlock, "POSNAME").TextString = outdoorTemp.PosName;
-            //                        link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                        shemaASU.ShemaLink1 = cnt;
-            //                        shemaASU.Description1 = outdoorTemp.Description;
-            //                        cnt++;
-
-            //                        break;
-            //                    case nameof(SupplyDamper):
-            //                    case nameof(ExtDamper):
-            //                        dynamic Damper = component;
-            //                        if (component.GetType().Name == nameof(SupplyDamper))
-            //                        {
-            //                            OutdoorTemp outdoor = Damper.outdoorTemp;
-            //                            if (outdoor != null)
-            //                            {
-            //                                shemaASU = outdoor.ShemaASU;
-                                            
-
-            //                                acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo, new double[] { 13, 32.67, 0});
-            //                                posname(acadBlock, "POSNAME").TextString = outdoor.PosName;
-            //                                link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                                shemaASU.ShemaLink1 = cnt;
-            //                                shemaASU.Description1 = outdoor.Description;
-            //                                cnt++;
-
-            //                            }
-            //                        }
-            //                        shemaASU = Damper.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        posname(acadBlock, "POSNAME").TextString = Damper.PosName;
-            //                        link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                        shemaASU.ShemaLink1 = cnt;
-            //                        shemaASU.Description1 = Damper.Description1;
-            //                        cnt++;
-            //                        break;
-            //                   case nameof(Recuperator):
-            //                        Recuperator recuperator = (Recuperator)component;
-            //                        shemaASU = recuperator.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        switch (recuperator._RecuperatorType)
-            //                        {
-            //                            case Recuperator.RecuperatorType.Recirculation:
-            //                                posname(acadBlock, "POSNAME_ACTUATOR1").TextString = recuperator.Drive1.Posname;
-            //                                posname(acadBlock, "POSNAME_ACTUATOR2").TextString = recuperator.Drive2.Posname;
-            //                                posname(acadBlock, "POSNAME_ACTUATOR3").TextString = recuperator.Drive3.Posname;
-            //                                link(acadBlock, "LINK1").TextString = cnt.ToString();
-            //                                recuperator.Drive1.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.Drive1.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.Drive1.Description;
-            //                                cnt++;
-            //                                link(acadBlock, "LINK2").TextString = (cnt).ToString();
-            //                                recuperator.Drive2.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.Drive2.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.Drive2.Description;
-            //                                cnt++;
-            //                                link(acadBlock, "LINK3").TextString = (cnt).ToString();
-            //                                recuperator.Drive3.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.Drive3.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.Drive3.Description;
-            //                                cnt++;
-            //                                break;
-            //                            case Recuperator.RecuperatorType.RotorControl:
-            //                                posname(acadBlock, "POSNAME_ACTUATOR").TextString = recuperator.Drive1.Posname;
-            //                                link(acadBlock, "LINK1").TextString = cnt.ToString();
-            //                                recuperator.Drive1.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.Drive1.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.Drive1.Description;
-            //                                cnt++;
-            //                                posname(acadBlock, "POSNAME_PRESD").TextString = recuperator.protectSensor2.PosName;
-            //                                link(acadBlock, "LINK2").TextString = cnt.ToString();
-            //                                recuperator.protectSensor2.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.protectSensor2.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.protectSensor2.Description;
-            //                                cnt++;
-            //                                break;
-            //                            case Recuperator.RecuperatorType.LaminatedNoBypass:
-            //                                posname(acadBlock, "POSNAME_PRESD").TextString = recuperator.protectSensor2.PosName;
-            //                                link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                                recuperator.protectSensor2.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.protectSensor2.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.protectSensor2.Description;
-            //                                cnt++;
-            //                                break;
-            //                            case Recuperator.RecuperatorType.LaminatedBypass:
-            //                                posname(acadBlock, "POSNAME_TEMP").TextString = recuperator.protectSensor1.PosName;
-            //                                link(acadBlock, "LINK1").TextString = cnt.ToString();
-            //                                recuperator.protectSensor1.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.protectSensor1.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.protectSensor1.Description;
-            //                                cnt++;
-            //                                posname(acadBlock, "POSNAME_BYPASS").TextString = recuperator.Drive1?.Posname;
-            //                                link(acadBlock, "LINK2").TextString = cnt.ToString();
-            //                                recuperator.Drive1.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.Drive1.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.Drive1.Description;
-            //                                cnt++;
-            //                                posname(acadBlock, "POSNAME_PRESD").TextString = recuperator.protectSensor2?.PosName;
-            //                                link(acadBlock, "LINK3").TextString = cnt.ToString();
-            //                                recuperator.protectSensor2.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.protectSensor2.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.protectSensor2.Description;
-            //                                cnt++;
-
-            //                                break;
-            //                            case Recuperator.RecuperatorType.Glycol:
-            //                                posname(acadBlock, "POSNAME_VALVE").TextString = recuperator.Drive1?.Posname;
-            //                                posname(acadBlock, "POSNAME_PUMP").TextString = recuperator.Drive2?.Posname;
-            //                                posname(acadBlock, "POSNAME_PRESD").TextString = recuperator.protectSensor2.PosName;
-            //                                link(acadBlock, "LINK1").TextString = cnt.ToString();
-            //                                recuperator.Drive1.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.Drive1.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.Drive1.Description;
-            //                                cnt++;
-            //                                link(acadBlock, "LINK2").TextString = (cnt).ToString();
-            //                                recuperator.Drive2.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.Drive2.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.Drive2.Description;
-            //                                cnt++;
-            //                                link(acadBlock, "LINK3").TextString = (cnt).ToString();
-            //                                recuperator.protectSensor2.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = recuperator.protectSensor2.ShemaASU;
-            //                                shemaASU.Description1 = recuperator.protectSensor2.Description;
-            //                                cnt++;
-            //                                break;
-            //                        }
-            //                        break;
-            //                    case nameof(SupplyVent):
-            //                    case nameof(ExtVent):
-
-            //                        dynamic vent = component;
-            //                        shemaASU = vent.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        Vent.AHUContolType aHUContolType = vent.ControlType;
-            //                        switch (aHUContolType)
-            //                        {
-            //                            case Vent.AHUContolType.Direct:
-            //                                posname(acadBlock, "POSNAME").TextString = vent.PosName;
-            //                                link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                                break;
-            //                            case Vent.AHUContolType.Soft:
-            //                            case Vent.AHUContolType.FCControl:
-            //                            case Vent.AHUContolType.Transworm:
-            //                                posname(acadBlock, "POSNAME1").TextString = vent.PosName;
-            //                                link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                                posname(acadBlock, "POSNAME2").TextString = "RO";
-            //                                break;
-                                        
-            //                        }
-                                    
-            //                        shemaASU.ShemaLink1 = cnt;
-            //                        //shemaASU.Description = vent.Description;
-            //                        cnt++;
-            //                        if (vent._PressureContol != null)
-            //                        {
-            //                            PressureContol pressureContol = vent._PressureContol;
-            //                            shemaASU = pressureContol.ShemaASU;
-                                        
-            //                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                            posname(acadBlock, "POSNAME").TextString = pressureContol.PosName;
-            //                            link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                            shemaASU.ShemaLink1 = cnt;
-            //                            shemaASU.Description1 = pressureContol.Description;
-            //                            cnt++;
-
-            //                        }
-            //                        break;
-            //                    case nameof(SpareSuplyVent):
-            //                    case nameof(SpareExtVent):
-            //                        dynamic sparevent = component;
-            //                        dynamic MainVent = null;
-            //                        dynamic Reserved = null;
-            //                        switch (component.GetType().Name)
-            //                        {
-            //                            case nameof(SpareSuplyVent):
-            //                                MainVent = sparevent.MainSupplyVent;
-            //                                Reserved = sparevent.ReservedSupplyVent;
-            //                                break;
-            //                            case nameof(SpareExtVent):
-            //                                MainVent = sparevent.MainExtVent;
-            //                                Reserved = sparevent.ReservedExtVent;
-            //                                break;
-            //                        }
-            //                        shemaASU = sparevent.shemaAsu;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);//отрисовали верхний блок
-            //                        Vent.AHUContolType aHUSpareContolType = sparevent.ControlType;
-            //                        switch (aHUSpareContolType)
-            //                        {
-            //                            case Vent.AHUContolType.Direct:
-            //                                posname(acadBlock, "POSNAME1").TextString = MainVent.PosName; //заполнили поз.1
-            //                                posname(acadBlock, "POSNAME2").TextString = Reserved.PosName; //заполнили поз2
-            //                                link(acadBlock, "LINK1").TextString = cnt.ToString(); //заполнили номер ссылки 1 наверху
-            //                                shemaASU = MainVent.ShemaASU;
-            //                                shemaASU.ShemaLink1 = cnt; //запомнили ссылку 1
-            //                                cnt++; //вот тут будет отрисовка низа
-            //                                link(acadBlock, "LINK2").TextString = cnt.ToString(); //заполнили номер ссылки 2 наверху
-            //                                shemaASU = Reserved.ShemaASU;
-            //                                shemaASU.ShemaLink1 = cnt; //запомнили ссылку 2
-            //                                cnt++;
-            //                                break;
-            //                            case Vent.AHUContolType.Soft:
-            //                            case Vent.AHUContolType.FCControl:
-            //                            case Vent.AHUContolType.Transworm:
-            //                                posname(acadBlock, "POSNAME1").TextString = MainVent.PosName;
-            //                                posname(acadBlock, "POSNAME2").TextString = Reserved.PosName;
-            //                                posname(acadBlock, "POSNAME3").TextString = "RO";
-            //                                posname(acadBlock, "POSNAME4").TextString = "RO";
-            //                                link(acadBlock, "LINK1").TextString = cnt.ToString();
-            //                                shemaASU = MainVent.ShemaASU;
-            //                                shemaASU.ShemaLink1 = cnt;
-            //                                cnt++;
-            //                                link(acadBlock, "LINK2").TextString = cnt.ToString();
-            //                                shemaASU = Reserved.ShemaASU;
-            //                                shemaASU.ShemaLink1 = cnt;
-            //                                cnt++;
-            //                                break;
-                                        
-            //                        }
-
-            //                        if (sparevent._PressureContol != null)
-            //                        {
-            //                            PressureContol pressureContol = sparevent._PressureContol;
-            //                            shemaASU = pressureContol.ShemaASU;
-            //                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                            posname(acadBlock, "POSNAME").TextString = pressureContol.PosName;
-            //                            link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                            shemaASU.ShemaLink1 = cnt;
-            //                            shemaASU.Description1 = pressureContol.Description;
-            //                            cnt++;
-
-            //                        }
-            //                        break;
-                                    
-            //                    case nameof(WaterHeater):
-            //                        WaterHeater waterHeater = (WaterHeater)component;
-            //                        shemaASU = waterHeater.ShemaASU;
-
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        posname(acadBlock, "POSNAME_PUMP").TextString = waterHeater._Pump.PosName; ;
-            //                        posname(acadBlock, "POSNAME_Valve").TextString = waterHeater._Valve.Posname; ;
-            //                        link(acadBlock, "LINK1").TextString = cnt.ToString();
-            //                        if (waterHeater._Pump != null) waterHeater._Pump.ShemaASU.ShemaLink1 = cnt;
-            //                        shemaASU = waterHeater._Pump?.ShemaASU;
-            //                        shemaASU.Description1 = waterHeater._Pump?.Description;
-            //                        cnt++;
-            //                        link(acadBlock, "LINK2").TextString = cnt.ToString();
-            //                        if (waterHeater._Valve != null) waterHeater._Valve.ShemaASU.ShemaLink1 = cnt;
-            //                        shemaASU = waterHeater._Valve?.ShemaASU;
-            //                        shemaASU.Description1 = waterHeater._Valve?.Description;
-            //                        cnt++;
-            //                        if (waterHeater.PS2 != null)
-            //                        {
-            //                            SensorT sensorPS2 = waterHeater.PS2;
-            //                            shemaASU = sensorPS2.ShemaASU;
-            //                            //Сделать блоки с датчиками и без них, не рисовать отдельно датчики
-
-            //                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                            posname(acadBlock, "POSNAME").TextString = waterHeater.PS2.PosName; ;
-            //                            link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                            shemaASU.ShemaLink1 = cnt;
-            //                            shemaASU.Description1 = sensorPS2.Description;
-            //                            cnt++;
-            //                        }
-            //                        if (waterHeater.PS1 != null)
-            //                        {
-            //                            SensorT sensorPS1 = waterHeater.PS1;
-            //                            shemaASU = sensorPS1.ShemaASU;
-            //                            //Сделать блоки с датчиками и без них, не рисовать отдельно датчики
-
-            //                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                            posname(acadBlock, "POSNAME").TextString = waterHeater.PS1.PosName; ;
-            //                            link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                            shemaASU.ShemaLink1 = cnt;
-            //                            shemaASU.Description1 = sensorPS1.Description;
-            //                            cnt++;
-            //                        }
-
-
-            //                        break;
-            //                    case nameof(ElectroHeater):
-            //                        ElectroHeater electroHeater = (ElectroHeater)component;
-            //                        shemaASU = electroHeater.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        posname(acadBlock, "POSNAME").TextString = electroHeater.PosName; ;
-            //                        link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                        shemaASU.ShemaLink1 = cnt;
-            //                        shemaASU.Description1 = electroHeater.Description;
-            //                        cnt++;
-
-            //                        break;
-            //                    case nameof(Froster):
-            //                        Froster froster = (Froster)component;
-            //                        shemaASU = froster.ShemaASU;
-            //                        shemaASU.ShemaLink1 = cnt;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        switch (froster._FrosterType)
-            //                        {
-            //                            case Froster.FrosterType.Freon:
-
-            //                                link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                                shemaASU.ShemaLink1 = cnt;
-            //                                shemaASU.Description1 = froster._KKB.Description;
-            //                                cnt++;
-            //                                break;
-            //                            case Froster.FrosterType.Water:
-            //                                posname(acadBlock, "POSNAME_Valve").TextString = froster._Valve.Posname;
-            //                                link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                                froster._Valve.ShemaASU.ShemaLink1 = cnt;
-            //                                shemaASU = froster._Valve.ShemaASU;
-            //                                shemaASU.Description1 = froster._Valve.Description;
-            //                                cnt++;
-            //                                break;
-            //                        }
-
-            //                        if (froster.Sens1 != null)
-            //                        {
-            //                            Froster.ProtectSensor PS1 = froster.Sens1;
-            //                            shemaASU = PS1.ShemaASU;
-            //                            shemaASU.Description1 = PS1.Description;
-            //                        }
-            //                        if (froster.Sens2 != null)
-            //                        {
-            //                            Froster.ProtectSensor PS2 = froster.Sens2;
-            //                            shemaASU = PS2.ShemaASU;
-            //                            shemaASU.Description1 = PS2.Description;
-            //                        }
-            //                        break;
-            //                    case nameof(Humidifier):
-            //                        Humidifier humidifier = (Humidifier)component;
-            //                        shemaASU = humidifier.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        posname(acadBlock, "POSNAME").TextString = humidifier.PosName;
-            //                        link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                        shemaASU.ShemaLink1 = cnt;
-            //                        shemaASU.Description1 = humidifier.Description;
-            //                        cnt++;
-            //                        if (humidifier.HumSensPresent)
-            //                        {
-
-            //                            shemaASU = humidifier.HumiditySensor.ShemaASU;
-            //                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                            posname(acadBlock, "POSNAME").TextString = humidifier.SensPosName;
-            //                            link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                            shemaASU.ShemaLink1 = cnt;
-            //                            shemaASU.Description1 = humidifier.HumiditySensor.Description;
-            //                            cnt++;
-            //                        }
-
-            //                        break;
-            //                    case nameof(SupplyTemp):
-            //                        SupplyTemp supplyTemp = (SupplyTemp)component;
-            //                        shemaASU = supplyTemp.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        posname(acadBlock, "POSNAME").TextString = supplyTemp.PosName;
-            //                        link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                        shemaASU.ShemaLink1 = cnt;
-            //                        shemaASU.Description1 = supplyTemp.Description;
-            //                        cnt++;
-            //                        break;
-            //                    case nameof(IndoorTemp):
-            //                        IndoorTemp indoorTemp = (IndoorTemp)component;
-            //                        shemaASU = indoorTemp.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        posname(acadBlock, "POSNAME").TextString = indoorTemp.PosName;
-            //                        link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                        shemaASU.ShemaLink1 = cnt;
-            //                        shemaASU.Description1 = indoorTemp.Description;
-            //                        cnt++;
-            //                        break;
-                                
-                                
-            //                    case nameof(ExhaustTemp):
-            //                        ExhaustTemp exhaustTemp = (ExhaustTemp)component;
-            //                        shemaASU = exhaustTemp.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        posname(acadBlock, "POSNAME").TextString = exhaustTemp.PosName;
-            //                        link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                        shemaASU.ShemaLink1 = cnt;
-            //                        shemaASU.Description1 = exhaustTemp.Description;
-            //                        cnt++;
-            //                        break;
-                                
-            //                    case nameof(Filtr):
-            //                    case nameof(ExtFiltr):
-            //                    case nameof(SupplyFiltr):
-            //                        dynamic filtr = component;
-            //                        shemaASU = filtr.ShemaASU;
-            //                        acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                        if (filtr._PressureContol != null)
-            //                        {
-            //                            PressureContol pressureContol = filtr._PressureContol;
-            //                            shemaASU = pressureContol.ShemaASU;
-            //                            acadBlock = DrawUpBlockV2(shemaASU, startPnt, posInfo);
-            //                            posname(acadBlock, "POSNAME").TextString = pressureContol.PosName;
-            //                            link(acadBlock, "LINK").TextString = cnt.ToString();
-            //                            pressureContol.ShemaASU.ShemaLink1 = cnt;
-            //                            shemaASU.Description1 = pressureContol.Description;
-            //                            cnt++;
-            //                        }
-
-            //                        break;
-
-            //                };
-
-
-            //            }
-            //        }
-            //        #endregion
-            //        #region Displacesement for next system
-
-            //        int maxXline = ventSystem.ComponentsV2
-            //            .Max(e => e.PozX);
-            //        double basementoffset = 40 + (ventcompcnt + 3) * 10;
-
-            //        if (maxXline <= 4 && maxYline <=1)
-            //        {
-            //            XOffsetForNextSystem += 420;
-                        
-            //            //draw frame
-            //            AcadBlockReference frameblock = DrawFrame();
-            //            object[] blockproperies = frameblock.GetDynamicBlockProperties();
-            //            object[] basementpropyrties = basement.GetDynamicBlockProperties();
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Выбор формата");
-            //            frameType.ElementAt(0).Value = "A3альбом";
-                        
-            //            //draw stamp
-            //            AcadBlockReference stamp = DrawStamp(frameblock, "A3");
-
-            //            //set basement size
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Расстояние2");
-            //            //basementProp.ElementAt(0).Value -= 77.96;
-            //            basementProp.ElementAt(0).Value = basementoffset;
-            //            YOffsetForNextPannel -= 297;
-
-            //        }
-            //        else if (maxXline >4 && maxXline <= 9 && maxYline <=1) 
-            //        {
-            //            XOffsetForNextSystem += 630;
-
-            //            //draw frame
-            //            AcadBlockReference frameblock = DrawFrame();
-            //            object[] blockproperies = frameblock.GetDynamicBlockProperties();
-            //            object[] basementpropyrties = basement.GetDynamicBlockProperties();
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Выбор формата");
-            //            frameType.ElementAt(0).Value = "А4х3";
-                        
-            //            //draw stamp
-            //            AcadBlockReference stamp = DrawStamp(frameblock, "A4x3");
-
-            //            //set basement size
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Расстояние2");
-            //            basementProp.ElementAt(0).Value = basementoffset;
-            //            YOffsetForNextPannel -= 297;
-
-            //        }
-            //        else if (maxXline > 9 && maxYline <= 1)
-            //        {
-            //            XOffsetForNextSystem += 891;
-
-            //            //draw frame
-            //            AcadBlockReference frameblock = DrawFrame();
-            //            object[] blockproperies = frameblock.GetDynamicBlockProperties();
-            //            object[] basementpropyrties = basement.GetDynamicBlockProperties();
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Выбор формата");
-            //            frameType.ElementAt(0).Value = "А4х4";
-
-            //            //draw stamp
-            //            AcadBlockReference stamp = DrawStamp(frameblock, "А4х4");
-
-            //            //set basement size
-                        
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Расстояние2");
-
-                        
-                        
-            //            basementProp.ElementAt(0).Value = basementoffset;
-            //            YOffsetForNextPannel -= 297;
-
-            //        }
-            //        else if (maxXline > 9 && maxYline > 1)
-            //        {
-            //            XOffsetForNextSystem += 891;
-
-            //            //draw frame
-            //            AcadBlockReference frameblock = DrawFrame();
-            //            object[] blockproperies = frameblock.GetDynamicBlockProperties();
-            //            object[] basementpropyrties = basement.GetDynamicBlockProperties();
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Выбор формата");
-            //            frameType.ElementAt(0).Value = "А3х3";
-
-            //            //draw stamp
-            //            AcadBlockReference stamp = DrawStamp(frameblock, "А3х3");
-
-            //            //set basement size
-
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Расстояние2");
-
-
-
-            //            basementProp.ElementAt(0).Value = basementoffset;
-            //            YOffsetForNextPannel -= 594;
-
-            //        }
-            //        else if (maxYline > 1) //возможно нужно повернуть А3
-            //        {
-            //            AcadBlockReference frameblock = DrawFrame();
-            //            object[] blockproperies = frameblock.GetDynamicBlockProperties();
-            //            object[] basementpropyrties = basement.GetDynamicBlockProperties();
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> frameType = blockproperies.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Выбор формата");
-            //            frameType.ElementAt(0).Value = "А3х3";
-
-            //            //draw stamp
-            //            AcadBlockReference stamp = DrawStamp(frameblock, "А3х3");
-
-            //            //set basement size
-
-            //            IEnumerable<AutoCAD.AcadDynamicBlockReferenceProperty> basementProp = basementpropyrties.OfType<AutoCAD.AcadDynamicBlockReferenceProperty>() //получение свойств
-            //                .Where(i => i.PropertyName == "Расстояние2");
-
-
-
-            //            basementProp.ElementAt(0).Value = basementoffset;
-            //            YOffsetForNextPannel -= 420;
-            //        }
-            //        #endregion
-            //        #region Set basement attributes
-            //        object[] attributes = basement.GetAttributes();
-            //        IEnumerable<AutoCAD.AcadAttributeReference> basementAttribut = attributes.OfType<AcadAttributeReference>()
-            //            .Where(i => i.TagString == "МАРКА_ЩИТА_C");
-            //        basementAttribut.ElementAt(0).TextString = pannel.PannelName;
-            //        #endregion
-            //        //DrawRoomBlock();
-            //    }
-            //    #region Draw dispatching line and calculated IO
-            //    (int, int, int, int) IO = (AI, AO, DI, DO);
-
-            //    if (pannel.Dispatching != Pannel._Dispatching.No)
-            //    {
-            //        MakeDispatcing(shapkaPnt, ventcompcnt + 1, IO);
-            //        MakeDispatchingSignals(shapkaPnt, ventcompcnt + 2, IO);
-
-            //    }
-            //    else
-            //    {
-            //        MakeDispatchingSignals(shapkaPnt, ventcompcnt + 1, IO);
-            //    }
-                
-            //    #endregion
-
-            //    // Set Y offset for next pannel
-            //   //YOffsetForNextPannel -= 297;
-
-
-            //}
+            
             #endregion
         }
         #region Autocad functions
@@ -2080,7 +1303,7 @@ namespace AOVGEN
         private AcadBlockReference DrawStamp(AcadBlockReference frame, string framesize)
         {
             double[] point = new double[3];
-            point[1] = frame.InsertionPoint[1]+5;
+            point[1] = frame.InsertionPoint[1]+5; 
             switch (framesize)
             {
                 case "A3":
@@ -2231,7 +1454,7 @@ namespace AOVGEN
         {
             string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
             string acadfile = programFiles + Acad.path;// + " //product ACAD //language " + '\u0022' + "ru - RU" + '\u0022';
-            Process acadProc = new Process();
+            Process acadProc = new();
             acadProc.StartInfo.FileName = acadfile;
             acadProc.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             try
@@ -2240,6 +1463,8 @@ namespace AOVGEN
             }
             catch
             {
+                //MessageBox.Show($"Не могу найти Autocad по пути \n {acadfile}\nгенерация схем невозомжна");
+                
                 throw new ApplicationException($"Не могу найти Autocad по пути \n {acadfile}\nгенерация схем невозомжна");
             }
             
@@ -2296,7 +1521,7 @@ namespace AOVGEN
                         if (shemaASU.Description1?.Length >32)
                         {
                             char[] chars = shemaASU.Description1.ToCharArray(0, 33);
-                            string s = new string(chars);
+                            string s = new(chars);
                             string[] s2 = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                             var s3 = s2.Take(s.Length - 1);
                             string[] devidedescription = shemaASU.Description1.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

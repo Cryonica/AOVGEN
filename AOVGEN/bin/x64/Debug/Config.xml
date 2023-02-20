@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Config>
+  <DataBase last="true">
+    <DBNAME>data.sqlite</DBNAME> 
+    <DBPATH>%appdata%\Roaming\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\data.sqlite</DBPATH>
+    <USERNAME>admin2</USERNAME>
+  </DataBase>
+  <STARTUP>
+    <SHOWDIALOG>False</SHOWDIALOG>
+  </STARTUP>
+  <Users last="true">
+    <USERNAME>Колтаков</USERNAME>
+  </Users>
+  <Users last="false">
+    <USERNAME>Попова</USERNAME>
+  </Users>
+  <Users last="false">
+    <USERNAME>Мусатов</USERNAME>
+  </Users>
+  <Users last="false">
+    <USERNAME>Задавин</USERNAME>
+  </Users>
+  <Users last="false">
+    <USERNAME>Лачинин</USERNAME>
+  </Users>
+  <Users last="false">
+    <USERNAME>Макаров</USERNAME>
+  </Users>
+  <Users last="false">
+    <USERNAME>Киров</USERNAME>
+  </Users>
+  <Users last="false">
+    <USERNAME>Миронов</USERNAME>
+  </Users>
+</Config>

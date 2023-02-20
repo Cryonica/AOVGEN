@@ -1,4 +1,5 @@
-﻿using AOVGEN.Properties;
+﻿using AOVGEN.Models;
+using AOVGEN.Properties;
 using Bunifu.UI.WinForms;
 using System;
 using System.Collections.Generic;
@@ -29,18 +30,18 @@ namespace AOVGEN
         private Image lastSelectedImage;
         private PosInfo lastPosInfo;
         private object lastComponent;
-        private readonly Dictionary<string, PosInfo> OccupDict = new Dictionary<string, PosInfo>();
+        private readonly Dictionary<string, PosInfo> OccupDict = new();
         private readonly int[] mymas = new int[2];
         private readonly int[] sizeMas = new int[2];
         private string hash;
-        private readonly PosInfo GlobalPosInfo = new PosInfo();
+        private readonly PosInfo GlobalPosInfo = new();
         private bool present;
         private bool isDrag;
-        private Rectangle theRectangle = new Rectangle(new Point(0, 0), new Size(0, 0));
+        private Rectangle theRectangle = new(new Point(0, 0), new Size(0, 0));
         private Point startPoint;
         
 
-        private static readonly Dictionary<string, string> imageDictionary = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> imageDictionary = new()
         {
             {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_T), "room__arrow_supp_exh_T"},
             {MD5HashGenerator.GenerateKey(Resources.room__arrow_supp_exh_T_big), "room__arrow_supp_exh_T_big"},
@@ -256,7 +257,7 @@ namespace AOVGEN
         {
             lastSelectedImage = image;
 
-            DoubleBufferedBunifuImageButton button = new DoubleBufferedBunifuImageButton
+            DoubleBufferedBunifuImageButton button = new()
             {
                 Image = image,
                 Size = new Size(50, 50),
@@ -271,7 +272,7 @@ namespace AOVGEN
             };
             //button.LocationChanged += Button_LocationChanged;
             object comp = CreateComp(type, image);
-            PosInfo posInfo = new PosInfo
+            PosInfo posInfo = new()
             {
                 Tag = comp,
                 ImageName = ImageName.ToString()
@@ -319,7 +320,7 @@ namespace AOVGEN
         {
             lastSelectedImage = image;
             BunifuImageButton bunifuImageButton = (BunifuImageButton)sender;
-            DoubleBufferedBunifuImageButton button = new DoubleBufferedBunifuImageButton
+            DoubleBufferedBunifuImageButton button = new()
             {
                 Image = image,
                 Width = 50,
@@ -334,7 +335,7 @@ namespace AOVGEN
             };
             //button.LocationChanged += Button_LocationChanged;
             object comp = CreateComp(type, image);
-            PosInfo posInfo = new PosInfo
+            PosInfo posInfo = new()
             {
                 Tag = comp,
                 ImageName = ImageName.ToString()
@@ -367,7 +368,7 @@ namespace AOVGEN
                 Zoom = 5
             };
             object comp = CreateComp(type, image);
-            PosInfo posInfo = new PosInfo
+            PosInfo posInfo = new()
             {
                 SizeX = x,
                 SizeY = y,
@@ -388,7 +389,7 @@ namespace AOVGEN
         {
             lastSelectedImage = image;
             BunifuImageButton imageButton = (BunifuImageButton)sender;
-            DoubleBufferedBunifuImageButton button = new DoubleBufferedBunifuImageButton
+            DoubleBufferedBunifuImageButton button = new()
             {
                 Image = image,
                 Width = 50,
@@ -402,7 +403,7 @@ namespace AOVGEN
                 Zoom = 5
             };
             object comp = CreateComp(type, image);
-            PosInfo posInfo = new PosInfo
+            PosInfo posInfo = new()
             {
                 SizeX = x,
                 SizeY = y,
@@ -526,7 +527,7 @@ namespace AOVGEN
 
                     if (MD5HashGenerator.GenerateKey(image) == MD5HashGenerator.GenerateKey(Resources.shutter_right_T))
                     {
-                        SupplyDamper supplyDamper = new SupplyDamper
+                        SupplyDamper supplyDamper = new()
                         {
                             SetSensor = true
                         };
@@ -551,7 +552,7 @@ namespace AOVGEN
             string connectionstr = @"Data Source=" + BDPath + ";";
             try
             {
-                SQLiteConnection Connection = new SQLiteConnection(connectionstr);
+                SQLiteConnection Connection = new(connectionstr);
                 return Connection;
             }
             catch
@@ -564,7 +565,7 @@ namespace AOVGEN
         {
             SQLiteConnection DeleteConnection = OpenDB();
             DeleteConnection.Open();
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = DeleteConnection
             };
@@ -613,7 +614,7 @@ namespace AOVGEN
                 RenameConnection.Open();
                 if (RenameConnection.State == ConnectionState.Open)
                 {
-                    SQLiteCommand command = new SQLiteCommand
+                    SQLiteCommand command = new()
                     {
                         Connection = RenameConnection
                     };
@@ -637,11 +638,11 @@ namespace AOVGEN
                     UpdateCaoonection.Open();
                     if (UpdateCaoonection.State == ConnectionState.Open)
                     {
-                        SQLiteCommand command = new SQLiteCommand
+                        SQLiteCommand command = new()
                         {
                             Connection = UpdateCaoonection
                         };
-                        List<string> updatepannelquery = new List<string>
+                        List<string> updatepannelquery = new()
                         {
                             $"UPDATE VentSystems SET Pannel = '{pannelguid}' WHERE [GUID] = '{newventsystemGUID}'",
                             $"UPDATE VentSystems SET PannelName = '{pannelname}' WHERE [GUID] = '{newventsystemGUID}'"
@@ -668,7 +669,7 @@ namespace AOVGEN
                     string InsertPannelToCableQuery = $"UPDATE Cable SET FromPannel = '{pannelname}', FromGUID = '{pannelguid}' WHERE SystemGUID = '{ventystegGUID}'";
 
                     UpdateCablesConnection.Open();
-                    SQLiteCommand command = new SQLiteCommand
+                    SQLiteCommand command = new()
                     {
                         Connection = UpdateCablesConnection,
                         CommandText = InsertPannelToCableQuery
@@ -685,14 +686,14 @@ namespace AOVGEN
         {
             try
             {
-                SQLiteCommand command = new SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = connection,
                     CommandText = $"SELECT [To], COUNT(*) AS ToCount FROM Cable WHERE SystemGUID = '{systemguid}' GROUP BY [To]"
                 };
                 if (connection.State == ConnectionState.Closed) connection.Open();
                 SQLiteDataReader dataReader = command.ExecuteReader();
-                DataTable dataTable = new DataTable();
+                DataTable dataTable = new();
                 dataTable.Load(dataReader);
                 dataReader.Close();
                 foreach (DataRow dataRow in dataTable.Rows)
@@ -705,7 +706,7 @@ namespace AOVGEN
                                 "ORDER BY Cable.SortPriority;";
                     command.CommandText = query;
                     SQLiteDataReader readerchild = command.ExecuteReader();
-                    DataTable dataTableChild = new DataTable();
+                    DataTable dataTableChild = new();
                     dataTableChild.Load(readerchild);
                     readerchild.Close();
                     if (dataTableChild.Rows.Count <= 0) continue;
@@ -713,7 +714,7 @@ namespace AOVGEN
                     {
                         {
                             DataRow row = dataTableChild.Rows[t1];
-                            Posnames posnames = new Posnames();
+                            Posnames posnames = new();
                             bool writeblock = bool.Parse(row["WriteBlock"].ToString());
                             string hosttable = row["TableForSearch"].ToString();
                             string posguid = row["ToGUID"].ToString();
@@ -771,10 +772,10 @@ namespace AOVGEN
                 })
                 .ToArray()
                 .Sum();
-            SQLiteConnection connection = new SQLiteConnection(connectionstring);
+            SQLiteConnection connection = new(connectionstring);
             connection.Open();
             string UpdatePannelPowerQuery = $"UPDATE Pannel SET Power = '{Power}' WHERE [GUID] = '{pannel.GetGUID()}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = UpdatePannelPowerQuery
@@ -799,10 +800,10 @@ namespace AOVGEN
                 .Cast<IPower>()
                 .FirstOrDefault(e => e.Voltage == ElectroDevice._Voltage.AC380) != null ? Pannel._Voltage.AC380 : Pannel._Voltage.AC220;
 
-            SQLiteConnection connection = new SQLiteConnection(connectionstring);
+            SQLiteConnection connection = new(connectionstring);
             connection.Open();
             string UpdatePannelPowerQuery = $"UPDATE Pannel SET Voltage = '{voltage}' WHERE [GUID] = '{pannel.GetGUID()}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = connection,
                 CommandText = UpdatePannelPowerQuery
@@ -816,9 +817,9 @@ namespace AOVGEN
 
         public static Task<bool> CheckLongPress(BunifuImageButton element, int duration)
         {
-            Timer timer = new Timer();
+            Timer timer = new();
 
-            TaskCompletionSource<bool> task = new TaskCompletionSource<bool>();
+            TaskCompletionSource<bool> task = new();
             timer.Interval = duration;
 
             void touchUpHandler(object sender, MouseEventArgs e)
@@ -865,7 +866,7 @@ namespace AOVGEN
 
         public class MD5HashGenerator
         {
-            private static readonly object locker = new object();
+            private static readonly object locker = new();
 
             /// <summary>
             /// Generates a hashed - key for an instance of a class.
@@ -909,8 +910,8 @@ namespace AOVGEN
             /// <exception cref="SerializationException">Is thrown if something went wrong during serialization.</exception>
             internal static byte[] ObjectToByteArray(object objectToSerialize)
             {
-                MemoryStream fs = new MemoryStream();
-                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream fs = new();
+                BinaryFormatter formatter = new();
                 try
                 {
                     //Here's the core functionality! One Line!
@@ -937,9 +938,9 @@ namespace AOVGEN
 
             internal static object ByteArrayToObject(byte[] bytes)
             {
-                using (MemoryStream ms = new MemoryStream())
+                using (MemoryStream ms = new())
                 {
-                    BinaryFormatter bf = new BinaryFormatter();
+                    BinaryFormatter bf = new();
                     try
                     {
                         lock (locker)
@@ -974,7 +975,7 @@ namespace AOVGEN
 
                     // Build the final string by converting each byte
                     // into hex and appending it to a StringBuilder
-                    StringBuilder sb = new StringBuilder();
+                    StringBuilder sb = new();
                     for (int i = 0; i < result.Length; i++)
                     {
                         sb.Append(result[i].ToString("X2"));
@@ -993,7 +994,7 @@ namespace AOVGEN
         }
         public class FastHash
         {
-            private static readonly object locker = new object();
+            private static readonly object locker = new();
 
             public static string GenerateKey(object sourceObject)
             {
@@ -1014,8 +1015,8 @@ namespace AOVGEN
             }
             private static byte[] ObjectToByteArray(object objectToSerialize)
             {
-                MemoryStream fs = new MemoryStream();
-                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream fs = new();
+                BinaryFormatter formatter = new();
                 try
                 {
                     //Here's the core functionality! One Line!
@@ -1116,7 +1117,7 @@ namespace AOVGEN
 
             internal int[] Size;
             internal object Tag { get; set; }
-            internal string GUID { get; set; }
+            public string GUID { get; set; }
 
             internal PosInfo()
             {

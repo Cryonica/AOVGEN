@@ -7,12 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AOVGEN", "AOVGEN\AOVGEN.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Updater", "Updater\Updater.csproj", "{EDDC8C6F-3269-4F8B-A1E3-ADDB3E7C3F5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GKS_ASU_Loader", "..\GKS_ASU_Loader\GKS_ASU_Loader\GKS_ASU_Loader.csproj", "{F4C0798A-C1E1-43F4-AC80-D3F836E56456}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0B5126A0-B8BB-4EBC-A0BD-99934FAE8E73}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GKS_ASU_Loader", "..\GKS_ASU_Loader\GKS_ASU_Loader.csproj", "{F4C0798A-C1E1-43F4-AC80-D3F836E56456}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

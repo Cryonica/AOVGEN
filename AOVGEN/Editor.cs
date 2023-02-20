@@ -5,7 +5,7 @@ using System.Data.SQLite;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.Wordprocessing;
+using AOVGEN.Models;
 using Telerik.WinControls.UI;
 using WinFormAnimation;
 
@@ -60,7 +60,7 @@ namespace AOVGEN
         {
             if (VentSystem == null)
             {
-                VentSystem myventSystem = new VentSystem();
+                VentSystem myventSystem = new();
                 VentSystem = myventSystem;
                 radAutoCompleteBox1.Text = "VentsystemName;";
             }
@@ -128,7 +128,7 @@ namespace AOVGEN
                         case nameof(Recuperator):
                             radButton3.Tag = VentSystem._Recuperator;
                             pictureBox3.Tag = VentSystem._Recuperator;
-                            pictureBox3.Image = new Bitmap(VentSystem._Recuperator.Imagepath);
+                            //pictureBox3.Image = new Bitmap(VentSystem._Recuperator.Imagepath);
                             pictureBox3.Visible = true;
                             break;
                         case nameof(SupplyTemp):
@@ -185,7 +185,7 @@ namespace AOVGEN
                         break;
 
                     case "Recuperator":
-                        if (radPropertyGrid1.SelectedObject is Recuperator recuperator) pictureBox3.Image = new Bitmap(recuperator.Imagepath);
+                        //if (radPropertyGrid1.SelectedObject is Recuperator recuperator) pictureBox3.Image = new Bitmap(recuperator.Imagepath);
                         break;
                     case "ExtVent":
                         
@@ -308,26 +308,26 @@ namespace AOVGEN
             switch (s.SourceControl.Name) //дальше я начиню смотреть на имя этой кнопки
             {
                 case nameof(radButton2):
-                    SupplyDamper supplyDamper = new SupplyDamper(); //вот тут я создаю экземпляр класса заслонки
+                    SupplyDamper supplyDamper = new(); //вот тут я создаю экземпляр класса заслонки
                     pictureBox4.Visible = true; //включаю картинку
                     VentSystem._SupplyDamper = supplyDamper; //в вент.систему в приточную заслонку кладу саму заслонку
                     pictureBox4.Tag = supplyDamper; //и вот это место, я еще в tag картинки кладу заслонку
                     radPropertyGrid1.SelectedObject = supplyDamper; //ну и контрол свойств назначаю заслонку (чтобы менять свойства у заслонки)
                     break;
                 case nameof(radButton1):
-                    SupplyFiltr supplyFiltr = new SupplyFiltr();
+                    SupplyFiltr supplyFiltr = new();
                     pictureBox1.Visible = true;
                     VentSystem._SupplyFiltr = supplyFiltr;
                     pictureBox1.Tag = supplyFiltr;
                     radPropertyGrid1.SelectedObject = supplyFiltr;
                     break;
                 case nameof(radButton3):
-                    Recuperator recuperator = new Recuperator
+                    Recuperator recuperator = new()
                     {
                         //_RecuperatorType = Recuperator.RecuperatorType.RotorNoControl
                     };
                     pictureBox3.Visible = true;
-                    //pictureBox3.Image = new Bitmap(Recuperator.makeimagepath(Recuperator.RecuperatorType.Recirculation).ToString());
+                    
                     recuperator._RecuperatorType = Recuperator.RecuperatorType.LaminatedBypass;
                     pictureBox3.Image = new Bitmap(recuperator.Imagepath);
                     VentSystem._Recuperator = recuperator;
@@ -335,28 +335,28 @@ namespace AOVGEN
                     radPropertyGrid1.SelectedObject = recuperator;
                     break;
                 case nameof(radButton4):
-                    SupplyVent supplyVent = new SupplyVent();
+                    SupplyVent supplyVent = new();
                     pictureBox6.Visible = true;
                     pictureBox6.Tag = supplyVent;
                     VentSystem._SupplyVent = supplyVent;
                     radPropertyGrid1.SelectedObject = supplyVent;
                     break;
                 case nameof(radButton5):
-                    WaterHeater waterHeater = new WaterHeater();
+                    WaterHeater waterHeater = new();
                     pictureBox7.Visible = true;
                     pictureBox7.Tag = waterHeater;
                     VentSystem._WaterHeater = waterHeater;
                     radPropertyGrid1.SelectedObject = waterHeater;
                     break;
                 case nameof(radButton6):
-                    ElectroHeater electroHeater = new ElectroHeater();
+                    ElectroHeater electroHeater = new();
                     pictureBox8.Visible = true;
                     pictureBox8.Tag = electroHeater;
                     VentSystem._ElectroHeater = electroHeater;
                     radPropertyGrid1.SelectedObject = electroHeater;
                     break;
                 case nameof(radButton7):
-                    Froster froster = new Froster(false);
+                    Froster froster = new(false);
                     pictureBox5.Visible = true;
                     pictureBox5.Tag = froster;
                     VentSystem._Froster = froster;
@@ -364,7 +364,7 @@ namespace AOVGEN
                     radPropertyGrid1.Items["valveType"].Visible = false;
                     break;
                 case nameof(radButton8):
-                    Humidifier humidifier = new Humidifier
+                    Humidifier humidifier = new()
                     {
 
                         HumType = Humidifier._HumType.Steam
@@ -375,21 +375,21 @@ namespace AOVGEN
                     radPropertyGrid1.SelectedObject = humidifier;
                     break;
                 case nameof(radButton11):
-                    ExtFiltr extFiltr = new ExtFiltr();
+                    ExtFiltr extFiltr = new();
                     pictureBox10.Visible = true;
                     pictureBox10.Tag = extFiltr;
                     VentSystem._ExtFiltr = extFiltr;
                     radPropertyGrid1.SelectedObject = extFiltr;
                     break;
                 case nameof(radButton10):
-                    ExtVent extVent = new ExtVent();
+                    ExtVent extVent = new();
                     pictureBox11.Visible = true;
                     pictureBox11.Tag = extVent;
                     VentSystem._ExtVent = extVent;
                     radPropertyGrid1.SelectedObject = extVent;
                     break;
                 case nameof(radButton9):
-                    ExtDamper extDamper = new ExtDamper();
+                    ExtDamper extDamper = new();
                     pictureBox12.Visible = true;
                     pictureBox12.Tag = extDamper;
                     VentSystem._ExtDamper = extDamper;
@@ -397,7 +397,7 @@ namespace AOVGEN
                     break;
                 case nameof(radButton13):
                     
-                    SupplyTemp supplyTemp = new SupplyTemp
+                    SupplyTemp supplyTemp = new()
                     {
                        _SensorType = Sensor.SensorType.Analogue
                     };
@@ -407,7 +407,7 @@ namespace AOVGEN
                     radPropertyGrid1.SelectedObject = supplyTemp;
                     break;
                 case nameof(radButton14):
-                    ExhaustTemp exhaustTemp = new ExhaustTemp
+                    ExhaustTemp exhaustTemp = new()
                     {
                         _SensorType = Sensor.SensorType.Analogue
                     };
@@ -417,7 +417,7 @@ namespace AOVGEN
                     radPropertyGrid1.SelectedObject = exhaustTemp;
                     break;
                 case nameof(radButton15):
-                    OutdoorTemp outdoorTemp = new OutdoorTemp
+                    OutdoorTemp outdoorTemp = new()
                     {
                         _SensorType = Sensor.SensorType.Analogue
                     };
@@ -427,7 +427,7 @@ namespace AOVGEN
                     radPropertyGrid1.SelectedObject = outdoorTemp;
                     break;
                 case nameof(radButton16):
-                    IndoorTemp indoorTemp = new IndoorTemp
+                    IndoorTemp indoorTemp = new()
                     {
                         _SensorType = Sensor.SensorType.Analogue
                     };
@@ -559,7 +559,7 @@ namespace AOVGEN
                 
                 if (connection.State != ConnectionState.Open) return;
                 {
-                    SQLiteCommand command = new SQLiteCommand
+                    SQLiteCommand command = new()
                     {
                         Connection = connection
                     };
@@ -580,7 +580,7 @@ namespace AOVGEN
                   
                    // Make TreeNode in Ventsystems Tree and Update Posnames
                     
-                    RadTreeNode ventsystemnode = new RadTreeNode
+                    RadTreeNode ventsystemnode = new()
                     {
                         Name = VentSystem.GUID,
                         Value = VentSystem.SystemName,
@@ -712,7 +712,7 @@ namespace AOVGEN
         {
             timer1.Start();
 
-            Animator animator = new Animator
+            Animator animator = new()
             {
                 Paths = new Path(1, 0, 400, 100).ToArray()
             };
@@ -729,7 +729,7 @@ namespace AOVGEN
             string connectionstr = @"Data Source=" + BDPath + ";";
             try
             {
-                SQLiteConnection connection = new SQLiteConnection(connectionstr);
+                SQLiteConnection connection = new(connectionstr);
                 return connection;
             }
             catch
@@ -779,7 +779,8 @@ namespace AOVGEN
 
             //execute delete query from databse//
 
-            using (SQLiteCommand command = new SQLiteCommand { Connection = connection })
+            using (SQLiteCommand command = new()
+            { Connection = connection })
             {
                 List<string> DeleteQuery = tablesForDelete
                     .Select(GenDeleteCommand)
@@ -805,7 +806,7 @@ namespace AOVGEN
                 connection.Open();
                 if (connection.State == ConnectionState.Open)
                 {
-                    SQLiteCommand command = new SQLiteCommand
+                    SQLiteCommand command = new()
                     {
                         Connection = connection
                     };
@@ -829,11 +830,11 @@ namespace AOVGEN
                     connection.Open();
                     if (connection.State == ConnectionState.Open)
                     {
-                        SQLiteCommand command = new SQLiteCommand
+                        SQLiteCommand command = new()
                         {
                             Connection = connection
                         };
-                        List<string> updatepannelquery = new List<string>
+                        List<string> updatepannelquery = new()
                         {
                             $"UPDATE VentSystems SET Pannel = '{pannelguid}' WHERE [GUID] = '{newventsystemGUID}'",
                             $"UPDATE VentSystems SET PannelName = '{pannelname}' WHERE [GUID] = '{newventsystemGUID}'"
@@ -866,7 +867,7 @@ namespace AOVGEN
                     connection.Open();
                     if (connection.State == ConnectionState.Open)
                     {
-                        SQLiteCommand command = new SQLiteCommand
+                        SQLiteCommand command = new()
                         {
                             Connection = connection
                         };
@@ -889,19 +890,19 @@ namespace AOVGEN
               
                 string Numbering = $"SELECT [To], COUNT(*) AS ToCount FROM Cable WHERE SystemGUID = '{systemguid}' GROUP BY [To]";
 
-                SQLiteCommand command = new SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = Connection
                 };
-                SQLiteCommand command1 = new SQLiteCommand
+                SQLiteCommand command1 = new()
                 {
                     Connection = Connection
                 };
-                SQLiteCommand command2 = new SQLiteCommand
+                SQLiteCommand command2 = new()
                 {
                     Connection = Connection
                 };
-                SQLiteCommand command3 = new SQLiteCommand
+                SQLiteCommand command3 = new()
                 {
                     Connection = Connection
                 };
@@ -918,7 +919,7 @@ namespace AOVGEN
                     int cnt = 1;
                     while (readerchild1.Read())
                     {
-                        Posnames posnames = new Posnames();
+                        Posnames posnames = new();
                         bool writeblock = bool.Parse(readerchild1[4].ToString());
                         string hosttable = readerchild1[5].ToString();
                         string posguid = readerchild1[1].ToString();
@@ -998,13 +999,13 @@ namespace AOVGEN
         {
             
             string findventsGUID = $"Select GUID FROM VentSystems WHERE Pannel = '{pannel.GetGUID()}'";
-            SQLiteCommand command = new SQLiteCommand
+            SQLiteCommand command = new()
             {
                 Connection = Connection,
                 CommandText = findventsGUID
             };
             command.CommandText = findventsGUID;
-            List<string> VSGuids = new List<string>();
+            List<string> VSGuids = new();
             using (SQLiteDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())

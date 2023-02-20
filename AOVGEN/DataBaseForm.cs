@@ -14,7 +14,6 @@ using GKS_ASU_Loader;
 using Telerik.WinControls.UI;
 using WinFormAnimation;
 using Path = System.IO.Path;
-using Timer = System.Timers.Timer;
 
 namespace AOVGEN
 {
@@ -26,9 +25,25 @@ namespace AOVGEN
         {
             InitializeComponent();
             Icon = Resources.DataBaseIcon;
-            LoadXML();
+            try
+            {
+                LoadXML();
+            }
+            catch { };
+            
             AnimationEmergence();
             Service = externalService;
+        }
+        public DataBaseForm()
+        {
+            InitializeComponent();
+            Icon = Resources.DataBaseIcon;
+            try
+            {
+                LoadXML();
+            }
+            catch { };
+            AnimationEmergence();
         }
 
         public string Configpath { get; set; }
@@ -127,10 +142,10 @@ namespace AOVGEN
 
         private void LoadXML()
         {
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new();
             string path = @"%AppData%";
             path = Environment.ExpandEnvironmentVariables(path);
-            path += @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\";
+            path += @"\Autodesk\Revit\Addins\2020\ASU\AOVGen\";
             doc.Load(path + @"Config.xml");
             Xmldoc = doc;
             Configpath = path + "Config.xml";
@@ -166,7 +181,7 @@ namespace AOVGEN
 
                     if (dbpath != string.Empty)
                     {
-                        ListViewDataItem listViewDataItem = new ListViewDataItem
+                        ListViewDataItem listViewDataItem = new()
                         {
                             Text = dbpath
                         };
@@ -180,12 +195,6 @@ namespace AOVGEN
             radListView1.SelectedIndex = trueindex;
             XmlNodeList showdialognodes = documentElement?.SelectNodes("/Config/STARTUP/SHOWDIALOG");
            
-
-            if (showdialognodes != null && showdialognodes.Item(0)?.InnerText == "True")
-            {
-                
-            }
-            
             radDropDownList1.DataSource = (from XmlNode user in users
                                           let u = user.InnerText
                                           let xmlAttributeCollection = user.Attributes
@@ -195,7 +204,7 @@ namespace AOVGEN
                                           .Select(e=> 
                                           {
                                               var (u, l) = e;
-                                              RadListDataItem radListDataItem = new RadListDataItem
+                                              RadListDataItem radListDataItem = new()
                                               {
                                                   Text = u,
                                                   Tag = Convert.ToBoolean(l)
@@ -267,7 +276,7 @@ namespace AOVGEN
             }
             catch 
             {
-                Thread thread = new Thread(()=> ShowMessage("Не нужно менять фамилии"));
+                Thread thread = new(()=> ShowMessage("Не нужно менять фамилии"));
                 thread.Start();
                 RadButton2_Click(this, EventArgs.Empty);
                 connectOK = false;
@@ -300,7 +309,7 @@ namespace AOVGEN
                         connectionstr = "Data Source=" + BDPath;
                         try
                         {
-                            SQLiteConnection connection = new SQLiteConnection(connectionstr);
+                            SQLiteConnection connection = new(connectionstr);
                             connection.Open();
                             if (connection.State == ConnectionState.Open) connectOK = true;
                             connection.Close();
@@ -320,7 +329,7 @@ namespace AOVGEN
                         try
                         {
                                 
-                            OleDbConnection connection = new OleDbConnection(connectionstr);
+                            OleDbConnection connection = new(connectionstr);
                             connection.Open();
                             if (connection.State == ConnectionState.Open) connectOK = true;
                             connection.Close();
@@ -337,12 +346,12 @@ namespace AOVGEN
             }
 
             if (!connectOK) return;
-            Thread _thread = new Thread(() =>
+            Thread _thread = new(() =>
             {
                 if (Service != null)
                 {
                     string username = radDropDownList1.Text;
-                    MainForm mainForm = new MainForm(DBFileName, BDPath, DataBaseType, Service, username);
+                    MainForm mainForm = new(DBFileName, BDPath, DataBaseType, Service, username);
                     mainForm.Load += MainForm_Load;
                     Application.Run(mainForm);
                             
@@ -351,7 +360,7 @@ namespace AOVGEN
                 else
                 {
                     string username = radDropDownList1.Text;
-                    MainForm mainForm = new MainForm(DBFileName, BDPath, DataBaseType, username);
+                    MainForm mainForm = new(DBFileName, BDPath, DataBaseType, username);
                     mainForm.Load += MainForm_Load;
                     Application.Run(mainForm);
                     mainForm.Load += MainForm_Load;
@@ -362,13 +371,13 @@ namespace AOVGEN
             _thread.SetApartmentState(ApartmentState.STA);
             _thread.Start();
             
-            System.Windows.Forms.Timer t = new System.Windows.Forms.Timer
+            System.Windows.Forms.Timer t = new()
             {
                 Interval = 10 // specify interval time as you want
             };
             t.Tick += Timer_Tick;
             Visible = false;
-            Loading loading = new Loading();
+            Loading loading = new();
             loading.Show();
             t.Start();
             
@@ -384,7 +393,7 @@ namespace AOVGEN
                 string consql = "Data Source=" + BDPath;
                 try
                 {
-                    SQLiteConnection connection = new SQLiteConnection(consql);
+                    SQLiteConnection connection = new(consql);
                     connection.Open();
                     if (connection.State == ConnectionState.Open)
                     {
@@ -403,7 +412,7 @@ namespace AOVGEN
                 string connectionstr = "Provider=" + FindProvider() + ";Data Source=" + BDPath + ";";
                 try
                 {
-                    OleDbConnection connection = new OleDbConnection(connectionstr);
+                    OleDbConnection connection = new(connectionstr);
                     connection.Open();
                     if (connection.State == ConnectionState.Open)
                     {
@@ -425,7 +434,7 @@ namespace AOVGEN
             //new Animator2D(new Path2D(806, 0, 0, 0, 400)
             //    .ContinueTo(50, 0, 150))
             //    .Play(pictureBox1, Animator2D.KnownProperties.Location);
-            Animator animator = new Animator
+            Animator animator = new()
             {
                 Paths = new WinFormAnimation.Path(0, 1, 200, 100).ToArray()
             };

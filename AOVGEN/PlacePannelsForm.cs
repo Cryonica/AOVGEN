@@ -14,7 +14,7 @@ namespace AOVGEN
     {
         private readonly RadTreeView LevelsTree;
         private readonly Dictionary<string, List<string>> FamDictionary;
-        public List<(string, string, string, string, string, string, string, string, string, double)> listinfo = new List<(string, string, string, string, string, string, string, string, string, double)>();
+        public List<(string, string, string, string, string, string, string, string, string, double)> listinfo = new();
         public PlacePannelsForm(RadTreeView radTreeView, Dictionary<string, List<string>> famdict)
         {
             LevelsTree = radTreeView;
@@ -66,7 +66,7 @@ namespace AOVGEN
                     radDropDownList1.Items.Add(famtypes.Key);
                 }
 
-                DataTable datatable = new DataTable("PannelsTable");
+                DataTable datatable = new("PannelsTable");
                 datatable.Columns.Add("ID", typeof(string));
                 datatable.Columns.Add("Имя шкафа", typeof(string));
                 datatable.Columns.Add("Уровень", typeof(string));
@@ -79,13 +79,13 @@ namespace AOVGEN
                 datatable.Columns.Add("Высота установки", typeof(double));
                 datatable.Columns.Add("RevitInfo", typeof(RevitDataInfo));
 
-                List<string> list = new List<string>();
+                List<string> list = new();
                 for (int t = 1; t <= 10; t++)
                 {
                     list.Add(t.ToString());
                 }
 
-                GridViewComboBoxColumn comboCol1 = new GridViewComboBoxColumn("Тип семейства")
+                GridViewComboBoxColumn comboCol1 = new("Тип семейства")
                 {
                     DataSource = FamDictionary.Keys.ToArray(),
 
@@ -94,7 +94,7 @@ namespace AOVGEN
 
 
                 };
-                GridViewComboBoxColumn comboCol2 = new GridViewComboBoxColumn("Имя семейства")
+                GridViewComboBoxColumn comboCol2 = new("Имя семейства")
                 {
                     //DataSource = list.ToArray(),
                     FieldName = "Имя семейства"
@@ -146,7 +146,7 @@ namespace AOVGEN
                         drToAdd["Уровень"] = Level;
                         drToAdd["Помещение"] = Room;
                         drToAdd["Мощность"] = pannel.Power;
-                        RevitDataInfo revitDataInfo = new RevitDataInfo
+                        RevitDataInfo revitDataInfo = new()
                         {
                             PannelName = pannel.PannelName,
                             PannelPower = pannel.Power,

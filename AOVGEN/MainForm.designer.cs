@@ -1333,7 +1333,7 @@ namespace AOVGEN
             // 
             // ribbonTab6
             // 
-            this.ribbonTab6.IsSelected = true;
+            this.ribbonTab6.IsSelected = false;
             this.ribbonTab6.Items.AddRange(new Telerik.WinControls.RadItem[] {
             this.radRibbonBarGroup9});
             this.ribbonTab6.Name = "ribbonTab6";
@@ -1379,7 +1379,7 @@ namespace AOVGEN
             // 
             // ribbonTab5
             // 
-            this.ribbonTab5.IsSelected = false;
+            this.ribbonTab5.IsSelected = true;
             this.ribbonTab5.Items.AddRange(new Telerik.WinControls.RadItem[] {
             this.radRibbonBarGroup5,
             this.radRibbonBarGroup6});

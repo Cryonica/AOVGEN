@@ -123,7 +123,7 @@ namespace AOVGEN
 
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            ArrayList values = new ArrayList();
+            ArrayList values = new();
             FieldInfo[] fis = _val.GetFields();
             foreach (FieldInfo fi in fis)
             {

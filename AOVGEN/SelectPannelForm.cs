@@ -15,7 +15,7 @@ namespace AOVGEN
 {
     public partial class SelectPannelForm : RadForm
     {
-        private readonly List<RadTreeNode> radTreeNodes = new List<RadTreeNode>();
+        private readonly List<RadTreeNode> radTreeNodes = new();
         internal Dictionary<string, Pannel> CheckedItems;
         SQLiteConnection connection;
 
@@ -54,7 +54,7 @@ namespace AOVGEN
                 connection = OpenDB();
                 connection.Open();
             }
-            SQLiteCommand command = new SQLiteCommand { Connection = connection };
+            SQLiteCommand command = new() { Connection = connection };
             foreach (Pannel pannel in Pannels)
             {
                 radCheckedListBox1.Items.Add(CreateItem(pannel, command));
@@ -94,11 +94,11 @@ namespace AOVGEN
             string query = $"SELECT Cable.GUID FROM Cable WHERE FromGUID = '{pannel.GetGUID()}'";
             command.CommandText = query;
             SQLiteDataReader reader = command.ExecuteReader();
-            DataTable dt = new DataTable();
+            DataTable dt = new();
             dt.Load(reader);
             int numRows = dt.Rows.Count;
-            ArrayList arrayList = new ArrayList();
-            ListViewDataItem item = new ListViewDataItem
+            ArrayList arrayList = new();
+            ListViewDataItem item = new()
             {
                 Image = new Bitmap(Resources.documents_32__1_),
                 Text = pannel.PannelName
@@ -153,7 +153,7 @@ namespace AOVGEN
             string connectionstr = @"Data Source=" + BDPath + ";";
             try
             {
-                SQLiteConnection connection = new SQLiteConnection(connectionstr);
+                SQLiteConnection connection = new(connectionstr);
                 return connection;
             }
             catch { }

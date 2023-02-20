@@ -58,7 +58,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>latest</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -78,6 +78,11 @@
     <ApplicationIcon>AOVGENico.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AdWindows, Version=3.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Revit_All_Main_Versions_API_x64.2021.1.4\lib\net48\AdWindows.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="AutoUpdater.NET, Version=1.7.0.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
       <HintPath>..\packages\Autoupdater.NET.Official.1.7.0\lib\net45\AutoUpdater.NET.dll</HintPath>
     </Reference>
@@ -109,6 +114,16 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="RevitAPI, Version=21.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Revit_All_Main_Versions_API_x64.2021.1.4\lib\net48\RevitAPI.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RevitAPIUI, Version=21.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Revit_All_Main_Versions_API_x64.2021.1.4\lib\net48\RevitAPIUI.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -159,6 +174,11 @@
     <Reference Include="TelerikCommon, Version=2019.2.618.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL">
       <HintPath>..\lib\RCWF\2019.2.618.40\TelerikCommon.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="UIFramework, Version=21.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Revit_All_Main_Versions_API_x64.2021.1.4\lib\net48\UIFramework.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="WinFormAnimation, Version=1.6.0.4, Culture=neutral, PublicKeyToken=310fd07b25df79b3, processorArchitecture=MSIL">
@@ -255,7 +275,54 @@
     <Compile Include="MainForm.designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\Cable.cs" />
+    <Compile Include="Models\CrossSection.cs" />
+    <Compile Include="Models\Damper.cs" />
+    <Compile Include="Models\Drive.cs" />
+    <Compile Include="Models\Dummy.cs" />
+    <Compile Include="Models\ElectroDevice.cs" />
+    <Compile Include="Models\ElectroHeater.cs" />
+    <Compile Include="Models\ExhaustTemp.cs" />
+    <Compile Include="Models\ExtDamper.cs" />
+    <Compile Include="Models\ExtFiltr.cs" />
+    <Compile Include="Models\ExtVent.cs" />
+    <Compile Include="Models\FControl.cs" />
+    <Compile Include="Models\Filtr.cs" />
+    <Compile Include="Models\Froster.cs" />
+    <Compile Include="Models\Humidifier.cs" />
+    <Compile Include="Models\HumiditySens.cs" />
+    <Compile Include="Models\ICompGUID.cs" />
+    <Compile Include="Models\IGetSensors.cs" />
+    <Compile Include="Models\IndoorTemp.cs" />
+    <Compile Include="Models\IPower.cs" />
+    <Compile Include="Models\ISchemaASU.cs" />
+    <Compile Include="Models\IVendoInfo.cs" />
+    <Compile Include="Models\KKB.cs" />
+    <Compile Include="Models\OutdoorTemp.cs" />
+    <Compile Include="Models\PressureContol.cs" />
+    <Compile Include="Models\PropertyDescriptorExtensions.cs" />
+    <Compile Include="Models\Pump.cs" />
+    <Compile Include="Models\Recuperator.cs" />
+    <Compile Include="Models\Room.cs" />
+    <Compile Include="Models\Sensor.cs" />
+    <Compile Include="Models\SensorT.cs" />
+    <Compile Include="Models\ShemaASU.cs" />
+    <Compile Include="Models\ShemaASUbase.cs" />
+    <Compile Include="Models\Singleton.cs" />
+    <Compile Include="Models\SpareExtVent.cs" />
+    <Compile Include="Models\SpareSuplyVent.cs" />
+    <Compile Include="Models\SupplyDamper.cs" />
+    <Compile Include="Models\SupplyFiltr.cs" />
+    <Compile Include="Models\SupplyTemp.cs" />
+    <Compile Include="Models\SupplyVent.cs" />
+    <Compile Include="Models\Valve.cs" />
+    <Compile Include="Models\Vent.cs" />
+    <Compile Include="Models\WaterHeater.cs" />
     <Compile Include="Pannel.cs" />
+    <Compile Include="ParsePreset\ISetParam.cs" />
+    <Compile Include="ParsePreset\SetParamContext.cs" />
+    <Compile Include="ParsePreset\SetParamsBase.cs" />
+    <Compile Include="ParsePreset\SetPresetParams.cs" />
     <Compile Include="PlacePannelsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -499,11 +566,12 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\GKS_ASU_Loader\GKS_ASU_Loader\GKS_ASU_Loader.csproj">
+    <ProjectReference Include="..\..\GKS_ASU_Loader\GKS_ASU_Loader.csproj">
       <Project>{f4c0798a-c1e1-43f4-ac80-d3f836e56456}</Project>
       <Name>GKS_ASU_Loader</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

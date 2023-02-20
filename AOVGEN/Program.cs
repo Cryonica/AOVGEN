@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.ServiceModel;
-using System.Text;
 using System.Windows.Forms;
 using GKS_ASU_Loader;
 
@@ -19,7 +16,6 @@ namespace AOVGEN
         [STAThread]
         private static void Main()
         {
-           
             CheckExistApp();
             CheckUpdate();
             IRevitExternalService revitService = CheckRevvitConnections();
@@ -32,16 +28,6 @@ namespace AOVGEN
                 if (Process.GetProcessesByName("AOVGEN").Length <= 1) return;
                 MessageBox.Show("Приложение уже запущено");
                 Environment.Exit(1);
-
-                //var present = Process
-                //    .GetProcesses()
-                //    .Where(e => e.ProcessName == Process.GetCurrentProcess().ProcessName)
-                //    .ToList();
-                //if (present.Count > 1)
-                //{
-                //    MessageBox.Show("Приложение уже запущено");
-                //    Environment.Exit(1);
-                //}
             }
             void CheckUpdate()
             {
@@ -63,8 +49,8 @@ namespace AOVGEN
                 else
                 {
                     MessageBox.Show("Похоже, проблема с доступом на сервер группы автоматизации");
-                    Environment.Exit(1);
-                    return;
+                    //Environment.Exit(1);
+                   
                 }
 
             }
@@ -75,7 +61,7 @@ namespace AOVGEN
                 {
 
                     ChannelFactory<IRevitExternalService> channelFactory =
-                        new ChannelFactory<IRevitExternalService>("IRevitExternalService");
+                        new("IRevitExternalService");
                     service = channelFactory.CreateChannel();
 
                 }
@@ -91,7 +77,14 @@ namespace AOVGEN
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new DataBaseForm(externalService));
+                if (externalService != null)
+                {
+                    Application.Run(new DataBaseForm(externalService));
+                }
+                else
+                {
+                    Application.Run(new DataBaseForm());
+                }
 
             }
 #endregion

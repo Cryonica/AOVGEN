@@ -1,11 +1,11 @@
-﻿using AutoCAD; //using Autodesk.AutoCAD.Runtime;
+﻿using AOVGEN.Models;
+using AutoCAD; //using Autodesk.AutoCAD.Runtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
@@ -120,7 +120,7 @@ namespace AOVGEN
             {
                 AcadApplication acadApp = Acad2019COM;
                 {
-                    IntPtr hWnd = new IntPtr(Acad2019COM.HWND);
+                    IntPtr hWnd = new(Acad2019COM.HWND);
                     if (hWnd != IntPtr.Zero)
                     {
                         SetForegroundWindow(hWnd);
@@ -162,7 +162,7 @@ namespace AOVGEN
                     if (acadDoc == null)
                     {
                         string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                         @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\Blocks.dwt";
+                                         @"\Autodesk\Revit\Addins\2022\ASU\AOVGen\Blocks.dwt";
                         acadDoc = acadApp.Documents.Add(docpath);
                         TableExternalConnectionDocName = acadDoc.Name;
                         //acadDoc.Activate();
@@ -183,11 +183,11 @@ namespace AOVGEN
                         return 0;
                     }
 
-                    Dictionary<string, List<Cable>> allcables = new Dictionary<string, List<Cable>>();
+                    Dictionary<string, List<Cable>> allcables = new();
                     level3.AsParallel().ForAll(keyValuePair1 =>
                     {
                         Dictionary<string, Dictionary<string, List<Cable>>> level2 = keyValuePair1.Value;
-                        List<Cable> cablelist = new List<Cable>();
+                        List<Cable> cablelist = new();
                         foreach (var ventcompdic in
                             from keyValuePair in level2
                             let ventname = keyValuePair.Key
@@ -407,8 +407,8 @@ namespace AOVGEN
             Rot.EnumRunning(out var monikerEnumerator);
             if (monikerEnumerator == null) return null;
             monikerEnumerator.Reset();
-            List<object> instances = new List<object>();
-            IntPtr pNumFetched = new IntPtr();
+            List<object> instances = new();
+            IntPtr pNumFetched = new();
             IMoniker[] monikers = new IMoniker[1];
             // go through all entries and identifies app instances
             while (monikerEnumerator.Next(1, monikers, pNumFetched) == 0)
@@ -428,12 +428,12 @@ namespace AOVGEN
         }
         #region Custom Exception
 
-        private readonly List<AcadBlockReference> cableP3_Down = new List<AcadBlockReference>();
-        private readonly List<AcadBlockReference> cableP5_Down = new List<AcadBlockReference>();
-        private readonly Dictionary<string, Pannel> checkedpannels = new Dictionary<string, Pannel>();
-        private readonly Dictionary<Cable.CableAttribute, AcadBlockReference> firstCable = new Dictionary<Cable.CableAttribute, AcadBlockReference>();
+        private readonly List<AcadBlockReference> cableP3_Down = new();
+        private readonly List<AcadBlockReference> cableP5_Down = new();
+        private readonly Dictionary<string, Pannel> checkedpannels = new();
+        private readonly Dictionary<Cable.CableAttribute, AcadBlockReference> firstCable = new();
         private readonly Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> level3;
-        private readonly Dictionary<string, VentSystem> ventsystemDict = new Dictionary<string, VentSystem>();
+        private readonly Dictionary<string, VentSystem> ventsystemDict = new();
         private readonly bool writecabeP;
         private readonly bool writecablePump;
         private readonly bool writecableValve;
@@ -467,7 +467,7 @@ namespace AOVGEN
         {
             string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
             string acadfile = programFiles + Acad.path;// + " //product ACAD //language " + '\u0022' + "ru - RU" + '\u0022';
-            Process acadProc = new Process();
+            Process acadProc = new();
             acadProc.StartInfo.FileName = acadfile;
             acadProc.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             try
@@ -1150,7 +1150,7 @@ namespace AOVGEN
             var minPoint = (double[])minPt;
             var maxPoint = (double[])maxPt;
             var size = maxPoint[0] - minPoint[0];
-            ArrayList list = new ArrayList
+            ArrayList list = new()
             {
                 blockObj1,
                 size

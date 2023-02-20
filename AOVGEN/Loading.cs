@@ -7,7 +7,7 @@ namespace AOVGEN
     public partial class Loading : RadForm
     {
         private readonly string SendMeString;
-        public event Action<int> Progress;
+        //public event Action<int> Progress;
 
         protected internal virtual void OnProgress(int obj)
         {

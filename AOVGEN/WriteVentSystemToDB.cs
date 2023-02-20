@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AOVGEN.Models;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
@@ -18,10 +19,10 @@ namespace AOVGEN
 			bool writevalvecable = false;
 			string sensguid1 = string.Empty;
 			string query = $"SELECT WritePumpCable, WriteValveCable FROM BuildSetting WHERE Place = '{Building.BuildGUID}'";
-			SQLiteConnection connection = new SQLiteConnection(connectionstr);
+			SQLiteConnection connection = new(connectionstr);
 			connection.Open();
-			SQLiteCommand command = new SQLiteCommand
-			{
+			SQLiteCommand command = new()
+            {
 				Connection = connection,
 				CommandText = query
 			};
@@ -74,8 +75,8 @@ namespace AOVGEN
 						supplyFiltrList.AsParallel()
 							.ForAll(posinfo =>
 							{
-								SupplyFiltr supplyFiltr = new SupplyFiltr //создаем экземпляр именно приточного фильтра
-							{
+								SupplyFiltr supplyFiltr = new()
+                                {
 									PressureProtect = ((Filtr)posinfo.Tag).PressureProtect,
 									_PressureContol =
 									{
@@ -94,7 +95,7 @@ namespace AOVGEN
 							{
 								((CrossSection)posinfo.Tag)._SensorT = new SupplyTemp //тут аналогично с воздуховодом. мы класс sensorT заменяем на SupplyTemp
 							{
-									_SensorType = ((CrossSection)posinfo.Tag).sensorTType,
+									_SensorType = ((CrossSection)posinfo.Tag).SensorTType,
 									Location = "Supply"
 								};
 							});
@@ -154,7 +155,7 @@ namespace AOVGEN
 								{
 									((CrossSection)pos.Tag)._SensorT = new ExhaustTemp
 									{
-										_SensorType = ((CrossSection)pos.Tag).sensorTType,
+										_SensorType = ((CrossSection)pos.Tag).SensorTType,
 										Location = "Exhaust"
 									};
 								});
@@ -284,7 +285,7 @@ namespace AOVGEN
 								var ventguid = Guid.NewGuid().ToString();
 								SupplyVent supplyVent = (SupplyVent)item.Tag; //прямое преобразование item к причтоному вентилятору чтобы были доступны свойства его
 								
-								Vent.FControl fControl = supplyVent._FControl;
+								FControl fControl = supplyVent._FControl;
 								string voltage = supplyVent.Voltage.ToString();
 								string controltype = supplyVent.ControlType.ToString();
 								string power = supplyVent.Power;
@@ -320,7 +321,7 @@ namespace AOVGEN
                                     Cable Cab5 = pressureContol.Cable1;
                                     if (Cab5 != null)
                                     {
-                                        string senstype = pressureContol.SensorType.ToString();
+                                        string senstype = pressureContol._SensorType.ToString();
                                         const string senscat = "Pressure";
                                         string sensblockname = Cab5.ToBlockName;
                                         string sensposname = Cab5.ToPosName;
@@ -367,7 +368,7 @@ namespace AOVGEN
 								var ventguid = Guid.NewGuid().ToString();
 								ExtVent extVent = (ExtVent)item.Tag;
 								extVent.GUID = ventguid;
-								Vent.FControl fControl = extVent._FControl;
+								FControl fControl = extVent._FControl;
 								PressureContol pressureContol = extVent._PressureContol;
 								string voltage1 = extVent.Voltage.ToString();
 								string controltype1 = extVent.ControlType.ToString();
@@ -403,7 +404,7 @@ namespace AOVGEN
                                     Cable Cab5 = ExtVentPressureContol.Cable1;
                                     if (Cab5 != null)
                                     {
-                                        string senstype = pressureContol.SensorType.ToString();
+                                        string senstype = pressureContol._SensorType.ToString();
                                         const string senscat = "Pressure";
                                         string sensblockname = Cab5.ToBlockName;
                                         string sensposname = Cab5.ToPosName;
@@ -456,7 +457,7 @@ namespace AOVGEN
                                 Cable Cab5 = pressureContol?.Cable1;
 								if (Cab5 != null)
 								{
-									string senstype = pressureContol.SensorType.ToString();
+									string senstype = pressureContol._SensorType.ToString();
 									const string senscat = "Pressure";
 									string sensblockname = Cab5.ToBlockName;
 									string sensposname = Cab5.ToPosName;
@@ -506,7 +507,7 @@ namespace AOVGEN
 								Cable Cab5 = pressureContol?.Cable1;
 								if (Cab5 != null)
 								{
-									string senstype = pressureContol.SensorType.ToString();
+									string senstype = pressureContol._SensorType.ToString();
 									const string senscat = "Pressure";
 									string sensblockname = Cab5.ToBlockName;
 									string sensposname = Cab5.ToPosName;
@@ -557,7 +558,7 @@ namespace AOVGEN
 								Cable Cab1 = pressureContol?.Cable1;
 								if (Cab1 != null)
 								{
-									string senstype = pressureContol.SensorType.ToString();
+									string senstype = pressureContol._SensorType.ToString();
 									const string senscat = "Pressure";
 									string sensblockname = pressureContol.Blockname;
 									string sensposname = pressureContol.PosName;
@@ -596,7 +597,7 @@ namespace AOVGEN
 								Cable Cab1 = pressureContol?.Cable1;
 								if (Cab1 != null)
 								{
-									string senstype = pressureContol.SensorType.ToString();
+									string senstype = pressureContol._SensorType.ToString();
 									const string senscat = "Pressure";
 									string sensblockname = pressureContol.Blockname;
 									string sensposname = pressureContol.PosName;
@@ -634,7 +635,7 @@ namespace AOVGEN
 								Cable Cab1 = pressureContol?.Cable1;
 								if (Cab1 != null)
 								{
-									string senstype = pressureContol.SensorType.ToString();
+									string senstype = pressureContol._SensorType.ToString();
 									const string senscat = "Pressure";
 									string sensblockname = pressureContol.Blockname;
 									string sensposname = pressureContol.PosName;
@@ -671,7 +672,7 @@ namespace AOVGEN
 								string blockname = supplyDamper.BlockName;
 								string voltage = supplyDamper.Voltage.ToString();
 								string spring = supplyDamper.Spring.ToString();
-								string hascntrol = supplyDamper.HasContol.ToString();
+								string hascntrol = supplyDamper.HasControl.ToString();
 								string posname = supplyDamper.PosName;
 								var cable1guid = Guid.NewGuid().ToString();
 								var cable2guid = string.Empty;
@@ -679,7 +680,7 @@ namespace AOVGEN
 								Cab1.cableGUID = cable1guid;
 								string posinfoguid = WritePosInfoToDB(ref command, item, supplyDamperguid, ventSystem.GUID);
 								if (Cab1 != null) WriteCableToDB(ref command, cable1guid, posname, supplyDamperguid, Cab1.SortPriority, "Damper", Cab1.Description, Cab1.WriteBlock, Cab1.Attrubute.ToString(), blockname, Cab1.WireNumbers);
-								if (supplyDamper.HasContol)
+								if (supplyDamper.HasControl)
 								{
 									Cable Cab2 = supplyDamper.Cable2;
 									cable2guid = Guid.NewGuid().ToString();
@@ -732,7 +733,7 @@ namespace AOVGEN
 								string blockname = extDamper.BlockName;
 								string voltage = extDamper.Voltage.ToString();
 								string spring = extDamper.Spring.ToString();
-								string hascntrol = extDamper.HasContol.ToString();
+								string hascntrol = extDamper.HasControl.ToString();
 								string posname = extDamper.PosName;
 								var cable1guid = Guid.NewGuid().ToString();
 								var cable2guid = string.Empty;
@@ -740,7 +741,7 @@ namespace AOVGEN
 								string posinfoguid = WritePosInfoToDB(ref command, item, extDamperguid, ventSystem.GUID);
 								if (Cab1 != null) WriteCableToDB(ref command, cable1guid, posname, extDamperguid, Cab1.SortPriority, "Damper", Cab1.Description, Cab1.WriteBlock, Cab1.Attrubute.ToString(), blockname, Cab1.WireNumbers);
 								//WriteCableToDB(ref command, cable1guid5, posname5, extDamperguid, extDamper.SortPriority, "Damper", extDamper.Description1);
-								if (extDamper.HasContol)
+								if (extDamper.HasControl)
 								{
 									Cable Cab2 = extDamper.Cable2;
 									cable2guid = Guid.NewGuid().ToString();
@@ -768,8 +769,8 @@ namespace AOVGEN
 							{
 								var waterHeaterguid = Guid.NewGuid().ToString();
 								WaterHeater waterHeater = (WaterHeater)item.Tag;
-								WaterHeater.Valve valve = waterHeater._Valve;
-								WaterHeater.Pump pump = waterHeater._Pump;
+								Valve valve = waterHeater._Valve;
+								Pump pump = waterHeater._Pump;
 								Sensor protectSensor1 = waterHeater.PS1;
 								Sensor protectSensor2 = waterHeater.PS2;
 								sensguid1 = string.Empty;
@@ -936,8 +937,8 @@ namespace AOVGEN
 								Froster froster = (Froster)item.Tag;
 								var Frosterguid = Guid.NewGuid().ToString();
 
-								Froster.Valve frostervalve = froster._Valve;
-								Froster.KKB frosterKKB = froster._KKB;
+								Valve frostervalve = froster._Valve;
+								KKB frosterKKB = froster._KKB;
 								Froster.FrosterType frosterType = froster._FrosterType;
 								ElectroDevice._Voltage _Voltage = froster.Voltage;
 								Froster.FrosterSensor frosterSensor = froster._FrosterSensor;
@@ -985,7 +986,7 @@ namespace AOVGEN
 							try
 							{
 								Humidifier humidifier = (Humidifier)item.Tag;
-								Humidifier.HumiditySens humiditySens = humidifier.HumiditySensor;
+								HumiditySens humiditySens = humidifier.HumiditySensor;
 								var Humidifierguid = Guid.NewGuid().ToString();
 								var cable1guid = Guid.NewGuid().ToString();
 								var cable2guid = Guid.NewGuid().ToString();
@@ -1054,9 +1055,9 @@ namespace AOVGEN
 								Recuperator recuperator = (Recuperator)item.Tag;
 								SensorT PS1 = recuperator.protectSensor1;
 								PressureContol PS2 = recuperator.protectSensor2;
-								Recuperator.Drive Drive1 = recuperator.Drive1;
-								Recuperator.Drive Drive2 = recuperator.Drive2;
-								Recuperator.Drive Drive3 = recuperator.Drive3;
+								Drive Drive1 = recuperator.Drive1;
+								Drive Drive2 = recuperator.Drive2;
+								Drive Drive3 = recuperator.Drive3;
 								var Recuperatorguid = Guid.NewGuid().ToString();
 								string RecType = recuperator._RecuperatorType.ToString();
 								string PS2GUID, Drive1GUID, Drive2GUID, Drive3GUID;
@@ -1153,23 +1154,23 @@ namespace AOVGEN
 									switch (crossSection._SensorT.GetType().Name)
 									{
 										case nameof(SupplyTemp):
-											Senstype = crossSection.sensorTType.ToString();
+											Senstype = crossSection.SensorTType.ToString();
 											var SupplyTempSensor = (SupplyTemp)crossSection._SensorT;
 											sensguid1 = WriteSensor(SupplyTempSensor, "SensTSupply", "Temperature", Senstype, SupplyTempSensor.Location);
 											break;
 										case nameof(ExhaustTemp):
-											Senstype = crossSection.sensorTType.ToString();
+											Senstype = crossSection.SensorTType.ToString();
 											var exhaustTemp = (ExhaustTemp)crossSection._SensorT;
 											sensguid1 = WriteSensor(exhaustTemp, "SensTexhaust", "Temperature", Senstype, exhaustTemp.Location);
 											break;
 										case nameof(SensorT):
-											Senstype = crossSection.sensorTType.ToString();
+											Senstype = crossSection.SensorTType.ToString();
 											sensguid1 = WriteSensor(crossSection._SensorT, "SensTNoLocation", "Temperature", Senstype, crossSection._SensorT.Location);
 											break;
 									}
 								}
 
-								Humidifier.HumiditySens humiditySens = crossSection._SensorH;
+								HumiditySens humiditySens = crossSection._SensorH;
 								Cable cableH = humiditySens?.Cable1;
 								if (cableH != null)
 								{
@@ -1198,7 +1199,7 @@ namespace AOVGEN
 									sensguid2 = string.Empty;
 									Room room = (Room)item.Tag;
 									IndoorTemp indoorTemp = (IndoorTemp)room._SensorT;
-									Humidifier.HumiditySens humiditySens = room._SensorH;
+									HumiditySens humiditySens = room._SensorH;
 									var RoomGUID = Guid.NewGuid().ToString();
 									string posinfoguid = WritePosInfoToDB(ref command, item, RoomGUID, ventSystem.GUID);
 									if (indoorTemp != null)
@@ -1583,7 +1584,7 @@ namespace AOVGEN
                 }
 				void WriteVent(Vent vent, EditorV2.PosInfo item, string Spareventguid)
 				{
-					Vent.FControl fControl = vent._FControl;
+					FControl fControl = vent._FControl;
 					string voltage = vent.Voltage.ToString();
 					string controltype = vent.ControlType.ToString();
 					string power = vent.Power;

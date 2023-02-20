@@ -10,19 +10,19 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Management;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-using System.Xml.Serialization;
 using Telerik.WinControls.UI;
 using WinFormAnimation;
 using Path = WinFormAnimation.Path;
 using PositionChangedEventArgs = Telerik.WinControls.UI.Data.PositionChangedEventArgs;
 using Size = System.Drawing.Size;
 using Timer = System.Windows.Forms.Timer;
+using AOVGEN.Models;
+using AOVGEN.ParsePreset;
 
 namespace AOVGEN
 {
@@ -36,7 +36,7 @@ namespace AOVGEN
         public string DBFilePath { get; set; }
         public RadTreeView Ventree { get; set; }
         public RadTreeView Projecttree { get; set; }
-        public RadTreeNodeCollection Joinedsystems { get; set; }
+        public RadTreeNodeCollection joinedSystems { get; set; }
         internal string projectGuid { get; set; }
         internal Building Building { get; set; }
         internal Project Project { get; set; }
@@ -271,8 +271,8 @@ namespace AOVGEN
 
             string path = @"%AppData%";
             path = Environment.ExpandEnvironmentVariables(path);
-            path += @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\";
-            XmlDocument doc = new XmlDocument();
+            path += @"\Autodesk\Revit\Addins\2020\ASU\AOVGen\";
+            XmlDocument doc = new();
             doc.Load(path + @"Presets.xml");
             ReadXMLPresets(doc, Type.Missing);
         }
@@ -412,7 +412,7 @@ namespace AOVGEN
                                 .ToList();
                             if (forremove2.Count > 0)
                             {
-                                List<string> addhashes = new List<string>();
+                                List<string> addhashes = new();
                                 foreach (var pos in forremove2)
                                 {
                                     for (int i = 0; i <= pos.SizeY; i++)
@@ -855,7 +855,6 @@ namespace AOVGEN
 
             Cursor.Position = new Point(Cursor.Position.X + 50, Cursor.Position.Y);
         }
-
         private void imageButton9LayoutClicked(object sender, EventArgs eventArgs)
         {
             switch (sender.GetType().GetProperty("Name")?.GetValue(sender, null))
@@ -961,52 +960,25 @@ namespace AOVGEN
 
         private void radPropertyGrid1_SelectedObjectChanged(object sender, PropertyGridSelectedObjectChangedEventArgs e)
         {
-            var selobj = e.SelectedObject?.GetType().Name;
-
-            void SetReadOnlyAttribute(object obj, string attrname, bool _readonly)
+            if (e.SelectedObject == null) return;
+            Type baseType = e.SelectedObject.GetType().BaseType;
+            if (baseType ==  typeof(Dummy))
             {
-                TypeDescriptor.GetProperties(obj)[attrname]
-                    .SetReadOnlyAttribute(_readonly);
+                var selectedObject = (Dummy)e.SelectedObject;
+                bool setreadOnlyHumidity = selectedObject._SensorH == null;
+                bool setreadOnlyTemperature = selectedObject._SensorT == null;
+                if (setreadOnlyTemperature && setreadOnlyHumidity)
+                {
+                    radPropertyGrid1.SelectedObject = null;
+                    return;
+                }
+                SetReadOnlyAttribute(selectedObject, nameof(selectedObject.SensorHType), setreadOnlyHumidity);
+                SetReadOnlyAttribute(selectedObject, nameof(selectedObject.SensorTType), setreadOnlyTemperature);
             }
-
-            switch (selobj)
+            static void SetReadOnlyAttribute(object obj, string attrName, bool readOnly)
             {
-                case nameof(CrossSection):
-                    {
-                        var crossSection = (CrossSection)e.SelectedObject;
-
-                        //var t = TypeDescriptor.GetProperties(crossSection);
-
-                        var setreadonlyH = crossSection._SensorH == null;
-                        var setreadonlyT = crossSection._SensorT == null;
-                        if (setreadonlyT && setreadonlyH)
-                        {
-                            radPropertyGrid1.SelectedObject = null;
-                            return;
-                        }
-
-                        SetReadOnlyAttribute(crossSection, "sensorHType", setreadonlyH);
-                        SetReadOnlyAttribute(crossSection, "sensorTType", setreadonlyT);
-                    }
-
-                    break;
-
-                case nameof(Room):
-                    {
-                        var room = (Room)e.SelectedObject;
-                        var setreadonlyH = room._SensorH == null;
-                        var setreadonlyT = room._SensorT == null;
-
-                        if (setreadonlyT && setreadonlyH)
-                        {
-                            radPropertyGrid1.SelectedObject = null;
-                            return;
-                        }
-
-                        SetReadOnlyAttribute(room, "sensorHType", setreadonlyH);
-                        SetReadOnlyAttribute(room, "sensorTType", setreadonlyT);
-                    }
-                    break;
+                TypeDescriptor.GetProperties(obj)[attrName]
+                    .SetReadOnlyAttribute(readOnly);
             }
         }
 
@@ -1023,8 +995,6 @@ namespace AOVGEN
                     .ToList()
                     .OrderBy(y => y.PozY)
                     .ToList();
-                //var t = AddCrossection(controlsWithPosInfo);//можно убрать
-                //if (t.Count > 0) controlsWithPosInfo.AddRange(t);
                 if (controlsWithPosInfo.Count > 0)
                 {
                     var Components = controlsWithPosInfo
@@ -1037,19 +1007,13 @@ namespace AOVGEN
                         {
                             alarmCnt++;
                             PlayAlarm();
-
                             return;
                         }
-
-                        var oldvensystemguid = VentSystem.GUID;
+                        var oldVensystemGuid = VentSystem.GUID;
                         VentSystem.GUID = Guid.NewGuid().ToString(); //create ventsystem GUID
                         VentSystem.ComponentsV2.Clear();
                         VentSystem.ComponentsV2 = controlsWithPosInfo;
                         if (!OpenForEdit) VentSystem.SystemName = radAutoCompleteBox1.Text; //get ventsystem name
-
-
-
-
                         // Open DataBase
                         if (connection.State == ConnectionState.Closed)
                         {
@@ -1061,8 +1025,6 @@ namespace AOVGEN
                         {
                             Connection = connection
                         };
-
-
                         //Write Ventsystem (host) to DataBase
                         var date = DateTime.Now.ToString("dd-MM-yyyy");
                         const string vesrsion = "1";
@@ -1070,14 +1032,14 @@ namespace AOVGEN
                             $"INSERT INTO Ventsystems ([GUID], SystemName, [Project], Modyfied, Version, Author, [Place]) VALUES ('{VentSystem.GUID}', '{VentSystem.SystemName}', '{Project.GetGUID()}', '{date}', '{vesrsion}', '{Author}', '{Building.BuildGUID}')";
                         command.CommandText = InsertQueryVensystem;
                         command.ExecuteNonQuery();
-                        var connectionstring = command.Connection.ConnectionString;
+                        var connectionString = command.Connection.ConnectionString;
                         // Write Ventsystem components to DataBase
-                        WriteVentSystemToDB.Execute(connectionstring, VentSystem, Project, Building);
+                        WriteVentSystemToDB.Execute(connectionString, VentSystem, Project, Building);
 
                         command.Dispose();
                         connection.Close();
                         // Make TreeNode in Ventsystems Tree and Update Posnames
-                        var ventsystemnode = new RadTreeNode
+                        var ventSystemNode = new RadTreeNode
                         {
                             Name = VentSystem.GUID,
                             Value = VentSystem.SystemName,
@@ -1088,34 +1050,34 @@ namespace AOVGEN
                         var buildNode = mainForm.FindNodeByName(Building.BuildGUID, projectnode?.Nodes);
                         if (OpenForEdit)
                         {
-                            DeleteVentSystem(oldvensystemguid);
-                            var treeNode = mainForm.FindNodeByName(oldvensystemguid, Joinedsystems);
+                            DeleteVentSystem(oldVensystemGuid);
+                            var treeNode = mainForm.FindNodeByName(oldVensystemGuid, joinedSystems);
                             Task task = null;
-                            var pannelnode = treeNode?.Parent;
+                            var pannelNode = treeNode?.Parent;
 
-                            if (pannelnode != null)
+                            if (pannelNode != null)
                             {
                                 SelectedNode.Name = VentSystem.GUID;
                                 SelectedNode.Tag = VentSystem;
-                                var ventnode = mainForm.FindNodeByName(oldvensystemguid, pannelnode.Nodes);
+                                var ventNode = mainForm.FindNodeByName(oldVensystemGuid, pannelNode.Nodes);
 
-                                ventnode.Name = VentSystem.GUID;
-                                ventnode.Tag = VentSystem;
-                                var ventcnt = pannelnode.Nodes.Count;
-                                var pannelGUID = pannelnode.Name;
-                                var pannelname = pannelnode.Text;
-                                var pannel = (Pannel) pannelnode.Tag;
+                                ventNode.Name = VentSystem.GUID;
+                                ventNode.Tag = VentSystem;
+                                var ventCount = pannelNode.Nodes.Count;
+                                var pannelGuid = pannelNode.Name;
+                                var pannelName = pannelNode.Text;
+                                var pannel = (Pannel) pannelNode.Tag;
                                 task = Task.Factory.StartNew(() =>
                                 {
-                                    UpdatePannel(ventsystemnode.Name, pannelGUID);
-                                    UpdateVentSystemQuery(ventsystemnode.Name, pannelGUID, pannelname);
-                                    UpdateConnectedCables(ventsystemnode.Name, pannelGUID, pannelname);
-                                    UpdateConnectedPosNames(ventsystemnode.Name, ventcnt, ".");
+                                    UpdatePannel(ventSystemNode.Name, pannelGuid);
+                                    UpdateVentSystemQuery(ventSystemNode.Name, pannelGuid, pannelName);
+                                    UpdateConnectedCables(ventSystemNode.Name, pannelGuid, pannelName);
+                                    UpdateConnectedPosNames(ventSystemNode.Name, ventCount, ".");
                                     Task.Factory.StartNew(() =>
-                                        pannel.Power = UpdatePannelPower(pannelnode, connectionstring)
+                                        pannel.Power = UpdatePannelPower(pannelNode, connectionString)
                                     );
                                     Task.Factory.StartNew(() =>
-                                        pannel.Voltage = UpdatePannelVoltage(pannelnode, connectionstring)
+                                        pannel.Voltage = UpdatePannelVoltage(pannelNode, connectionString)
                                     );
                                 });
                             }
@@ -1129,12 +1091,11 @@ namespace AOVGEN
                             {
                                 mainForm.UpdateBuildNode(buildNode);
                             }
-                            //SelectedNode.Name = ventSystem.GUID;
-                            //SelectedNode.Tag = ventSystem;
+                            
                         }
                         else
                         {
-                            Ventree.Nodes.Add(ventsystemnode);
+                            Ventree.Nodes.Add(ventSystemNode);
                         }
 
                         Ventree.Update();
@@ -1337,32 +1298,18 @@ namespace AOVGEN
         private void radDropDownList1_SelectedIndexChanged(object sender, PositionChangedEventArgs e)
         {
             radDropDownList2.Items.Clear();
-
-            //var items = (IGrouping<string, (string presetName, string presetType)>)
-            //    radDropDownList1.Items[e.Position].Tag;
-            //foreach (var VARIABLE in items)
-            //{
-
-            //    radDropDownList2.Items.Add(
-            //        new RadListDataItem
-            //        {
-            //            Text = VARIABLE.presetName,
-            //            Tag = VARIABLE
-            //        });
-            //}
-
-
             var dataItem =
-                ((Dictionary<string, KeyValuePair<(string, string), byte[]>>)radDropDownList1.Items[e.Position]
-                    .Tag)
-                .Values;
-            foreach (var radListDataItem in dataItem.Select(keyValuePair => new RadListDataItem
+                ((Dictionary<string, KeyValuePair<(string, string), byte[]>>)radDropDownList1
+                .Items[e.Position]
+                .Tag
+                ).Values;
+            foreach (var radListDataItem in dataItem
+                .Select(keyValuePair => new RadListDataItem
+                {
+                    Text = keyValuePair.Key.Item1,
+                    Tag = keyValuePair.Value
+                }))
             {
-                Text = keyValuePair.Key.Item1,
-                Tag = keyValuePair.Value
-            }))
-            {
-                
                 radDropDownList2.Items.Add(radListDataItem);
             }
         }
@@ -1380,7 +1327,6 @@ namespace AOVGEN
             CreateBigButton(Resources.waterheater1, typeof(WaterHeater), 0, 1, ((dynamic)sender).Tag, sender);
             Cursor.Position = GetRelativePoint(sender);
         }
-
         private void bunifuImageButton6_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left || currObject != null) return;
@@ -1540,645 +1486,665 @@ namespace AOVGEN
             XmlElement documentElement = xmlPresetsDocument.DocumentElement;
             if (documentElement == null) return;
             XmlNodeList PresetsNodes = documentElement.SelectNodes("/Presets/Preset");
-            Dictionary<(string, string), byte[]> presetsDictionary =
-                new Dictionary<(string, string), byte[]>();
-            //if (VentSystem == null) VentSystem = new VentSystem();
-
+            Dictionary<(string, string), byte[]> presetsDictionary = new();
+            
             if (PresetsNodes == null) return;
+
             foreach (XmlNode presets in PresetsNodes) //пресеты
             {
                 string presetName = presets.Attributes["presetName"].Value;
                 string presetType = presets.Attributes["presetType"].Value;
                 XmlNode ComponentNode = presets.FirstChild;
-                List<PosInfo> posInfos = new List<PosInfo>();
+                List<PosInfo> posInfos = new();
+                SetParamContext setParamContext = new();
                 foreach (XmlNode items in ComponentNode)
                 {
                     if (items.Attributes != null)
                     {
-                        string ItemName = items.Attributes["itemName"].Value;
-                        PropertyInfo pinfo;
+                        //new method
+                        string itemName = items.Attributes["itemName"].Value;
                         PosInfo posInfo;
-                        switch (ItemName)
-                        {
-                            case nameof(SupplyVent):
-                                SupplyVent supplyVent = new SupplyVent();
-
-                                XmlNode ParamNodeSupplyVent = items.ChildNodes[0];
-                                XmlNode posInfoNodeSupplyVent = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeSupplyVent.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "Voltage":
-                                            var voltage = param.InnerText;
-                                            pinfo = supplyVent.GetType().GetProperty("Voltage");
-                                            pinfo?.SetValue(supplyVent, Enum.Parse(pinfo.PropertyType, voltage));
-                                            break;
-
-                                        case "Power":
-                                            supplyVent.Power = param.InnerText;
-                                            break;
-
-                                        case "Loction":
-                                            supplyVent.Location = param.InnerText;
-                                            break;
-
-                                        case "Description":
-                                            supplyVent.Description = param.InnerText;
-                                            break;
-
-                                        case "ControlType":
-                                            string controlType = param.InnerText;
-                                            pinfo = supplyVent.GetType().GetProperty("ControlType");
-                                            pinfo?.SetValue(supplyVent,
-                                                Enum.Parse(pinfo.PropertyType, controlType));
-                                            break;
-
-                                        case "Protect":
-                                            string protect = param.InnerText;
-                                            pinfo = supplyVent.GetType().GetProperty("Protect");
-                                            pinfo?.SetValue(supplyVent, Enum.Parse(pinfo.PropertyType, protect));
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeSupplyVent);
-                                posInfo.Tag = supplyVent;
-                                posInfos.Add(posInfo);
-                                break;
-
-                            case nameof(ExtVent):
-
-                                ExtVent extVent = new ExtVent();
-
-                                XmlNode ParamNodeExtVent = items.ChildNodes[0];
-                                XmlNode posInfoNodeExtVent = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeExtVent.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "Voltage":
-                                            var voltage = param.InnerText;
-                                            pinfo = extVent.GetType().GetProperty("Voltage");
-                                            pinfo?.SetValue(extVent, Enum.Parse(pinfo.PropertyType, voltage));
-                                            break;
-
-                                        case "Power":
-                                            extVent.Power = param.InnerText;
-                                            break;
-
-                                        case "Loction":
-                                            extVent.Location = param.InnerText;
-                                            break;
-
-                                        case "Description":
-                                            extVent.Description = param.InnerText;
-                                            break;
-
-                                        case "ControlType":
-                                            string controlType = param.InnerText;
-                                            pinfo = extVent.GetType().GetProperty("ControlType");
-                                            pinfo?.SetValue(extVent, Enum.Parse(pinfo.PropertyType, controlType));
-                                            break;
-
-                                        case "Protect":
-                                            string protect = param.InnerText;
-                                            pinfo = extVent.GetType().GetProperty("Protect");
-                                            pinfo?.SetValue(extVent, Enum.Parse(pinfo.PropertyType, protect));
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeExtVent);
-                                posInfo.Tag = extVent;
-                                posInfos.Add(posInfo);
-                                break;
-
-                            case nameof(SupplyDamper):
-                                SupplyDamper supplyDamper = new SupplyDamper();
-
-                                XmlNode ParamNodeSupplyDamper = items.ChildNodes[0];
-                                XmlNode posInfoNodeSupplyDamper = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeSupplyDamper.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "HasControl":
-                                            supplyDamper.HasContol = Convert.ToBoolean(param.InnerText);
-                                            break;
-
-                                        case "Description":
-                                            supplyDamper.Description = param.InnerText;
-                                            break;
-
-                                        case nameof(OutdoorTemp):
-                                            XmlNode outdoorNode = param.ChildNodes[0];
-                                            XmlNode controlNode = outdoorNode.FirstChild;
-                                            var controlType = controlNode.InnerText;
-                                            switch (controlType)
-                                            {
-                                                case "Analogue":
-                                                case "Discrete":
-                                                    supplyDamper.SetSensor = true;
-                                                    pinfo = supplyDamper.GetType().GetProperty("SensorType");
-                                                    pinfo?.SetValue(supplyDamper,
-                                                        Enum.Parse(pinfo.PropertyType, controlType));
-                                                    break;
-
-                                                case "No":
-                                                    break;
-                                            }
-
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeSupplyDamper);
-                                posInfo.Tag = supplyDamper;
-                                posInfos.Add(posInfo);
-                                break;
-
-                            case nameof(ExtDamper):
-                                ExtDamper extDamper = new ExtDamper();
-
-                                XmlNode ParamNodeExtDamper = items.ChildNodes[0];
-                                XmlNode posInfoNodeExtDamper = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeExtDamper.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "HasControl":
-                                            extDamper.HasContol = Convert.ToBoolean(param.InnerText);
-                                            break;
-
-                                        case "Description":
-                                            extDamper.Description = param.InnerText;
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeExtDamper);
-                                posInfo.Tag = extDamper;
-                                posInfos.Add(posInfo);
-                                break;
-
-                            case nameof(SupplyFiltr):
-                                SupplyFiltr supplyFiltr = new SupplyFiltr();
-
-                                XmlNode ParamNodeSupplyFiltr = items.ChildNodes[0];
-                                XmlNode posInfoNodeSupplyFiltr = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeSupplyFiltr.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "Description":
-                                            supplyFiltr.Description = param.InnerText;
-                                            break;
-
-                                        case nameof(PressureContol):
-                                            XmlNode pressureControlNode = param.ChildNodes[0];
-                                            XmlNode controlNode = pressureControlNode.FirstChild;
-                                            var controlType = controlNode.InnerText;
-                                            switch (controlType)
-                                            {
-                                                case "Analogue":
-                                                case "Discrete":
-
-                                                    pinfo = supplyFiltr.GetType().GetProperty("PressureProtect");
-                                                    pinfo?.SetValue(supplyFiltr,
-                                                        Enum.Parse(pinfo.PropertyType, controlType));
-                                                    break;
-
-                                                case "No":
-                                                    break;
-                                            }
-
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeSupplyFiltr);
-                                posInfo.Tag = supplyFiltr;
-                                posInfos.Add(posInfo);
-                                break;
-
-                            case nameof(ExtFiltr):
-                                ExtFiltr extFiltr = new ExtFiltr();
-
-                                XmlNode ParamNodeExtFiltr = items.ChildNodes[0];
-                                XmlNode posInfoNodeExtFiltr = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeExtFiltr.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "Description":
-                                            extFiltr.Description = param.InnerText;
-                                            break;
-
-                                        case nameof(PressureContol):
-                                            XmlNode pressureControlNode = param.ChildNodes[0];
-                                            XmlNode controlNode = pressureControlNode.FirstChild;
-                                            var controlType = controlNode.InnerText;
-                                            switch (controlType)
-                                            {
-                                                case "Analogue":
-                                                case "Discrete":
-
-                                                    pinfo = extFiltr.GetType().GetProperty("PressureProtect");
-                                                    pinfo?.SetValue(extFiltr,
-                                                        Enum.Parse(pinfo.PropertyType, controlType));
-                                                    break;
-
-                                                case "No":
-                                                    break;
-                                            }
-
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeExtFiltr);
-                                posInfo.Tag = extFiltr;
-                                posInfos.Add(posInfo);
-                                break;
-
-                            case nameof(Filtr):
-                                Filtr filtr = new Filtr();
-
-                                XmlNode ParamNodeFiltr = items.ChildNodes[0];
-                                XmlNode posInfoNodeFiltr = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeFiltr.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "Description":
-                                            filtr.Description = param.InnerText;
-                                            break;
-
-                                        case nameof(PressureContol):
-                                            XmlNode pressureControlNode = param.ChildNodes[0];
-                                            XmlNode controlNode = pressureControlNode.FirstChild;
-                                            var controlType = controlNode.InnerText;
-                                            switch (controlType)
-                                            {
-                                                case "Analogue":
-                                                case "Discrete":
-
-                                                    pinfo = filtr.GetType().GetProperty("PressureProtect");
-                                                    pinfo?.SetValue(filtr,
-                                                        Enum.Parse(pinfo.PropertyType, controlType));
-                                                    break;
-
-                                                case "No":
-                                                    break;
-                                            }
-
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeFiltr);
-                                posInfo.Tag = filtr;
-                                posInfos.Add(posInfo);
-                                break;
-
-                            case nameof(ElectroHeater):
-                                ElectroHeater electroHeater = new ElectroHeater();
-
-                                XmlNode ParamNodeEllectroHeater = items.ChildNodes[0];
-                                XmlNode posInfoNodeElectroHeater = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeEllectroHeater.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "Description":
-                                            electroHeater.Description = param.InnerText;
-                                            break;
-
-                                        case "Voltage":
-                                            var voltage = param.InnerText;
-                                            pinfo = electroHeater.GetType().GetProperty("Voltage");
-                                            pinfo?.SetValue(electroHeater, Enum.Parse(pinfo.PropertyType, voltage));
-                                            break;
-
-                                        case "Power":
-                                            electroHeater.Power = param.InnerText;
-                                            break;
-
-                                        case "Stairs":
-
-                                            break;
-
-                                        case "ControlType":
-
-                                            break;
-
-                                        case "Protect":
-
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeElectroHeater);
-                                posInfo.Tag = electroHeater;
-                                posInfos.Add(posInfo);
-                                break;
-
-                            case nameof(WaterHeater):
-                                WaterHeater waterHeater = new WaterHeater();
-
-                                XmlNode ParamNodeWaterHeater = items.ChildNodes[0];
-                                XmlNode posInfoNodeWaterHeater = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeWaterHeater.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "ValveType":
-                                            pinfo = waterHeater.GetType().GetProperty("valveType");
-                                            pinfo?.SetValue(waterHeater,
-                                                Enum.Parse(pinfo.PropertyType, param.InnerText));
-
-                                            break;
-
-                                        case "PumpTK":
-                                            waterHeater.HasTK = Convert.ToBoolean(param.InnerText);
-                                            break;
-
-                                        case "WaterProtect":
-
-                                            pinfo = waterHeater.GetType().GetProperty("Waterprotect");
-                                            pinfo?.SetValue(waterHeater,
-                                                Enum.Parse(pinfo.PropertyType, param.InnerText));
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeWaterHeater);
-                                posInfo.Tag = waterHeater;
-                                posInfos.Add(posInfo);
-                                break;
-
-                            case nameof(Humidifier):
-                                Humidifier humidifier = new Humidifier();
-
-                                XmlNode ParamNodeHumidifier = items.ChildNodes[0];
-                                XmlNode posInfoNodeHumidifier = items.ChildNodes[1];
-
-                                foreach (XmlNode param in ParamNodeHumidifier.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "HumType":
-
-                                            pinfo = humidifier.GetType().GetProperty("HumType");
-                                            pinfo?.SetValue(humidifier,
-                                                Enum.Parse(pinfo.PropertyType, param.InnerText));
-
-                                            break;
-
-                                        case "ControlType":
-                                            pinfo = humidifier.GetType().GetProperty("HumControlType");
-                                            pinfo?.SetValue(humidifier,
-                                                Enum.Parse(pinfo.PropertyType, param.InnerText));
-                                            break;
-
-                                        case "Voltage":
-
-                                            pinfo = humidifier.GetType().GetProperty("Voltage");
-                                            pinfo?.SetValue(humidifier,
-                                                Enum.Parse(pinfo.PropertyType, param.InnerText));
-                                            break;
-
-                                        case "Power":
-                                            humidifier.Power = param.InnerText;
-                                            break;
-
-                                        case "HumSensPresent":
-                                            humidifier.HumSensPresent = Convert.ToBoolean(param.InnerText);
-                                            break;
-
-                                        case "SensorType":
-                                            if (humidifier.HumSensPresent)
-                                            {
-                                                pinfo = humidifier.GetType().GetProperty("SensorType");
-                                                pinfo?.SetValue(humidifier,
-                                                    Enum.Parse(pinfo.PropertyType, param.InnerText));
-                                            }
-
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeHumidifier);
-                                posInfo.Tag = humidifier;
-                                posInfos.Add(posInfo);
-
-                                break;
-
-                            case nameof(Froster):
-
-                                XmlNode ParamNodeFroster = items.ChildNodes[0];
-                                XmlNode posInfoNodeFroster = items.ChildNodes[1];
-                                Froster froster = null;
-
-                                foreach (XmlNode param in ParamNodeFroster.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "FrosterType":
-                                            Froster.FrosterType frosterType =
-                                                (Froster.FrosterType)Enum.Parse(typeof(Froster.FrosterType),
-                                                    param.InnerText, true);
-                                            froster = new Froster(frosterType);
-                                            break;
-
-                                        case "Stairs":
-                                            if (froster != null)
-                                            {
-                                                pinfo = froster.GetType().GetProperty("Stairs");
-                                                pinfo?.SetValue(froster,
-                                                    Enum.Parse(pinfo.PropertyType, param.InnerText));
-                                            }
-
-                                            break;
-
-                                        case "KKBControlType":
-                                            if (froster != null)
-                                            {
-                                                pinfo = froster.GetType().GetProperty("KKBControlType");
-                                                pinfo?.SetValue(froster,
-                                                    Enum.Parse(pinfo.PropertyType, param.InnerText));
-                                            }
-
-                                            break;
-
-                                        case "ValveType":
-                                            if (froster != null)
-                                            {
-                                                pinfo = froster.GetType().GetProperty("valveType");
-                                                pinfo?.SetValue(froster,
-                                                    Enum.Parse(pinfo.PropertyType, param.InnerText));
-                                            }
-
-                                            break;
-
-                                        case "Voltage":
-                                            if (froster != null)
-                                            {
-                                                pinfo = froster.GetType().GetProperty("Voltage");
-                                                pinfo?.SetValue(froster,
-                                                    Enum.Parse(pinfo.PropertyType, param.InnerText));
-                                            }
-
-                                            break;
-
-                                        case "Power":
-                                            if (froster != null)
-                                            {
-                                                froster.Power = param.InnerText;
-                                            }
-
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeFroster);
-                                posInfo.Tag = froster;
-                                posInfos.Add(posInfo);
-
-                                break;
-
-                            case nameof(Recuperator):
-                                XmlNode ParamNodeRecuperator = items.ChildNodes[0];
-                                XmlNode posInfoNodeRecuperator = items.ChildNodes[1];
-                                Recuperator recuperator = new Recuperator();
-
-                                foreach (XmlNode param in ParamNodeRecuperator.ChildNodes)
-                                {
-                                    switch (param.LocalName)
-                                    {
-                                        case "RecuperatorType":
-                                            pinfo = recuperator.GetType().GetProperty("_RecuperatorType");
-                                            pinfo?.SetValue(recuperator,
-                                                Enum.Parse(pinfo.PropertyType, param.InnerText));
-                                            break;
-                                    }
-                                }
-
-                                posInfo = SetXmlProPertyToPosInfo(posInfoNodeRecuperator);
-                                posInfo.Tag = recuperator;
-                                posInfos.Add(posInfo);
-
-                                break;
-
-                            case nameof(Room):
-                                {
-                                    XmlNode ParamNodeCrossection = items.ChildNodes[0];
-                                    XmlNode posInfoNodeCrossSection = items.ChildNodes[1];
-                                    string sensTtype = string.Empty;
-                                    string sensHtype = string.Empty;
-
-                                    foreach (XmlNode param in ParamNodeCrossection.ChildNodes)
-                                    {
-                                        switch (param.LocalName)
-                                        {
-                                            case "SensorTType":
-                                                sensTtype = param.InnerText;
-                                                break;
-
-                                            case "SensorHType":
-                                                sensHtype = param.InnerText;
-                                                break;
-                                        }
-                                    }
-
-                                    bool sentTPresent = sensTtype != "No";
-                                    bool sentHPresent = sensHtype != "No";
-
-                                    Room room = new Room(sentTPresent, sentHPresent);
-                                    if (room._SensorT != null)
-                                    {
-                                        pinfo = room.GetType().GetProperty("sensorTType");
-                                        pinfo?.SetValue(room, Enum.Parse(pinfo.PropertyType, sensTtype));
-                                    }
-
-                                    if (room._SensorH != null)
-                                    {
-                                        pinfo = room.GetType().GetProperty("sensorHType");
-                                        pinfo?.SetValue(room, Enum.Parse(pinfo.PropertyType, sensHtype));
-                                    }
-
-                                    posInfo = SetXmlProPertyToPosInfo(posInfoNodeCrossSection);
-                                    posInfo.Tag = room;
-                                    posInfos.Add(posInfo);
-                                }
-
-                                break;
-
-                            case nameof(CrossSection):
-                                {
-                                    XmlNode ParamNodeCrossection = items.ChildNodes[0];
-                                    XmlNode posInfoNodeCrossSection = items.ChildNodes[1];
-                                    string sensTtype = string.Empty;
-                                    string sensHtype = string.Empty;
-                                    foreach (XmlNode param in ParamNodeCrossection.ChildNodes)
-                                    {
-                                        switch (param.LocalName)
-                                        {
-                                            case "SensorTType":
-                                                sensTtype = param.InnerText;
-                                                break;
-
-                                            case "SensorHType":
-                                                sensHtype = param.InnerText;
-                                                break;
-                                        }
-                                    }
-
-                                    bool sentTPresent = sensTtype != "No";
-                                    bool sentHPresent = sensHtype != "No";
-
-                                    CrossSection crossSection = new CrossSection(sentTPresent, sentHPresent);
-                                    if (crossSection._SensorT != null)
-                                    {
-                                        pinfo = crossSection.GetType().GetProperty("sensorTType");
-                                        pinfo?.SetValue(crossSection, Enum.Parse(pinfo.PropertyType, sensTtype));
-                                    }
-
-                                    if (crossSection._SensorH != null)
-                                    {
-                                        pinfo = crossSection.GetType().GetProperty("sensorHType");
-                                        pinfo?.SetValue(crossSection, Enum.Parse(pinfo.PropertyType, sensHtype));
-                                    }
-
-                                    posInfo = SetXmlProPertyToPosInfo(posInfoNodeCrossSection);
-                                    posInfo.Tag = crossSection;
-                                    posInfos.Add(posInfo);
-                                }
-
-                                break;
-                        }
+                        Type entityType = Type.GetType($"AOVGEN.Models.{itemName}");
+                        var Instance = Activator.CreateInstance(entityType);
+                        setParamContext.ParamStrategy = new SetPresetParams(Instance, items);
+                        setParamContext.SetParams();
+                        posInfo = setParamContext.PosInfo;
+                        posInfo.Tag = setParamContext.Entity;
+                        posInfos.Add(posInfo);
+                        float f = 10.12f;
+                        long l = 200L;
+                        var t1 = f + l;
+
+
+                        //old method
+                        #region OldMethod
+                        //PropertyInfo pinfo;
+                        //switch (ItemName)
+                        //{
+                        //    case nameof(SupplyVent):
+                        //        setParamContext.ParamStrategy = new SetVentParams<SupplyVent>(items);
+                        //        setParamContext.SetParams();
+                        //        posInfo = setParamContext.PosInfo;
+                        //        posInfo.Tag = setParamContext.Entity;
+                        //        //SupplyVent supplyVent = new SupplyVent();
+                        //        //XmlNode ParamNodeSupplyVent = items.ChildNodes[0];
+                        //        //XmlNode posInfoNodeSupplyVent = items.ChildNodes[1];
+
+                        //        //foreach (XmlNode param in ParamNodeSupplyVent.ChildNodes)
+                        //        //{
+                        //        //    switch (param.LocalName)
+                        //        //    {
+                        //        //        case "Voltage":
+                        //        //            var voltage = param.InnerText;
+                        //        //            pinfo = supplyVent.GetType().GetProperty("Voltage");
+                        //        //            pinfo?.SetValue(supplyVent, Enum.Parse(pinfo.PropertyType, voltage));
+                        //        //            break;
+
+                        //        //        case "Power":
+                        //        //            supplyVent.Power = param.InnerText;
+                        //        //            break;
+
+                        //        //        case "Loction":
+                        //        //            supplyVent.Location = param.InnerText;
+                        //        //            break;
+
+                        //        //        case "Description":
+                        //        //            supplyVent.Description = param.InnerText;
+                        //        //            break;
+
+                        //        //        case "ControlType":
+                        //        //            string controlType = param.InnerText;
+                        //        //            pinfo = supplyVent.GetType().GetProperty("ControlType");
+                        //        //            pinfo?.SetValue(supplyVent,
+                        //        //                Enum.Parse(pinfo.PropertyType, controlType));
+                        //        //            break;
+
+                        //        //        case "Protect":
+                        //        //            string protect = param.InnerText;
+                        //        //            pinfo = supplyVent.GetType().GetProperty("Protect");
+                        //        //            pinfo?.SetValue(supplyVent, Enum.Parse(pinfo.PropertyType, protect));
+                        //        //            break;
+                        //        //    }
+                        //        //}
+                        //        //posInfo = SetXmlProPertyToPosInfo(posInfoNodeSupplyVent);
+                        //        //posInfo.Tag = supplyVent;
+                        //        //posInfos.Add(posInfo);
+                        //        break;
+
+                        //    case nameof(ExtVent):
+
+                        //        setParamContext.ParamStrategy = new SetVentParams<ExtVent>(items);
+                        //        setParamContext.SetParams();
+                        //        posInfo = setParamContext.PosInfo;
+                        //        posInfo.Tag = setParamContext.Entity;
+                        //        //ExtVent extVent = new ExtVent();
+                        //        //XmlNode ParamNodeExtVent = items.ChildNodes[0];
+                        //        //XmlNode posInfoNodeExtVent = items.ChildNodes[1];
+
+                        //        //foreach (XmlNode param in ParamNodeExtVent.ChildNodes)
+                        //        //{
+                        //        //    switch (param.LocalName)
+                        //        //    {
+                        //        //        case "Voltage":
+                        //        //            var voltage = param.InnerText;
+                        //        //            pinfo = extVent.GetType().GetProperty("Voltage");
+                        //        //            pinfo?.SetValue(extVent, Enum.Parse(pinfo.PropertyType, voltage));
+                        //        //            break;
+
+                        //        //        case "Power":
+                        //        //            extVent.Power = param.InnerText;
+                        //        //            break;
+
+                        //        //        case "Loction":
+                        //        //            extVent.Location = param.InnerText;
+                        //        //            break;
+
+                        //        //        case "Description":
+                        //        //            extVent.Description = param.InnerText;
+                        //        //            break;
+
+                        //        //        case "ControlType":
+                        //        //            string controlType = param.InnerText;
+                        //        //            pinfo = extVent.GetType().GetProperty("ControlType");
+                        //        //            pinfo?.SetValue(extVent, Enum.Parse(pinfo.PropertyType, controlType));
+                        //        //            break;
+
+                        //        //        case "Protect":
+                        //        //            string protect = param.InnerText;
+                        //        //            pinfo = extVent.GetType().GetProperty("Protect");
+                        //        //            pinfo?.SetValue(extVent, Enum.Parse(pinfo.PropertyType, protect));
+                        //        //            break;
+                        //        //    }
+                        //        //}
+
+                        // posInfo = SetXmlProPertyToPosInfo(posInfoNodeExtVent);
+                        //        //posInfo.Tag = extVent;
+                        //        //posInfos.Add(posInfo);
+                        //        break;
+
+                        //    case nameof(SupplyDamper):
+                        //        setParamContext.ParamStrategy = new SetSupplyDamperParams(Instance, items);
+                        //        setParamContext.SetParams();
+
+                        //        SupplyDamper supplyDamper = new SupplyDamper();
+
+                        //        XmlNode ParamNodeSupplyDamper = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeSupplyDamper = items.ChildNodes[1];
+
+                        //        foreach (XmlNode param in ParamNodeSupplyDamper.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "HasControl":
+                        //                    supplyDamper.HasControl = Convert.ToBoolean(param.InnerText);
+                        //                    break;
+
+                        //                case "Description":
+                        //                    supplyDamper.Description = param.InnerText;
+                        //                    break;
+
+                        //                case nameof(OutdoorTemp):
+                        //                    XmlNode outdoorNode = param.ChildNodes[0];
+                        //                    XmlNode controlNode = outdoorNode.FirstChild;
+                        //                    var controlType = controlNode.InnerText;
+                        //                    switch (controlType)
+                        //                    {
+                        //                        case "Analogue":
+                        //                        case "Discrete":
+                        //                            supplyDamper.SetSensor = true;
+                        //                            pinfo = supplyDamper.GetType().GetProperty("SensorType");
+                        //                            pinfo?.SetValue(supplyDamper,
+                        //                                Enum.Parse(pinfo.PropertyType, controlType));
+                        //                            break;
+
+                        //                        case "No":
+                        //                            break;
+                        //                    }
+
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //        posInfo = SetXmlProPertyToPosInfo(posInfoNodeSupplyDamper);
+                        //        posInfo.Tag = supplyDamper;
+                        //        posInfos.Add(posInfo);
+                        //        break;
+
+                        //    case nameof(ExtDamper):
+                        //        ExtDamper extDamper = new ExtDamper();
+
+                        //        XmlNode ParamNodeExtDamper = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeExtDamper = items.ChildNodes[1];
+
+                        //        foreach (XmlNode param in ParamNodeExtDamper.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "HasControl":
+                        //                    extDamper.HasControl = Convert.ToBoolean(param.InnerText);
+                        //                    break;
+
+                        //                case "Description":
+                        //                    extDamper.Description = param.InnerText;
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //        posInfo = SetXmlProPertyToPosInfo(posInfoNodeExtDamper);
+                        //        posInfo.Tag = extDamper;
+                        //        posInfos.Add(posInfo);
+                        //        break;
+
+                        //    case nameof(SupplyFiltr):
+                        //        SupplyFiltr supplyFiltr = new SupplyFiltr();
+
+                        //        XmlNode ParamNodeSupplyFiltr = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeSupplyFiltr = items.ChildNodes[1];
+
+                        //        foreach (XmlNode param in ParamNodeSupplyFiltr.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "Description":
+                        //                    supplyFiltr.Description = param.InnerText;
+                        //                    break;
+
+                        //                case nameof(PressureContol):
+                        //                    XmlNode pressureControlNode = param.ChildNodes[0];
+                        //                    XmlNode controlNode = pressureControlNode.FirstChild;
+                        //                    var controlType = controlNode.InnerText;
+                        //                    switch (controlType)
+                        //                    {
+                        //                        case "Analogue":
+                        //                        case "Discrete":
+
+                        //                            pinfo = supplyFiltr.GetType().GetProperty("PressureProtect");
+                        //                            pinfo?.SetValue(supplyFiltr,
+                        //                                Enum.Parse(pinfo.PropertyType, controlType));
+                        //                            break;
+
+                        //                        case "No":
+                        //                            break;
+                        //                    }
+
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //        posInfo = SetXmlProPertyToPosInfo(posInfoNodeSupplyFiltr);
+                        //        posInfo.Tag = supplyFiltr;
+                        //        posInfos.Add(posInfo);
+                        //        break;
+
+                        //    case nameof(ExtFiltr):
+                        //        ExtFiltr extFiltr = new ExtFiltr();
+
+                        //        XmlNode ParamNodeExtFiltr = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeExtFiltr = items.ChildNodes[1];
+
+                        //        foreach (XmlNode param in ParamNodeExtFiltr.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "Description":
+                        //                    extFiltr.Description = param.InnerText;
+                        //                    break;
+
+                        //                case nameof(PressureContol):
+                        //                    XmlNode pressureControlNode = param.ChildNodes[0];
+                        //                    XmlNode controlNode = pressureControlNode.FirstChild;
+                        //                    var controlType = controlNode.InnerText;
+                        //                    switch (controlType)
+                        //                    {
+                        //                        case "Analogue":
+                        //                        case "Discrete":
+
+                        //                            pinfo = extFiltr.GetType().GetProperty("PressureProtect");
+                        //                            pinfo?.SetValue(extFiltr,
+                        //                                Enum.Parse(pinfo.PropertyType, controlType));
+                        //                            break;
+
+                        //                        case "No":
+                        //                            break;
+                        //                    }
+
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //        posInfo = SetXmlProPertyToPosInfo(posInfoNodeExtFiltr);
+                        //        posInfo.Tag = extFiltr;
+                        //        posInfos.Add(posInfo);
+                        //        break;
+
+                        //    case nameof(Filtr):
+                        //        Filtr filtr = new Filtr();
+
+                        //        XmlNode ParamNodeFiltr = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeFiltr = items.ChildNodes[1];
+
+                        //        foreach (XmlNode param in ParamNodeFiltr.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "Description":
+                        //                    filtr.Description = param.InnerText;
+                        //                    break;
+
+                        //                case nameof(PressureContol):
+                        //                    XmlNode pressureControlNode = param.ChildNodes[0];
+                        //                    XmlNode controlNode = pressureControlNode.FirstChild;
+                        //                    var controlType = controlNode.InnerText;
+                        //                    switch (controlType)
+                        //                    {
+                        //                        case "Analogue":
+                        //                        case "Discrete":
+
+                        //                            pinfo = filtr.GetType().GetProperty("PressureProtect");
+                        //                            pinfo?.SetValue(filtr,
+                        //                                Enum.Parse(pinfo.PropertyType, controlType));
+                        //                            break;
+
+                        //                        case "No":
+                        //                            break;
+                        //                    }
+
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //        posInfo = SetXmlProPertyToPosInfo(posInfoNodeFiltr);
+                        //        posInfo.Tag = filtr;
+                        //        posInfos.Add(posInfo);
+                        //        break;
+
+                        //    case nameof(ElectroHeater):
+                        //        ElectroHeater electroHeater = new ElectroHeater();
+
+                        //        XmlNode ParamNodeEllectroHeater = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeElectroHeater = items.ChildNodes[1];
+
+                        //        foreach (XmlNode param in ParamNodeEllectroHeater.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "Description":
+                        //                    electroHeater.Description = param.InnerText;
+                        //                    break;
+
+                        //                case "Voltage":
+                        //                    var voltage = param.InnerText;
+                        //                    pinfo = electroHeater.GetType().GetProperty("Voltage");
+                        //                    pinfo?.SetValue(electroHeater, Enum.Parse(pinfo.PropertyType, voltage));
+                        //                    break;
+
+                        //                case "Power":
+                        //                    electroHeater.Power = param.InnerText;
+                        //                    break;
+
+                        //                case "Stairs":
+
+                        //                    break;
+
+                        //                case "ControlType":
+
+                        //                    break;
+
+                        //                case "Protect":
+
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //posInfo = SetXmlProPertyToPosInfo(posInfoNodeElectroHeater);
+                        //        posInfo.Tag = electroHeater;
+                        //        posInfos.Add(posInfo);
+                        //        break;
+
+                        //    case nameof(WaterHeater):
+                        //        WaterHeater waterHeater = new WaterHeater();
+
+                        //        XmlNode ParamNodeWaterHeater = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeWaterHeater = items.ChildNodes[1];
+
+                        //        foreach (XmlNode param in ParamNodeWaterHeater.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "ValveType":
+                        //                    pinfo = waterHeater.GetType().GetProperty("valveType");
+                        //                    pinfo?.SetValue(waterHeater,
+                        //                        Enum.Parse(pinfo.PropertyType, param.InnerText));
+
+                        //                    break;
+
+                        //                case "PumpTK":
+                        //                    waterHeater.HasTK = Convert.ToBoolean(param.InnerText);
+                        //                    break;
+
+                        //                case "WaterProtect":
+
+                        //                    pinfo = waterHeater.GetType().GetProperty("Waterprotect");
+                        //                    pinfo?.SetValue(waterHeater,
+                        //                        Enum.Parse(pinfo.PropertyType, param.InnerText));
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //        posInfo = SetXmlProPertyToPosInfo(posInfoNodeWaterHeater);
+                        //        posInfo.Tag = waterHeater;
+                        //        posInfos.Add(posInfo);
+                        //        break;
+
+                        //    case nameof(Humidifier):
+                        //        Humidifier humidifier = new Humidifier();
+
+                        //        XmlNode ParamNodeHumidifier = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeHumidifier = items.ChildNodes[1];
+
+                        //        foreach (XmlNode param in ParamNodeHumidifier.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "HumType":
+
+                        //                    pinfo = humidifier.GetType().GetProperty("HumType");
+                        //                    pinfo?.SetValue(humidifier,
+                        //                        Enum.Parse(pinfo.PropertyType, param.InnerText));
+
+                        //                    break;
+
+                        //                case "ControlType":
+                        //                    pinfo = humidifier.GetType().GetProperty("HumControlType");
+                        //                    pinfo?.SetValue(humidifier,
+                        //                        Enum.Parse(pinfo.PropertyType, param.InnerText));
+                        //                    break;
+
+                        //                case "Voltage":
+
+                        //                    pinfo = humidifier.GetType().GetProperty("Voltage");
+                        //                    pinfo?.SetValue(humidifier,
+                        //                        Enum.Parse(pinfo.PropertyType, param.InnerText));
+                        //                    break;
+
+                        //                case "Power":
+                        //                    humidifier.Power = param.InnerText;
+                        //                    break;
+
+                        //                case "HumSensPresent":
+                        //                    humidifier.HumSensPresent = Convert.ToBoolean(param.InnerText);
+                        //                    break;
+
+                        //                case "SensorType":
+                        //                    if (humidifier.HumSensPresent)
+                        //                    {
+                        //                        pinfo = humidifier.GetType().GetProperty("SensorType");
+                        //                        pinfo?.SetValue(humidifier,
+                        //                            Enum.Parse(pinfo.PropertyType, param.InnerText));
+                        //                    }
+
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //        posInfo = SetXmlProPertyToPosInfo(posInfoNodeHumidifier);
+                        //        posInfo.Tag = humidifier;
+                        //        posInfos.Add(posInfo);
+
+                        //        break;
+
+                        //    case nameof(Froster):
+
+                        //        XmlNode ParamNodeFroster = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeFroster = items.ChildNodes[1];
+                        //        Froster froster = null;
+
+                        //        foreach (XmlNode param in ParamNodeFroster.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "FrosterType":
+                        //                    Froster.FrosterType frosterType =
+                        //                        (Froster.FrosterType)Enum.Parse(typeof(Froster.FrosterType),
+                        //                            param.InnerText, true);
+                        //                    froster = new Froster(frosterType);
+                        //                    break;
+
+                        //                case "Stairs":
+                        //                    if (froster != null)
+                        //                    {
+                        //                        pinfo = froster.GetType().GetProperty("Stairs");
+                        //                        pinfo?.SetValue(froster,
+                        //                            Enum.Parse(pinfo.PropertyType, param.InnerText));
+                        //                    }
+
+                        //                    break;
+
+                        //                case "KKBControlType":
+                        //                    if (froster != null)
+                        //                    {
+                        //                        pinfo = froster.GetType().GetProperty("KKBControlType");
+                        //                        pinfo?.SetValue(froster,
+                        //                            Enum.Parse(pinfo.PropertyType, param.InnerText));
+                        //                    }
+
+                        //                    break;
+
+                        //                case "ValveType":
+                        //                    if (froster != null)
+                        //                    {
+                        //                        pinfo = froster.GetType().GetProperty("valveType");
+                        //                        pinfo?.SetValue(froster,
+                        //                            Enum.Parse(pinfo.PropertyType, param.InnerText));
+                        //                    }
+
+                        //                    break;
+
+                        //                case "Voltage":
+                        //                    if (froster != null)
+                        //                    {
+                        //                        pinfo = froster.GetType().GetProperty("Voltage");
+                        //                        pinfo?.SetValue(froster,
+                        //                            Enum.Parse(pinfo.PropertyType, param.InnerText));
+                        //                    }
+
+                        //                    break;
+
+                        //                case "Power":
+                        //                    if (froster != null)
+                        //                    {
+                        //                        froster.Power = param.InnerText;
+                        //                    }
+
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //        posInfo = SetXmlProPertyToPosInfo(posInfoNodeFroster);
+                        //        posInfo.Tag = froster;
+                        //        posInfos.Add(posInfo);
+
+                        //        break;
+
+                        //    case nameof(Recuperator):
+                        //        XmlNode ParamNodeRecuperator = items.ChildNodes[0];
+                        //        XmlNode posInfoNodeRecuperator = items.ChildNodes[1];
+                        //        Recuperator recuperator = new Recuperator();
+
+                        //        foreach (XmlNode param in ParamNodeRecuperator.ChildNodes)
+                        //        {
+                        //            switch (param.LocalName)
+                        //            {
+                        //                case "RecuperatorType":
+                        //                    pinfo = recuperator.GetType().GetProperty("_RecuperatorType");
+                        //                    pinfo?.SetValue(recuperator,
+                        //                        Enum.Parse(pinfo.PropertyType, param.InnerText));
+                        //                    break;
+                        //            }
+                        //        }
+
+                        //        posInfo = SetXmlProPertyToPosInfo(posInfoNodeRecuperator);
+                        //        posInfo.Tag = recuperator;
+                        //        posInfos.Add(posInfo);
+
+                        //        break;
+
+                        //    case nameof(Room):
+                        //        {
+                        //            XmlNode ParamNodeCrossection = items.ChildNodes[0];
+                        //            XmlNode posInfoNodeCrossSection = items.ChildNodes[1];
+                        //            string sensTtype = string.Empty;
+                        //            string sensHtype = string.Empty;
+
+                        //            foreach (XmlNode param in ParamNodeCrossection.ChildNodes)
+                        //            {
+                        //                switch (param.LocalName)
+                        //                {
+                        //                    case "SensorTType":
+                        //                        sensTtype = param.InnerText;
+                        //                        break;
+
+                        //                    case "SensorHType":
+                        //                        sensHtype = param.InnerText;
+                        //                        break;
+                        //                }
+                        //            }
+
+                        //            bool sentTPresent = sensTtype != "No";
+                        //            bool sentHPresent = sensHtype != "No";
+
+                        //            Room room = new Room(sentTPresent, sentHPresent);
+                        //            if (room._SensorT != null)
+                        //            {
+                        //                pinfo = room.GetType().GetProperty("sensorTType");
+                        //                pinfo?.SetValue(room, Enum.Parse(pinfo.PropertyType, sensTtype));
+                        //            }
+
+                        //            if (room._SensorH != null)
+                        //            {
+                        //                pinfo = room.GetType().GetProperty("sensorHType");
+                        //                pinfo?.SetValue(room, Enum.Parse(pinfo.PropertyType, sensHtype));
+                        //            }
+
+                        //            posInfo = SetXmlProPertyToPosInfo(posInfoNodeCrossSection);
+                        //            posInfo.Tag = room;
+                        //            posInfos.Add(posInfo);
+                        //        }
+
+                        //        break;
+
+                        //    case nameof(CrossSection):
+                        //        {
+                        //            XmlNode ParamNodeCrossection = items.ChildNodes[0];
+                        //            XmlNode posInfoNodeCrossSection = items.ChildNodes[1];
+                        //            string sensTtype = string.Empty;
+                        //            string sensHtype = string.Empty;
+                        //            foreach (XmlNode param in ParamNodeCrossection.ChildNodes)
+                        //            {
+                        //                switch (param.LocalName)
+                        //                {
+                        //                    case "SensorTType":
+                        //                        sensTtype = param.InnerText;
+                        //                        break;
+
+                        //                    case "SensorHType":
+                        //                        sensHtype = param.InnerText;
+                        //                        break;
+                        //                }
+                        //            }
+
+                        //            bool sentTPresent = sensTtype != "No";
+                        //            bool sentHPresent = sensHtype != "No";
+
+                        //            CrossSection crossSection = new CrossSection(sentTPresent, sentHPresent);
+                        //            if (crossSection._SensorT != null)
+                        //            {
+                        //                pinfo = crossSection.GetType().GetProperty("sensorTType");
+                        //                pinfo?.SetValue(crossSection, Enum.Parse(pinfo.PropertyType, sensTtype));
+                        //            }
+
+                        //            if (crossSection._SensorH != null)
+                        //            {
+                        //                pinfo = crossSection.GetType().GetProperty("sensorHType");
+                        //                pinfo?.SetValue(crossSection, Enum.Parse(pinfo.PropertyType, sensHtype));
+                        //            }
+
+                        //            posInfo = SetXmlProPertyToPosInfo(posInfoNodeCrossSection);
+                        //            posInfo.Tag = crossSection;
+                        //            posInfos.Add(posInfo);
+                        //        }
+
+                        //        break;
+                        //}
+                        #endregion
                     }
                 }
-
                 var presetkey = (presetName, presetType);
-
                 presetsDictionary.Add(presetkey, MD5HashGenerator.ObjectToByteArray(posInfos));
             }
-
             var t = presetsDictionary
                 .GroupBy(e => e.Key.Item2)
                 .ToList();
-            
             foreach (var dataItem in t.Select(VARIABLE =>
             {
                 return new RadListDataItem
@@ -2200,13 +2166,13 @@ namespace AOVGEN
             var dataArray = MD5HashGenerator.ObjectToByteArray(obj); //data for encrypt to byte array
 
             //get disk  ID
-            ManagementObject dsk = new ManagementObject(@"win32_logicaldisk.deviceid=""c:""");
+            ManagementObject dsk = new(@"win32_logicaldisk.deviceid=""c:""");
             dsk.Get();
             string diskID = dsk["VolumeSerialNumber"].ToString();
 
             //get MB ID
             ManagementObjectCollection mbsList = null;
-            ManagementObjectSearcher mbs = new ManagementObjectSearcher("Select * From Win32_processor");
+            ManagementObjectSearcher mbs = new("Select * From Win32_processor");
             mbsList = mbs.Get();
             string CPUid = "";
             foreach (var o in mbsList)
@@ -2261,6 +2227,8 @@ namespace AOVGEN
 
                     aes.Key = key;
                     aes.IV = iv;
+                    
+
 
                     using (var encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
                     {
@@ -2299,11 +2267,11 @@ namespace AOVGEN
                 }
             }
         }
+        
 
-
-        private static PosInfo SetXmlProPertyToPosInfo(XmlNode posInfoNode)
+        internal static PosInfo SetXmlProPertyToPosInfo(XmlNode posInfoNode)
         {
-            PosInfo posInfo = new PosInfo();
+            PosInfo posInfo = new();
             foreach (XmlNode posinfo in posInfoNode)
             {
                 switch (posinfo.LocalName)
@@ -2404,7 +2372,7 @@ namespace AOVGEN
         }
         private List<PosInfo> AddCrossection(List<PosInfo> posInfos)
         {
-            List<PosInfo> exitPosInfos = new List<PosInfo>();
+            List<PosInfo> exitPosInfos = new();
             PosInfo ySupplyPosInfo = posInfos
                 .FirstOrDefault(e => e.Tag is SupplyVent || e.Tag is SpareSuplyVent);
             PosInfo yExtPosInfo = posInfos
@@ -2424,8 +2392,8 @@ namespace AOVGEN
                 {
                     int[] arr = { i, YSupplyPos };
                     if (OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(arr))) continue;
-                    CrossSection crossSection = new CrossSection(false, false);
-                    PosInfo posInfo = new PosInfo
+                    CrossSection crossSection = new(false, false);
+                    PosInfo posInfo = new()
                     {
                         Pos = arr,
                         ImageName = "cross1",
@@ -2449,8 +2417,8 @@ namespace AOVGEN
                 {
                     int[] arr = { i, YExtPos };
                     if (OccupDict.ContainsKey(MD5HashGenerator.GenerateKey(arr))) continue;
-                    CrossSection crossSection = new CrossSection(false, false);
-                    PosInfo posInfo = new PosInfo
+                    CrossSection crossSection = new(false, false);
+                    PosInfo posInfo = new()
                     {
                         Pos = arr,
                         ImageName = "cross1",
@@ -2492,7 +2460,7 @@ namespace AOVGEN
                     .OrderBy(y => y.PozY)
                     .ToList();
                 //xml Decalration:
-                XmlDocument xmlDoc = new XmlDocument();
+                XmlDocument xmlDoc = new();
                 XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
 
                 XmlElement root = xmlDoc.CreateElement("Preset");
@@ -2602,7 +2570,7 @@ namespace AOVGEN
                             SupplyDamper supplyDamper = (SupplyDamper)component;
                             {
                                 var comp1 = ("Description", supplyDamper.Description);
-                                var comp2 = ("HasControl", supplyDamper.hascontrol.ToString());
+                                var comp2 = ("HasControl", supplyDamper.HasControl.ToString());
                                 var comp3 = ("ControlType", supplyDamper.SensorType.ToString());
                                 compList = new List<(string, string)>
                             {
@@ -2617,7 +2585,7 @@ namespace AOVGEN
                             ExtDamper extDamper = (ExtDamper)component;
                             {
                                 var comp1 = ("Description", extDamper.Description);
-                                var comp2 = ("HasControl", extDamper.HasContol.ToString());
+                                var comp2 = ("HasControl", extDamper.HasControl.ToString());
                                 compList = new List<(string, string)>
                             {
                                 comp1,
@@ -2715,8 +2683,8 @@ namespace AOVGEN
                         case nameof(CrossSection):
                             CrossSection crossSection = (CrossSection)component;
                             {
-                                var comp1 = ("SensorTType", crossSection.sensorTType.ToString());
-                                var comp2 = ("SensorHType", crossSection.sensorHType.ToString());
+                                var comp1 = ("SensorTType", crossSection.SensorTType.ToString());
+                                var comp2 = ("SensorHType", crossSection.SensorHType.ToString());
                                 compList = new List<(string, string)>
                             {
                                 comp1,
@@ -2728,8 +2696,8 @@ namespace AOVGEN
                         case nameof(Room):
                             Room room = (Room)component;
                             {
-                                var comp1 = ("SensorTType", room.sensorTType.ToString());
-                                var comp2 = ("SensorHType", room.sensorHType.ToString());
+                                var comp1 = ("SensorTType", room.SensorTType.ToString());
+                                var comp2 = ("SensorHType", room.SensorHType.ToString());
                                 compList = new List<(string, string)>
                             {
                                 comp1,
@@ -2777,7 +2745,7 @@ namespace AOVGEN
 
                 string path = @"%AppData%";
                 path = Environment.ExpandEnvironmentVariables(path);
-                path += @"\Autodesk\Revit\Addins\2021\GKSASU\AOVGen\";
+                path += @"\Autodesk\Revit\Addins\2020\ASU\AOVGen\";
                 xmlDoc.Save(path + @"shema.xml");
             }
         }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
+using AOVGEN.Models;
 using AutoCAD;
 using Telerik.WinControls.UI;
 
@@ -236,7 +237,6 @@ namespace AOVGEN
                             acadDocument.SendCommand("(close TargetFile)\n");
                             acadDocument.SendCommand("(textpage)\n");
                             
-                            //System.Windows.Forms.SendKeys.Send("{ESC}");
                             acadApp.Visible = true;
                             string alltext = File.ReadAllText(filename, Encoding.Default);
                             alltext = alltext.Replace("(", "").Replace(")", "");
@@ -249,11 +249,6 @@ namespace AOVGEN
                             }
                         }
                     }
-                    //ShowWindow(hWnd, (int)ShowWindowEnum.Restore);
-                    
-
-
-
                 }
                 catch (Exception ex)
                 {

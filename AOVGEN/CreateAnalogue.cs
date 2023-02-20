@@ -75,7 +75,7 @@ namespace AOVGEN
             timer1.Start();
 
 
-            Animator animator = new Animator
+            Animator animator = new()
             {
                 Paths = new Path(1, 0, 400, 100).ToArray()
             };
@@ -106,7 +106,7 @@ namespace AOVGEN
                 string suffix = radTextBox3.Text;
 
                 DataTable dataSource = RadGridView.DataSource as DataTable;
-                SQLiteCommand command = new SQLiteCommand
+                SQLiteCommand command = new()
                 {
                     Connection = connection
                 };
@@ -161,7 +161,7 @@ namespace AOVGEN
                             drToAdd["Author"] = reader[4].ToString();
                             dataSource.Rows.Add(drToAdd);
                             //dataSource.AcceptChanges();
-                            Pannel pannel = new Pannel
+                            Pannel pannel = new()
                             {
                                 PannelName = pannelname,
                                 Power = power,
@@ -264,7 +264,7 @@ namespace AOVGEN
             //OleDbConnection connection = OpenDB();
             string tableselect = $"SELECT Pannel.GUID, Pannel.PannelName, Pannel.Power, Pannel.Voltage, Pannel.Category, Pannel.FireProtect, Pannel.Dispatching, Pannel.Protocol, Pannel.Version FROM Pannel WHERE GUID = '{pannelguid}'";
             connection.Open();
-            SQLiteCommand command = new SQLiteCommand(tableselect, connection);
+            SQLiteCommand command = new(tableselect, connection);
             SQLiteDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {

@@ -20,7 +20,7 @@ namespace AOVGEN
         private void SpreadSheetForm_Load(object sender, EventArgs e)
         {
 
-            Dictionary<string, List<dynamic>> VentDict = new Dictionary<string, List<dynamic>>();
+            Dictionary<string, List<dynamic>> VentDict = new();
             if (radTreeView4 != null)
             {
                 foreach (RadTreeNode radTreeNode in radTreeView4.Nodes)
@@ -39,7 +39,7 @@ namespace AOVGEN
                 }
             }
 
-            DataTable dt = new DataTable();
+            DataTable dt = new();
 
             dt.Columns.Add("Поз.");
             dt.Columns.Add("Наименование и техническая характеристика");

@@ -22,7 +22,7 @@ namespace AOVGEN
         {
             timer1.Start();
 
-            Animator animator = new Animator
+            Animator animator = new()
             {
                 Paths = new Path(1, 0, 800, 100).ToArray()
             };

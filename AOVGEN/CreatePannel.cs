@@ -33,7 +33,7 @@ namespace AOVGEN
             timer1.Start();
            
 
-            Animator animator = new Animator
+            Animator animator = new()
             {
                 Paths = new Path(1, 0, 400, 100).ToArray()
             };
@@ -178,7 +178,7 @@ namespace AOVGEN
                 {
                     
                     string selectprjguid = $"SELECT Buildings.Project FROM Buildings WHERE GUID = '{BUILDGUID}'";
-                    SQLiteCommand command = new SQLiteCommand(selectprjguid, connection);
+                    SQLiteCommand command = new(selectprjguid, connection);
                     var dataReader = command.ExecuteReader();
                     while (dataReader.Read())
                     {
@@ -237,7 +237,7 @@ namespace AOVGEN
                         string Version = "1";
 
                         string InsertQuery = $"INSERT INTO Pannel ([GUID], PannelName, [Project], Power, Voltage, Category, FireProtect, Dispatching, Protocol, [Place], Modyfied, Version, Author) VALUES ('{NewPannelGUID}','{PannelName}','{prgGUID}','0','{Pannel._Voltage.AC220}','{Category}','{FireProtect}','{Dispatching}','{Protocol}','{Place}','{Modyfied}','{Version}','{Author}')";
-                        SQLiteCommand command1 = new SQLiteCommand(InsertQuery, connection);
+                        SQLiteCommand command1 = new(InsertQuery, connection);
                         command1.ExecuteNonQuery();
                         command1.Dispose();
                         connection.Close();
@@ -299,7 +299,7 @@ namespace AOVGEN
             string connectionstr = @"Data Source=" + BDPath + ";";
             try
             {
-                SQLiteConnection connection = new SQLiteConnection (connectionstr);
+                SQLiteConnection connection = new(connectionstr);
                 return connection;
             }
             catch { }
@@ -321,7 +321,7 @@ namespace AOVGEN
             SQLiteConnection connection = OpenDB();
             string tableselect = $"SELECT Pannel.GUID, Pannel.PannelName, Pannel.Power, Pannel.Voltage, Pannel.Category, Pannel.FireProtect, Pannel.Dispatching, Pannel.Protocol, Pannel.Version FROM Pannel WHERE GUID = '{pannelguid}'";
             connection.Open();
-            SQLiteCommand command = new SQLiteCommand(tableselect, connection);
+            SQLiteCommand command = new(tableselect, connection);
             SQLiteDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -394,7 +394,7 @@ namespace AOVGEN
                         string protocol = Row.Cells[11].Value.ToString();
 
 
-                        Pannel pannel = new Pannel
+                        Pannel pannel = new()
                         {
                             PannelName = pannelname,
                             Power = power,
