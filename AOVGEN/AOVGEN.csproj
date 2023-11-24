@@ -50,6 +50,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>9.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
@@ -257,6 +258,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="EnumDescConverter.cs" />
+    <Compile Include="Helpers\Helper.cs" />
     <Compile Include="IO_Summ.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -446,7 +448,16 @@
   <ItemGroup>
     <!--sirinie -->
     <COMReference Include="AutoCAD">
-      <Guid>{E2077CF2-3573-4E66-B1DC-01118675056D}</Guid>
+      <Guid>{AA9A2205-75AA-43AD-9138-1767F1BB5E0C}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="AXDBLib">
+      <Guid>{39FFAA00-8623-488F-8C53-DD3B0B7A464F}</Guid>
       <VersionMajor>1</VersionMajor>
       <VersionMinor>0</VersionMinor>
       <Lcid>0</Lcid>

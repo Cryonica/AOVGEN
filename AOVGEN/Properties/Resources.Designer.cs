@@ -61,6 +61,51 @@ namespace AOVGEN.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на C:\Program Files\Autodesk\AutoCAD 2019\acad.exe;2019.
+        /// </summary>
+        internal static string _23 {
+            get {
+                return ResourceManager.GetString("23", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на C:\Program Files\Autodesk\AutoCAD 2020\acad.exe;2020.
+        /// </summary>
+        internal static string _23_1 {
+            get {
+                return ResourceManager.GetString("23.1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на C:\Program Files\Autodesk\AutoCAD 2021\acad.exe;2021.
+        /// </summary>
+        internal static string _24 {
+            get {
+                return ResourceManager.GetString("24", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на C:\Program Files\Autodesk\AutoCAD 2022\acad.exe;2022.
+        /// </summary>
+        internal static string _24_1 {
+            get {
+                return ResourceManager.GetString("24.1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на C:\Program Files\Autodesk\AutoCAD 2023\acad.exe;2023.
+        /// </summary>
+        internal static string _24_2 {
+            get {
+                return ResourceManager.GetString("24.2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap _3dgifmaker98263 {
@@ -497,6 +542,24 @@ namespace AOVGEN.Properties {
             get {
                 object obj = ResourceManager.GetObject("OpenFolder", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на \Autodesk\Revit\Addins\2022\ASU\AOVGen\.
+        /// </summary>
+        internal static string PluginFolder {
+            get {
+                return ResourceManager.GetString("PluginFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на 22.
+        /// </summary>
+        internal static string PluginVersion {
+            get {
+                return ResourceManager.GetString("PluginVersion", resourceCulture);
             }
         }
         

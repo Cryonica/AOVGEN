@@ -1,4 +1,5 @@
 ﻿using AOVGEN.Models;
+using AOVGEN.Properties;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -69,7 +70,7 @@ namespace AOVGEN
 	{
         private static string Appfolder()
 		{
-			return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Autodesk\Revit\Addins\2022\ASU\AOVGen\";
+			return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Resources.PluginFolder; //@"\Autodesk\Revit\Addins\2022\ASU\AOVGen\";
 
 		}
 		[DisplayName("Имя системы")]
@@ -131,116 +132,108 @@ namespace AOVGEN
 			
 			List<dynamic> ListKIP = new();
             
+		
+
             foreach (var posInfo in ComponentsV2)
             {
-                object component = posInfo.Tag;
-				string  objname = component.GetType().Name;
-				switch (objname)
+                try
                 {
-					case nameof(OutdoorTemp):
-						//ListKIP.Add("Датчик наружной температуры");
-						ListKIP.Add(component);
-						break;
-					
-					case nameof(SupplyFiltr):
-						SupplyFiltr supplyFiltr = (SupplyFiltr)component;
-						if (supplyFiltr._PressureContol != null) ListKIP.Add(supplyFiltr._PressureContol);//ListKIP.Add("Датчик перепада давления на приточном фильтре");
-						break;
-					case nameof(Recuperator):
-						Recuperator recuperator = (Recuperator)component;
-						if (recuperator.protectSensor1 != null) ListKIP.Add(recuperator.protectSensor1);
-						if (recuperator.protectSensor2 != null) ListKIP.Add(recuperator.protectSensor2);
 
-						//ListKIP.Add(recuperator.protectSensor1?.Description);
-						//ListKIP.Add("Датчик перепада давления на рекуператоре");
-						break;
-					case nameof(SupplyVent):
-						SupplyVent supplyVent = (SupplyVent)component;
-						if (supplyVent._PressureContol != null) ListKIP.Add(supplyVent._PressureContol);//ListKIP.Add("Датчик перепада давления на приточном вентиляторе");
-						if (supplyVent._FControl != null) ListKIP.Add(supplyVent._FControl);
-						
-
-						//switch (supplyVent.ControlType)
-      //                  {
-						//	case Vent.AHUContolType.Soft:
-						//		ListKIP.Add("Устройство плавного пуска");
-						//		break;
-						//	case Vent.AHUContolType.FCControl:
-						//		ListKIP.Add("Регулятор оборотов");
-						//		break;
-						//	case Vent.AHUContolType.Transworm:
-						//		ListKIP.Add("Трансформатный регулятор скорости");
-						//		break;
-						//}
-							
-						break;
-					case nameof(WaterHeater):
-						WaterHeater waterHeater = (WaterHeater)component;
-						if (waterHeater.PS1 != null) ListKIP.Add(waterHeater.PS1);//ListKIP.Add("Датчик температуры в канале");
-						if (waterHeater.PS2 != null) ListKIP.Add(waterHeater.PS2);//ListKIP.Add("Датчик температуры в обратном теплоносителе");
-						
-						break;
+					object component = posInfo.Tag;
+					string  objname = component.GetType().Name;
+					switch (objname)
+					{
+						case nameof(OutdoorTemp):
+							//ListKIP.Add("Датчик наружной температуры");
+							ListKIP.Add(component);
+							break;
 					
-					case nameof(Froster):
-						Froster froster = (Froster)component;
-						if (froster.Sens1 != null) ListKIP.Add(froster.Sens1);//ListKIP.Add("Охладитель сенсор 1");
-						if (froster.Sens2 != null) ListKIP.Add(froster.Sens2);// ListKIP.Add("Охладитель сенсор 2");
+						case nameof(SupplyFiltr):
+							SupplyFiltr supplyFiltr = (SupplyFiltr)component;
+							if (supplyFiltr._PressureContol != null) ListKIP.Add(supplyFiltr._PressureContol);//ListKIP.Add("Датчик перепада давления на приточном фильтре");
+							break;
+						case nameof(Recuperator):
+							Recuperator recuperator = (Recuperator)component;
+							if (recuperator.protectSensor1 != null) ListKIP.Add(recuperator.protectSensor1);
+							if (recuperator.protectSensor2 != null) ListKIP.Add(recuperator.protectSensor2);
+
+							//ListKIP.Add(recuperator.protectSensor1?.Description);
+							//ListKIP.Add("Датчик перепада давления на рекуператоре");
+							break;
+						case nameof(SupplyVent):
+							SupplyVent supplyVent = (SupplyVent)component;
+							if (supplyVent._PressureContol != null) ListKIP.Add(supplyVent._PressureContol);//ListKIP.Add("Датчик перепада давления на приточном вентиляторе");
+							if (supplyVent._FControl != null)
+                            {
+								//ListKIP.Add(supplyVent._FControl);
+							}
+							break;
+
+						case nameof(WaterHeater):
+							WaterHeater waterHeater = (WaterHeater)component;
+							if (waterHeater.PS1 != null) ListKIP.Add(waterHeater.PS1);//ListKIP.Add("Датчик температуры в канале");
+							if (waterHeater.PS2 != null) ListKIP.Add(waterHeater.PS2);//ListKIP.Add("Датчик температуры в обратном теплоносителе");
 						
-						break;
-					case nameof(Humidifier):
-						Humidifier humidifier = (Humidifier)component;
-						if (humidifier.HumiditySensor != null) ListKIP.Add(humidifier.HumiditySensor);//ListKIP.Add("Увлажнитель сенсор");
+							break;
+					
+						case nameof(Froster):
+							Froster froster = (Froster)component;
+							if (froster.Sens1 != null) ListKIP.Add(froster.Sens1);//ListKIP.Add("Охладитель сенсор 1");
+							if (froster.Sens2 != null) ListKIP.Add(froster.Sens2);// ListKIP.Add("Охладитель сенсор 2");
 						
-						break;
-					case nameof(SupplyTemp):
-						//ListKIP.Add("Датчик температуры в приточном канале");
-						ListKIP.Add(component);
-						break;
-					case nameof(IndoorTemp):
-						//ListKIP.Add("Датчик температуры наружного воздуха");
-						ListKIP.Add(component);
-						break;
-					case nameof(ExtVent):
-						ExtVent extVent = (ExtVent) component;
-						if (extVent._PressureContol != null) ListKIP.Add(extVent._PressureContol);//ListKIP.Add("Датчик перепада давления на вытяжном вентиляторе");
-						if (extVent._FControl != null) ListKIP.Add(extVent._FControl);
-						//switch (extVent.ControlType)
-						//{
-						//	case Vent.AHUContolType.Soft:
-						//		ListKIP.Add("Устройство плавного пуска");
-						//		break;
-						//	case Vent.AHUContolType.FCControl:
-						//		ListKIP.Add("Регулятор оборотов");
-						//		break;
-						//	case Vent.AHUContolType.Transworm:
-						//		ListKIP.Add("Трансформатный регулятор скорости");
-						//		break;
-						//}
-						break;
-					case nameof(ExhaustTemp):
-						ListKIP.Add(component);
-						//ListKIP.Add("Датчик температуры в вытяжном канале");
-						break;
-					case nameof(ExtFiltr):
-						ExtFiltr extFiltr = (ExtFiltr)component;
-						if (extFiltr._PressureContol != null) ListKIP.Add(extFiltr._PressureContol);//ListKIP.Add("Датчик перепада давления на вытяжном фильтре");
-						break;
-					case nameof(Room):
-						Room room = (Room)component;
-						if (room._SensorT != null) ListKIP.Add(room._SensorT);
-						if (room._SensorH != null) ListKIP.Add(room._SensorH);
-						break;
-					case nameof(CrossSection):
-						CrossSection crossSection = (CrossSection)component;
-						if (crossSection._SensorT != null) ListKIP.Add(crossSection._SensorT);
-						if (crossSection._SensorH != null) ListKIP.Add(crossSection._SensorH);
-						break;
-					case nameof(SupplyDamper):
-                        SupplyDamper supplyDamper = (SupplyDamper) component;
-						if (supplyDamper.outdoorTemp != null) ListKIP.Add(supplyDamper.outdoorTemp);
-						break;
+							break;
+						case nameof(Humidifier):
+							Humidifier humidifier = (Humidifier)component;
+							if (humidifier.HumiditySensor != null) ListKIP.Add(humidifier.HumiditySensor);//ListKIP.Add("Увлажнитель сенсор");
+						
+							break;
+						case nameof(SupplyTemp):
+							//ListKIP.Add("Датчик температуры в приточном канале");
+							ListKIP.Add(component);
+							break;
+						case nameof(IndoorTemp):
+							//ListKIP.Add("Датчик температуры наружного воздуха");
+							ListKIP.Add(component);
+							break;
+						case nameof(ExtVent):
+							ExtVent extVent = (ExtVent) component;
+							if (extVent._PressureContol != null) ListKIP.Add(extVent._PressureContol);//ListKIP.Add("Датчик перепада давления на вытяжном вентиляторе");
+							if (extVent._FControl != null)
+							{
+								//ListKIP.Add(extVent._FControl);
+							}
+							break;
+						case nameof(ExhaustTemp):
+							ListKIP.Add(component);
+							//ListKIP.Add("Датчик температуры в вытяжном канале");
+							break;
+						case nameof(ExtFiltr):
+							ExtFiltr extFiltr = (ExtFiltr)component;
+							if (extFiltr._PressureContol != null) ListKIP.Add(extFiltr._PressureContol);//ListKIP.Add("Датчик перепада давления на вытяжном фильтре");
+							break;
+						case nameof(Room):
+							Room room = (Room)component;
+							if (room._SensorT != null) ListKIP.Add(room._SensorT);
+							if (room._SensorH != null) ListKIP.Add(room._SensorH);
+							break;
+						case nameof(CrossSection):
+							CrossSection crossSection = (CrossSection)component;
+							if (crossSection._SensorT != null) ListKIP.Add(crossSection._SensorT);
+							if (crossSection._SensorH != null) ListKIP.Add(crossSection._SensorH);
+							break;
+						case nameof(SupplyDamper):
+							SupplyDamper supplyDamper = (SupplyDamper) component;
+							if (supplyDamper.outdoorTemp != null) ListKIP.Add(supplyDamper.outdoorTemp);
+							break;
+
+					}
+                }
+				catch
+                {
+					var t = posInfo;
 
 				}
+				
 			}
             return ListKIP;
 
@@ -268,6 +261,8 @@ namespace AOVGEN
 		{
 			internal List<SignificantInfo2> significantInfo2s1;
 			internal List<string[]> shemas;
+			internal List<FControl> fControls;
+
 
 		}
         public new string GetHashCode()
@@ -283,10 +278,27 @@ namespace AOVGEN
 									   select p);
 
 			//Get sensor shemas 
-			ShemaASU[] _shemas = GetKIP()
+			var _shemas = GetKIP()
 				.Cast<Sensor>()
 				.Select(s => s.ShemaASU)
 				.ToArray();
+
+			List<FControl> fControls = new();
+
+			var vents = ComponentsV2
+				.Select(c => c.Tag)
+				.OfType<Vent>() // Используйте метод OfType<T> для фильтрации и приведения типа одновременно
+				.ToList();
+
+			if (vents !=null)
+            {
+				foreach (Vent vent in vents)
+                {
+					if (vent._FControl != null) fControls.Add(vent._FControl);
+
+				}
+            }
+
 
 			//Create list of meaningful information from sensor shemas
 			List<string[]> shemas = new();
@@ -302,7 +314,8 @@ namespace AOVGEN
 			SignificantInfo3 significantInfo3 = new()
 			{
 				significantInfo2s1 = significantInfo2s,
-				shemas = shemas
+				shemas = shemas,
+				fControls = fControls
 			};
 
 			return EditorV2.MD5HashGenerator.GenerateKey(significantInfo3);

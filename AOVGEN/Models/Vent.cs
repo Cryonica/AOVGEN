@@ -600,7 +600,7 @@ namespace AOVGEN.Models
 		private void SetCable2Type(object val)
 		{
 			AHUProtect aHU = (AHUProtect)val;
-			aHUProtectVariable = aHU;
+			
 			switch (aHU)
 			{
 				case AHUProtect.Thermokontakt:
@@ -636,10 +636,13 @@ namespace AOVGEN.Models
 					break;
 				case AHUProtect.No:
 					Cable4 = null;
+					if (aHUProtectVariable == AHUProtect.No) break;
+					ShemaASU = ShemaASU.CreateBaseShema();
 					break;
 
 
 			}
+			aHUProtectVariable = aHU;
 		}
 		private void CheckVoltage(object val)
 		{

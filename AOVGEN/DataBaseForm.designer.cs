@@ -62,25 +62,28 @@ namespace AOVGEN
             this.office2007BlackTheme1 = new Telerik.WinControls.Themes.Office2007BlackTheme();
             this.radListView1 = new Telerik.WinControls.UI.RadListView();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.radDropDownList1 = new Telerik.WinControls.UI.RadDropDownList();
             this.radButton3 = new Telerik.WinControls.UI.RadButton();
             this.radButton2 = new Telerik.WinControls.UI.RadButton();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.timer2 = new System.Windows.Forms.Timer(this.components);
-            this.radDropDownList1 = new Telerik.WinControls.UI.RadDropDownList();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.radDropDownList2 = new Telerik.WinControls.UI.RadDropDownList();
             ((System.ComponentModel.ISupportInitialize)(this.radButton1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.radListView1)).BeginInit();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.radDropDownList1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.radButton3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.radButton2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.radDropDownList1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.radDropDownList2)).BeginInit();
             this.SuspendLayout();
             // 
             // radButton1
             // 
-            this.radButton1.Location = new System.Drawing.Point(566, 221);
+            this.radButton1.Location = new System.Drawing.Point(566, 254);
             this.radButton1.Name = "radButton1";
             this.radButton1.Size = new System.Drawing.Size(110, 31);
             this.radButton1.TabIndex = 0;
@@ -100,6 +103,8 @@ namespace AOVGEN
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.radDropDownList2);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.radDropDownList1);
             this.panel1.Controls.Add(this.radButton3);
@@ -108,12 +113,30 @@ namespace AOVGEN
             this.panel1.Controls.Add(this.radButton1);
             this.panel1.Location = new System.Drawing.Point(115, 192);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(679, 264);
+            this.panel1.Size = new System.Drawing.Size(679, 296);
             this.panel1.TabIndex = 2;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(364, 188);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(80, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Пользователь";
+            // 
+            // radDropDownList1
+            // 
+            this.radDropDownList1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.radDropDownList1.Location = new System.Drawing.Point(450, 180);
+            this.radDropDownList1.Name = "radDropDownList1";
+            this.radDropDownList1.Size = new System.Drawing.Size(226, 25);
+            this.radDropDownList1.TabIndex = 3;
+            this.radDropDownList1.ThemeName = "Office2007Black";
             // 
             // radButton3
             // 
-            this.radButton3.Location = new System.Drawing.Point(3, 221);
+            this.radButton3.Location = new System.Drawing.Point(3, 254);
             this.radButton3.Name = "radButton3";
             this.radButton3.Size = new System.Drawing.Size(110, 31);
             this.radButton3.TabIndex = 2;
@@ -123,7 +146,7 @@ namespace AOVGEN
             // 
             // radButton2
             // 
-            this.radButton2.Location = new System.Drawing.Point(450, 221);
+            this.radButton2.Location = new System.Drawing.Point(450, 254);
             this.radButton2.Name = "radButton2";
             this.radButton2.Size = new System.Drawing.Size(110, 31);
             this.radButton2.TabIndex = 1;
@@ -150,29 +173,29 @@ namespace AOVGEN
             // 
             this.timer2.Tick += new System.EventHandler(this.Timer2_Tick);
             // 
-            // radDropDownList1
+            // label2
             // 
-            this.radDropDownList1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.radDropDownList1.Location = new System.Drawing.Point(450, 180);
-            this.radDropDownList1.Name = "radDropDownList1";
-            this.radDropDownList1.Size = new System.Drawing.Size(226, 25);
-            this.radDropDownList1.TabIndex = 3;
-            this.radDropDownList1.ThemeName = "Office2007Black";
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(364, 221);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(70, 13);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "Autocad vers";
             // 
-            // label1
+            // radDropDownList2
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(364, 188);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(80, 13);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Пользователь";
+            this.radDropDownList2.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.radDropDownList2.Location = new System.Drawing.Point(450, 213);
+            this.radDropDownList2.Name = "radDropDownList2";
+            this.radDropDownList2.Size = new System.Drawing.Size(226, 25);
+            this.radDropDownList2.TabIndex = 5;
+            this.radDropDownList2.ThemeName = "Office2007Black";
             // 
             // DataBaseForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(806, 495);
+            this.ClientSize = new System.Drawing.Size(806, 494);
             this.ControlBox = false;
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.pictureBox1);
@@ -187,14 +210,18 @@ namespace AOVGEN
             ((System.ComponentModel.ISupportInitialize)(this.radListView1)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.radDropDownList1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.radButton3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.radButton2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.radDropDownList1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.radDropDownList2)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
+
+        private Label label2;
+        private RadDropDownList radDropDownList2;
     }
 }

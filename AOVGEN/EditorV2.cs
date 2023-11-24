@@ -271,7 +271,7 @@ namespace AOVGEN
 
             string path = @"%AppData%";
             path = Environment.ExpandEnvironmentVariables(path);
-            path += @"\Autodesk\Revit\Addins\2020\ASU\AOVGen\";
+            path += Resources.PluginFolder; //@"\Autodesk\Revit\Addins\2020\ASU\AOVGen\";
             XmlDocument doc = new();
             doc.Load(path + @"Presets.xml");
             ReadXMLPresets(doc, Type.Missing);
@@ -2745,7 +2745,7 @@ namespace AOVGEN
 
                 string path = @"%AppData%";
                 path = Environment.ExpandEnvironmentVariables(path);
-                path += @"\Autodesk\Revit\Addins\2020\ASU\AOVGen\";
+                path += Resources.PluginFolder;// @"\Autodesk\Revit\Addins\2020\ASU\AOVGen\";
                 xmlDoc.Save(path + @"shema.xml");
             }
         }

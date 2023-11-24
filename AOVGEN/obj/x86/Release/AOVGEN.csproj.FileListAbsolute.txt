@@ -156,3 +156,4 @@ C:\Users\user\source\repos\AOVGEN\AOVGEN\obj\x86\Release\AOVGEN.csproj.CoreCompi
 C:\Users\user\source\repos\AOVGEN\AOVGEN\obj\x86\Release\AOVGEN.csproj.CopyComplete
 C:\Users\user\source\repos\AOVGEN\AOVGEN\obj\x86\Release\AOVGEN.exe
 C:\Users\user\source\repos\AOVGEN\AOVGEN\obj\x86\Release\AOVGEN.pdb
+C:\Users\user\source\repos\AOVGEN\AOVGEN\obj\x86\Release\Interop.AXDBLib.dll

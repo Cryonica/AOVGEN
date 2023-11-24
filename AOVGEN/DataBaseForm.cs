@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.Data.SQLite;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
@@ -21,6 +24,7 @@ namespace AOVGEN
     {
         private bool connectOK;
         private bool mainformload;
+        private string _acadVers;
         public DataBaseForm(IRevitExternalService externalService)
         {
             InitializeComponent();
@@ -29,7 +33,7 @@ namespace AOVGEN
             {
                 LoadXML();
             }
-            catch { };
+            catch (Exception e) { MessageBox.Show(e.Message); };
             
             AnimationEmergence();
             Service = externalService;
@@ -145,7 +149,7 @@ namespace AOVGEN
             XmlDocument doc = new();
             string path = @"%AppData%";
             path = Environment.ExpandEnvironmentVariables(path);
-            path += @"\Autodesk\Revit\Addins\2020\ASU\AOVGen\";
+            path += Resources.PluginFolder;// @"\Autodesk\Revit\Addins\2020\ASU\AOVGen\";
             doc.Load(path + @"Config.xml");
             Xmldoc = doc;
             Configpath = path + "Config.xml";
@@ -153,6 +157,45 @@ namespace AOVGEN
             XmlElement documentElement = doc.DocumentElement;
             XmlNodeList aNodes = documentElement?.SelectNodes("/Config/DataBase");
             XmlNodeList users = documentElement?.SelectNodes("/Config/Users");
+            XmlNodeList acadVersions = documentElement?.SelectNodes("/Config/AcadVersion/ProgId");
+            XmlNodeList configVersions = documentElement?.SelectNodes("/Config/ConfigVersion");
+
+            
+            ResourceManager resourceManager = new(Resources.ResourceManager.BaseName, typeof(Program).Assembly);
+            ResourceSet resourceSet = resourceManager.GetResourceSet(System.Threading.Thread.CurrentThread.CurrentCulture, true, true);
+            if (resourceSet != null)
+            {
+                var resourceNames = resourceSet.Cast<DictionaryEntry>()
+                .Where(entry => entry.Value.ToString().Contains("acad.exe"))
+                .Select(entry => new string[2] { entry.Key.ToString(), entry.Value.ToString() })
+                .OrderBy(entry => entry[0]);
+
+                if (resourceNames.Count() > 0)
+                {
+                    foreach(var resourceName in resourceNames)
+                    {
+                        var vals = resourceName[1].Split(';');
+                        RadListDataItem radListDataItem = new(vals[1]);
+                        radListDataItem.Tag = resourceName[0];
+                        radDropDownList2.Items.Add(radListDataItem);
+
+                    }
+                }
+            }
+
+
+            if (configVersions != null)
+            {
+                string vers = (from XmlNode version in configVersions
+                          let v = version.InnerText
+                          select v).First();
+                if (vers != Resources.PluginVersion)
+                {
+                    MessageBox.Show("Файл настроек не от данной версии плагина");
+                    Environment.Exit(1);
+
+                }
+            }
 
             string dbname = string.Empty;
             string dbpath = string.Empty;
@@ -193,8 +236,20 @@ namespace AOVGEN
                 }
 
             radListView1.SelectedIndex = trueindex;
-            XmlNodeList showdialognodes = documentElement?.SelectNodes("/Config/STARTUP/SHOWDIALOG");
-           
+            //XmlNodeList showdialognodes = documentElement?.SelectNodes("/Config/STARTUP/SHOWDIALOG");
+            
+            if (configVersions != null)
+            {
+                _acadVers = (from XmlNode version in acadVersions
+                                   let v = version.InnerText
+                            select v).First();
+
+                
+                radDropDownList2.SelectedItem = radDropDownList2.Items
+                    .Where(i => i.Tag.ToString() == _acadVers)
+                    .FirstOrDefault();
+                
+            }
             radDropDownList1.DataSource = (from XmlNode user in users
                                           let u = user.InnerText
                                           let xmlAttributeCollection = user.Attributes
@@ -228,6 +283,7 @@ namespace AOVGEN
             }
             
         }
+       
         private void WriteToXMLAttr(string dbname)
         {
             try
@@ -236,6 +292,8 @@ namespace AOVGEN
                 XmlElement documentElement = doc.DocumentElement;
                 XmlNodeList aNodes = documentElement?.SelectNodes("/Config/DataBase");
                 XmlNodeList users = documentElement?.SelectNodes("/Config/Users");
+                XmlNodeList acadVers = documentElement?.SelectNodes("/Config/AcadVersion/ProgId");
+
                 bool flag = false;
                 if (aNodes != null)
                     foreach (XmlNode childnodes in aNodes)
@@ -272,6 +330,14 @@ namespace AOVGEN
 
                 if (first?.Attributes != null)
                     first.Attributes[0].Value = "true";
+
+                string selectedAcadVers = radDropDownList2.SelectedItem.Tag.ToString();
+
+                XmlNode second = acadVers?
+                    .Cast<XmlNode>()
+                    .FirstOrDefault().LastChild;
+                second.InnerText = selectedAcadVers;
+                _acadVers = selectedAcadVers;
                 doc.Save(Configpath);
             }
             catch 
@@ -351,7 +417,7 @@ namespace AOVGEN
                 if (Service != null)
                 {
                     string username = radDropDownList1.Text;
-                    MainForm mainForm = new(DBFileName, BDPath, DataBaseType, Service, username);
+                    MainForm mainForm = new(DBFileName, BDPath, DataBaseType, Service, username, _acadVers );
                     mainForm.Load += MainForm_Load;
                     Application.Run(mainForm);
                             

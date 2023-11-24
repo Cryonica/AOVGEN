@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -51,6 +51,7 @@ namespace AOVGEN
         public string DBFileName { get; set; }
         public string DBFilePath { get; set; }
         public string DBType { get; set; }
+        private string AcadVersion { get; set; }
         private string tableExtDocName { get; set; }
         
 
@@ -73,14 +74,16 @@ namespace AOVGEN
         internal static extern IntPtr SetForegroundWindow(IntPtr hWnd);
 
 
-        public MainForm(string dbfilename, string dbfilepath, string DataBaseType, IRevitExternalService externalService, string author)
+        public MainForm(string dbfilename, string dbfilepath, string DataBaseType, IRevitExternalService externalService, string author, string acadVersion)
         {
             DBFileName = dbfilename;
             DBFilePath = dbfilepath;
             DBType = DataBaseType;
             Service = externalService;
             Author = author;
-            
+            AcadVersion = acadVersion;
+
+
             InitializeComponent();
             
             
@@ -6764,12 +6767,10 @@ namespace AOVGEN
                     }
                     string objname;
                     
-                    ventobjects
-                        .AsParallel()
-                        .ForAll(component =>
-                        {
-                            objname = component.GetType().Name;
-                            switch (objname)
+                    foreach(var component in ventobjects)
+                    {
+                        objname = component.GetType().Name;
+                        switch (objname)
                             {
                                 case nameof(OutdoorTemp):
                                     OutdoorTemp outdoorTemp = (OutdoorTemp)component;
@@ -6991,8 +6992,10 @@ namespace AOVGEN
                                     break;
 
                             }
+                    }
+                    
 
-                        });
+                       
                     systemList.Add((ventSystem.GUID, ventSystem));
                 }
 
@@ -7001,7 +7004,7 @@ namespace AOVGEN
                     VentSystemS.Add(pannel, systemList);
                 }
             }
-            ShemaASUTP shema = new()
+            ShemaASUTP shema = new(AcadVersion)
             {
                 VentSystemS = VentSystemS,
                 Author = Author
@@ -7160,7 +7163,16 @@ namespace AOVGEN
                         //    }
                         //}
                         var SortedDict = level3.OrderBy(obj => obj.Key).ToDictionary(obj => obj.Key, obj => obj.Value);
-                        TableExternalConnections table = new(SortedDict, ventsystemDict, cabsettings, CheckedPannels, tableExtDocName) 
+
+                        TableExternalConnectionsParams p = new();
+                        p.inputdict = SortedDict;
+                        p.inputvensystemDict = ventsystemDict;
+                        p.inputcabsettings = cabsettings;
+                        p.pannels = CheckedPannels;
+                        p.tabdocname = tableExtDocName;
+                        p.selectedAcadVers = AcadVersion;
+
+                        TableExternalConnections table = new(p) 
                         {
                             Author = Author, 
                             BuildingName = building.Buildname, 
@@ -7319,19 +7331,26 @@ namespace AOVGEN
             {
                 RadTreeNode parent = radTreeNode.Parent;
                 if (!(parent.Tag is Project project)) return;
-                EditorV2 editor = new(this)
+
+                //EditorV2 editor1 = new(this);
+
+                Task.Factory.StartNew(() =>
                 {
-                    Opacity = 0,
-                    DBFilePath = DBFilePath,
-                    Ventree = radTreeView2,
-                    Projecttree = radTreeView1,
-                    projectGuid = project.GetGUID(),
-                    connection = connection,
-                    Building = building,
-                    Author = Author,
-                    Project = project
-                };
-                _  = editor.ShowDialog();
+
+                    EditorV2 editor = new(this)
+                    {
+                        Opacity = 0,
+                        DBFilePath = DBFilePath,
+                        Ventree = radTreeView2,
+                        Projecttree = radTreeView1,
+                        projectGuid = project.GetGUID(),
+                        connection = connection,
+                        Building = building,
+                        Author = Author,
+                        Project = project
+                    };
+                    editor.ShowDialog();
+                });
                 
                 
                 //GC.Collect(0, GCCollectionMode.Forced);
@@ -9370,7 +9389,7 @@ namespace AOVGEN
                     
                     //if (returninfo ==2) MessageBox.Show("Готово");
                 }
-                catch (OperationCanceledException oc)
+                catch (OperationCanceledException)
                 {
                     MessageBox.Show("Вышло время ожидания размещения шкафов");
                 }
@@ -9707,4 +9726,3 @@ namespace AOVGEN
         internal bool RoomPresent;
     }
 }
-

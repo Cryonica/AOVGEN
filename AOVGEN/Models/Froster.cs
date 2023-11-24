@@ -209,14 +209,14 @@ namespace AOVGEN.Models
 		[DisplayName("Поз.обозначение клапана")]
 		public string ValvePosName => GetValveInfo()[0];
 
-		[DisplayName("Имя блока клапана")]
-		public string ValveBlockName => GetValveInfo()[1];
+		[DisplayName("Имя блока вод.охлад.")]
+		public string ValveBlockName => GetValveInfo()[2];
 
 		[DisplayName("Поз.обозначение ККБ")]
 		public string KKBPosName => GetKKBInfo()[0];
 
 		[DisplayName("Имя блока ККБ")]
-		public string KKBBlockName => GetKKBInfo()[1];
+		public string KKBBlockName => GetKKBInfo()[2];
 		[Browsable(false)]
 		public string GUID { get; set; }
 		internal string Sens1GUID
@@ -369,21 +369,23 @@ namespace AOVGEN.Models
 		}
 		protected string[] GetValveInfo()
 		{
-			string[] array = { string.Empty, string.Empty };
+			string[] array = { string.Empty, string.Empty, string.Empty };
 			if (_Valve != null)
 			{
 				array[0] = _Valve.Posname;
 				array[1] = _Valve.BlockName;
+				array[2] = ShemaASU.ShemaUp;
 			}
 			return array;
 		}
 		protected string[] GetKKBInfo()
 		{
-			string[] array = { string.Empty, string.Empty };
+			string[] array = { string.Empty, string.Empty, string.Empty };
 			if (_KKB != null)
 			{
 				array[0] = _KKB.PosName;
 				array[1] = _KKB.BlockName;
+				array[2] = "Froster_Frion_Steps";
 				if (_KKB.Cable1 != null) _KKB.Cable1.ToBlockName = _KKB.BlockName;
 
 
@@ -612,7 +614,8 @@ namespace AOVGEN.Models
 					{
 						_KKBControlType = KKB.KKBControlType.Analogue,
 						Voltage = VoltageVariable,
-						Description = "Компрессор охладителя"
+						Description = "Компрессор охладителя",
+						
 
 					};
 					_KKB.MakeSortPriority(_KKB.Voltage);
@@ -645,11 +648,16 @@ namespace AOVGEN.Models
 						SortPriority = _Valve.SortPriority,
 						Description = _Valve.Description
 					};
+					
 					_Valve.ShemaASU.componentPlace = ShemaASUbase.ComponentPlace.Supply;
 					_Valve.ShemaASU.SetIO(ShemaASU.IOType.AO, 1);
 					_Valve.ShemaASU.ShemaUp = "Supply_Froster_Water";
 					_KKB = null;
-					
+					ShemaASU.ShemaUp = "Froster_Water";
+					valveType = _Valve._ValveType;
+					KKBControlType = KKB.KKBControlType.No;
+
+
 					break;
 			}
 			return frostertype;
@@ -687,138 +695,141 @@ namespace AOVGEN.Models
 		private KKB.FrosterStairs CheckfrosterStairs(object val)
 		{
 			frosterStairs = (KKB.FrosterStairs)val;
-			_KKB.Stairs = frosterStairs;
-			_KKB.StairsString = GetEnumDescription(Stairs);
-			switch (frosterStairs)
-			{
-				case KKB.FrosterStairs.One:
-					_KKB.Displacement = -28.75646364;
+			if (_KKB != null)
+            {
+				_KKB.Stairs = frosterStairs;
+				_KKB.StairsString = GetEnumDescription(Stairs);
+				switch (frosterStairs)
+				{
+					case KKB.FrosterStairs.One:
+						_KKB.Displacement = -28.75646364;
 
-					_KKB.Cable2 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 1 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable3 = null;
-					_KKB.Cable4 = null;
-					_KKB.Cable5 = null;
-					_KKB.Cable2.SortPriority = _KKB.Cable2.MakeControlSortpriority(_KKB.SortPriority + "2");
-					ShemaASU.SetIO(ShemaASU.IOType.DO, 1);
-					break;
-				case KKB.FrosterStairs.Two:
-					_KKB.Displacement = -19.80135002;
+						_KKB.Cable2 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 1 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable3 = null;
+						_KKB.Cable4 = null;
+						_KKB.Cable5 = null;
+						_KKB.Cable2.SortPriority = _KKB.Cable2.MakeControlSortpriority(_KKB.SortPriority + "2");
+						ShemaASU.SetIO(ShemaASU.IOType.DO, 1);
+						break;
+					case KKB.FrosterStairs.Two:
+						_KKB.Displacement = -19.80135002;
 
-					_KKB.Cable2 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 1 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable3 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 2 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable4 = null;
-					_KKB.Cable5 = null;
-					_KKB.Cable2.SortPriority = _KKB.Cable2.MakeControlSortpriority(_KKB.SortPriority + "2");
-					_KKB.Cable3.SortPriority = _KKB.Cable3.MakeControlSortpriority(_KKB.SortPriority + "3");
-					ShemaASU.SetIO(ShemaASU.IOType.DO, 2);
-					break;
-				case KKB.FrosterStairs.Three:
-					_KKB.Displacement = -9.90067439;
+						_KKB.Cable2 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 1 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable3 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 2 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable4 = null;
+						_KKB.Cable5 = null;
+						_KKB.Cable2.SortPriority = _KKB.Cable2.MakeControlSortpriority(_KKB.SortPriority + "2");
+						_KKB.Cable3.SortPriority = _KKB.Cable3.MakeControlSortpriority(_KKB.SortPriority + "3");
+						ShemaASU.SetIO(ShemaASU.IOType.DO, 2);
+						break;
+					case KKB.FrosterStairs.Three:
+						_KKB.Displacement = -9.90067439;
 
-					_KKB.Cable2 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 1 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable3 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 2 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable4 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 3 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable5 = null;
-					_KKB.Cable2.SortPriority = _KKB.Cable2.MakeControlSortpriority(_KKB.SortPriority + "2");
-					_KKB.Cable3.SortPriority = _KKB.Cable3.MakeControlSortpriority(_KKB.SortPriority + "3");
-					_KKB.Cable4.SortPriority = _KKB.Cable4.MakeControlSortpriority(_KKB.SortPriority + "4");
-					ShemaASU.SetIO(ShemaASU.IOType.DO, 3);
-					break;
-				case KKB.FrosterStairs.Four:
-					_KKB.Displacement = 0;
-					_KKB.StairsString = "4";
-					_KKB.Cable2 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 1 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable3 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 2 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable4 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 3 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable5 = new Cable
-					{
-						WriteBlock = false,
-						Attrubute = Cable.CableAttribute.D,
-						ToPosName = _KKB.PosName,
-						ToBlockName = _KKB.BlockName,
-						Description = "Управление ККБ 4 ступень",
-						WireNumbers = 2
-					};
-					_KKB.Cable2.SortPriority = _KKB.Cable2.MakeControlSortpriority(_KKB.SortPriority + "2");
-					_KKB.Cable3.SortPriority = _KKB.Cable3.MakeControlSortpriority(_KKB.SortPriority + "3");
-					_KKB.Cable4.SortPriority = _KKB.Cable4.MakeControlSortpriority(_KKB.SortPriority + "4");
-					_KKB.Cable5.SortPriority = _KKB.Cable5.MakeControlSortpriority(_KKB.SortPriority + "5");
-					ShemaASU.SetIO(ShemaASU.IOType.DO, 4);
-					break;
+						_KKB.Cable2 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 1 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable3 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 2 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable4 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 3 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable5 = null;
+						_KKB.Cable2.SortPriority = _KKB.Cable2.MakeControlSortpriority(_KKB.SortPriority + "2");
+						_KKB.Cable3.SortPriority = _KKB.Cable3.MakeControlSortpriority(_KKB.SortPriority + "3");
+						_KKB.Cable4.SortPriority = _KKB.Cable4.MakeControlSortpriority(_KKB.SortPriority + "4");
+						ShemaASU.SetIO(ShemaASU.IOType.DO, 3);
+						break;
+					case KKB.FrosterStairs.Four:
+						_KKB.Displacement = 0;
+						_KKB.StairsString = "4";
+						_KKB.Cable2 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 1 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable3 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 2 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable4 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 3 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable5 = new Cable
+						{
+							WriteBlock = false,
+							Attrubute = Cable.CableAttribute.D,
+							ToPosName = _KKB.PosName,
+							ToBlockName = _KKB.BlockName,
+							Description = "Управление ККБ 4 ступень",
+							WireNumbers = 2
+						};
+						_KKB.Cable2.SortPriority = _KKB.Cable2.MakeControlSortpriority(_KKB.SortPriority + "2");
+						_KKB.Cable3.SortPriority = _KKB.Cable3.MakeControlSortpriority(_KKB.SortPriority + "3");
+						_KKB.Cable4.SortPriority = _KKB.Cable4.MakeControlSortpriority(_KKB.SortPriority + "4");
+						_KKB.Cable5.SortPriority = _KKB.Cable5.MakeControlSortpriority(_KKB.SortPriority + "5");
+						ShemaASU.SetIO(ShemaASU.IOType.DO, 4);
+						break;
 
-			}
+				}
+            }
 
 			return frosterStairs;
 

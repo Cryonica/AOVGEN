@@ -1,4 +1,5 @@
 ﻿using AOVGEN.Models;
+using AOVGEN.Properties;
 using AutoCAD; //using Autodesk.AutoCAD.Runtime;
 using System;
 using System.Collections;
@@ -25,6 +26,15 @@ namespace AOVGEN
             return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
         }
     }
+    internal class TableExternalConnectionsParams
+    {
+        public  Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> inputdict;
+        public  Dictionary<string, VentSystem> inputvensystemDict;
+        public bool[] inputcabsettings;
+        public Dictionary<string, Pannel> pannels;
+        public string tabdocname;
+        public string selectedAcadVers;
+    }
 
     internal class TableExternalConnections
     {
@@ -46,21 +56,24 @@ namespace AOVGEN
             "AutoCAD.Application.21.1",
             "AutoCAD.Application.21.2",
             "AutoCAD.Application.23",
-            "AutoCAD.Application.23.0"
+            "AutoCAD.Application.23.0",
+            "AutoCAD.Application.24",
+            "AutoCAD.Application.24.0"
         };
 
         private AcadDocument acadDoc;
 
-        internal TableExternalConnections(Dictionary<string, Dictionary<string, Dictionary<string, List<Cable>>>> inputdict, Dictionary<string, VentSystem> inputvensystemDict, bool[] inputcabsettings, Dictionary<string, Pannel> pannels, string tabdocname)
+        internal TableExternalConnections(TableExternalConnectionsParams p)
         {
-            var cabsettings = inputcabsettings;
-            level3 = inputdict;
+            var cabsettings = p.inputcabsettings;
+            level3 = p.inputdict;
             writecabeP = cabsettings[0];
             writecablePump = cabsettings[1];
             writecableValve = cabsettings[2];
-            ventsystemDict = inputvensystemDict;
-            checkedpannels = pannels;
-            TableExternalConnectionDocName = tabdocname;
+            ventsystemDict = p.inputvensystemDict;
+            checkedpannels = p.pannels;
+            TableExternalConnectionDocName = p.tabdocname;
+            selectedAcad = p.selectedAcadVers;
         }
 
         internal string Author { get; set; }
@@ -83,26 +96,27 @@ namespace AOVGEN
         {
             int result = 0;
             List<object> instances = GetRunningInstances(progIds);
-            dynamic GetAutoCad2019()
+            dynamic GetAutoCad()
             {
                 return instances
                     .Cast<dynamic>()
-                    .FirstOrDefault(e => ((string)e.Version).Contains("23"));
+                    .FirstOrDefault(e => ((string)e.Version).Contains(selectedAcad));
             }
 
-            (string path, string progID) Acad2019;
-            Acad2019.progID = "AutoCAD.Application";
-            Acad2019.path = @"\Autodesk\AutoCAD 2019\acad.exe";
+            //(string path, string progID) Acad2019;
+            //Acad2019.progID = "AutoCAD.Application";
+            //Acad2019.path = @"\Autodesk\AutoCAD 2019\acad.exe";
             dynamic Acad2019COM = null;
             Task<dynamic> StartAcadTask = null;
             try
             {
-                Acad2019COM = GetAutoCad2019();
+                Acad2019COM = GetAutoCad();
                 if (Acad2019COM == null)
                 {
-                    MessageBox.Show(@"Попытка запуска Autocad 2019\n" +
+                    MessageBox.Show(@"Попытка запуска Autocad \n" +
                                     @"Или попробуйте запустить его вручную");
-                    StartAcadTask = Task.Factory.StartNew(() => StartAutocad(Acad2019));
+                    string acadpath = Resources.ResourceManager.GetString(selectedAcad).Split(';')[0];
+                    StartAcadTask = Task.Factory.StartNew(() => Helpers.Helper.StartAutocad(acadpath, "AutoCAD.Application")); ;
                 }
             }
             catch
@@ -113,7 +127,7 @@ namespace AOVGEN
             StartAcadTask?.Wait();
             if (Acad2019COM == null)
             {
-                Acad2019COM = Marshal.GetActiveObject(Acad2019.progID);
+                Acad2019COM = Marshal.GetActiveObject("AutoCAD.Application");
                 if (Acad2019COM == null) return result;
             }
             try
@@ -162,7 +176,7 @@ namespace AOVGEN
                     if (acadDoc == null)
                     {
                         string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                         @"\Autodesk\Revit\Addins\2022\ASU\AOVGen\Blocks.dwt";
+                                         Resources.PluginFolder + "Blocks.dwt"; //"\Autodesk\Revit\Addins\2022\ASU\AOVGen\Blocks.dwt";
                         acadDoc = acadApp.Documents.Add(docpath);
                         TableExternalConnectionDocName = acadDoc.Name;
                         //acadDoc.Activate();
@@ -437,6 +451,7 @@ namespace AOVGEN
         private readonly bool writecabeP;
         private readonly bool writecablePump;
         private readonly bool writecableValve;
+        private readonly string selectedAcad;
         private double[] max;
         private double[] min;
         private Pannel Pannel;

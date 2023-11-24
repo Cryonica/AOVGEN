@@ -10,12 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AOVGEN.Models;
+using AOVGEN.Properties;
 using AutoCAD; //using Autodesk.AutoCAD.Runtime;
 
 namespace AOVGEN
 {
 #pragma warning disable IDE1006
-    class ShemaASUTP
+     class ShemaASUTP
     {
         #region Set Autocad windw to front
         [DllImport("user32.dll")]
@@ -71,6 +72,11 @@ namespace AOVGEN
 
         }
         #endregion
+        private string selectedAcad;
+        public ShemaASUTP(string _selectedAcad)
+        {
+            selectedAcad = _selectedAcad;
+        }
         //[CommandMethod("NewDrawing", CommandFlags.Session)]
         [DllImport("ole32.dll")]
         static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
@@ -84,6 +90,7 @@ namespace AOVGEN
             // get the app clsid
             List<string> clsIds = (from progId in AcadIDs select Type.GetTypeFromProgID(progId) into type where type != null select type.GUID.ToString().ToUpper()).ToList();
             // get Running Object Table ...
+            
             GetRunningObjectTable(0, out var Rot);
             if (Rot == null) return null;
             // get enumerator for ROT entries
@@ -128,34 +135,46 @@ namespace AOVGEN
             "AutoCAD.Application.21.1",
             "AutoCAD.Application.21.2",
             "AutoCAD.Application.23",
-            "AutoCAD.Application.23.0"
+            "AutoCAD.Application.23.0",
+            "AutoCAD.Application.24"
         };
 
         internal int Execute()
         {
             int result = 0;
-            List<object> instances = GetRunningInstances(progIds);
-            dynamic GetAutoCad2019()
+            List<dynamic> instances = GetRunningInstances(progIds);
+            dynamic GetAutocad(string vers)
             {
                 return instances
                     .Cast<dynamic>()
-                    .FirstOrDefault(e => ((string)e.Version).Contains("23"));
+                    .FirstOrDefault(e => ((string)e.Version).Contains(vers));
             }
 
-            (string path, string progID) Acad2019;
-            Acad2019.progID = "AutoCAD.Application";
-            Acad2019.path = @"\Autodesk\AutoCAD 2020\acad.exe";
-            dynamic Acad2019COM = null;
+            //(string path, string progID) Acad2019;
+            //(string path, string progID) Acad2021;
+            //Acad2019.progID = "AutoCAD.Application";
+            //Acad2019.path = @"\Autodesk\AutoCAD 2020\acad.exe";
+            //Acad2021.progID = "AutoCAD.Application";
+            //Acad2021.path = @"\Autodesk\AutoCAD 2021\acad.exe";
+            dynamic AcadCOM = null;
             Task<dynamic> StartAcadTask = null;
+
             try
             {
 
-                Acad2019COM = GetAutoCad2019();
-                if (Acad2019COM == null)
+                AcadCOM = GetAutocad(selectedAcad);
+                
+                //if (AcadCOM == null)
+                //{
+                //    AcadCOM = GetAutocad("24");
+                //}
+
+                if (AcadCOM == null)
                 {
-                    MessageBox.Show(@"Попытка запуска Autocad 2019\n" +
-                                    @"Или попробуйте запустить его вручную");
-                    StartAcadTask = Task.Factory.StartNew(() => StartAutocad(Acad2019));
+                    string acadpath =  Resources.ResourceManager.GetString(selectedAcad).Split(';')[0];
+                    StartAcadTask = Task.Factory.StartNew(() => Helpers.Helper.StartAutocad(acadpath, "AutoCAD.Application"));
+                    MessageBox.Show("Не получилось запустить Autocad, запустите его вручную");
+                    return result;
                 }
 
             }
@@ -164,20 +183,27 @@ namespace AOVGEN
                 //cadApp = StartAutocad(Acad2019); //MessageBox.Show("Не нашел акад");
 
             }
+            
 
-
-            StartAcadTask?.Wait();
-            if (Acad2019COM == null)
+            if (AcadCOM == null)
             {
 
-                Acad2019COM = Marshal.GetActiveObject(Acad2019.progID);
-                if (Acad2019COM == null) return result;
+                AcadCOM = Marshal.GetActiveObject("AutoCAD.Application");
+                if (AcadCOM == null)
+                {
+                    AcadCOM = Marshal.GetActiveObject("AutoCAD.Application");
+                }
+                if (AcadCOM == null)
+                {
+                    MessageBox.Show("Не нашел Autocad");
+                    return result;
+                }
             }
 
             try
             {
-                AcadApplication acadApp = Acad2019COM;
-                IntPtr hWnd = new(Acad2019COM.HWND);
+                AcadApplication acadApp = AcadCOM;
+                IntPtr hWnd = new(AcadCOM.HWND);
                 if (hWnd != IntPtr.Zero)
                 {
                     SetForegroundWindow(hWnd);
@@ -214,7 +240,7 @@ namespace AOVGEN
                 {
 
 
-                    string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Autodesk\Revit\Addins\2022\ASU\AOVGen\ShchemaASU.dwt";
+                    string docpath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Resources.PluginFolder + "ShchemaASU.dwt";//  @"\Autodesk\Revit\Addins\2022\ASU\AOVGen\ShchemaASU.dwt";
                     acadDoc = acadApp.Documents.Add(docpath);
                     acadDoc.Activate();
                 }
@@ -227,9 +253,7 @@ namespace AOVGEN
             {
                 if (ex.HResult == -2147467262)
                 {
-                    string message = "Не получилось найти среду для генерации схемы\n" +
-                                     "Генерация должна быть выполнена в Autocad 2019\n" +
-                                     "Если запущены разные версии Autocad, закройте лишние, оставьте 1 экземпляр v2019";
+                    string message = "Что-то пошло не так";
                     const string caption = "Ошибка!";
                     MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 }
@@ -324,7 +348,7 @@ namespace AOVGEN
             {
                 const string message = "Не смог получить точку вставки";
                 const string caption = "Ошибка!";
-                MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                System.Windows.Forms.MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 return;
             }
             
@@ -816,7 +840,7 @@ namespace AOVGEN
                                             cnt++;
                                             break;
                                         case Froster.FrosterType.Water:
-                                            posname(acadBlock, "POSNAME_Valve").TextString = froster._Valve.Posname;
+                                            posname(acadBlock, "POSNAME_VALVE").TextString = froster._Valve.Posname;
                                             link(acadBlock, "LINK").TextString = cnt.ToString();
                                             froster._Valve.ShemaASU.ShemaLink1 = cnt;
                                             shemaASU = froster._Valve.ShemaASU;
@@ -1280,6 +1304,10 @@ namespace AOVGEN
         private AcadAttributeReference GetAttrFromBlock(AcadBlockReference acadBlock, string attrname)
         {
             object[] prop = acadBlock.GetAttributes();
+            foreach (var p in prop.OfType<AcadAttributeReference>())
+            {
+                var tt = p.TagString;
+            }
             IEnumerable<AcadAttributeReference> Properties = prop.OfType<AcadAttributeReference>()
                 .Where(i => i.TagString == attrname);
             return Properties?.ElementAt(0);
@@ -1450,12 +1478,12 @@ namespace AOVGEN
             }
             return null;
         }
-        private dynamic  StartAutocad((string path, string progID) Acad)
+        private dynamic  StartAutocad(string path, string progID)
         {
             string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
-            string acadfile = programFiles + Acad.path;// + " //product ACAD //language " + '\u0022' + "ru - RU" + '\u0022';
+            //string acadfile = programFiles + Acad.path;// + " //product ACAD //language " + '\u0022' + "ru - RU" + '\u0022';
             Process acadProc = new();
-            acadProc.StartInfo.FileName = acadfile;
+            acadProc.StartInfo.FileName = path;
             acadProc.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             try
             {
@@ -1465,7 +1493,7 @@ namespace AOVGEN
             {
                 //MessageBox.Show($"Не могу найти Autocad по пути \n {acadfile}\nгенерация схем невозомжна");
                 
-                throw new ApplicationException($"Не могу найти Autocad по пути \n {acadfile}\nгенерация схем невозомжна");
+                throw new ApplicationException($"Не могу найти Autocad по пути \n {path}\nгенерация схем невозомжна");
             }
             
             if (!acadProc.WaitForInputIdle(300000))
@@ -1476,7 +1504,7 @@ namespace AOVGEN
                 
                 try
                 {
-                    acadApp = Marshal.GetActiveObject(Acad.progID);
+                    acadApp = Marshal.GetActiveObject(progID);
                     return acadApp;
                 }
                 catch (COMException ex)
